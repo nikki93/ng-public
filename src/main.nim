@@ -3,8 +3,19 @@
 type
   SdlWindow = object
   SdlWindowPtr* = ptr SdlWindow
+
   SdlRenderer = object
   SdlRendererPtr* = ptr SdlRenderer
+
+  SdlEventType* {.size: sizeof(uint32).} = enum
+    QuitEvent = 0x100, AppTerminating, AppLowMemory, AppWillEnterBackground,
+
+  SdlEvent* = object
+    kind*: SdlEventType
+    padding: array[56-sizeof(SdlEventType), byte]
+
+const
+  INIT_VIDEO* = 0x00000020
 
 proc init*(flags: uint32): cint {.importc: "SDL_Init".}
 
@@ -20,19 +31,19 @@ proc destroy*(window: SdlWindowPtr) {.importc: "SDL_DestroyWindow".}
 
 proc destroy*(renderer: SdlRendererPtr) {.importc: "SDL_DestroyRenderer".}
 
-proc pollEvent*(event: pointer): cint {.importc: "SDL_PollEvent".}
+proc pollEvent*(event: var SdlEvent): bool {.importc: "SDL_PollEvent".}
 
-proc setDrawColor*(renderer: SdlRendererPtr, r, g, b, a: uint8): cint {.
-  importc: "SDL_SetRenderDrawColor", discardable.}
-
-proc present*(renderer: SdlRendererPtr) {.importc: "SDL_RenderPresent".}
+proc setDrawColor*(
+  renderer: SdlRendererPtr, r, g, b: uint8, a: uint8 = 0xff): cint {.
+    importc: "SDL_SetRenderDrawColor", discardable.}
 
 proc clear*(renderer: SdlRendererPtr): cint {.
   importc: "SDL_RenderClear", discardable.}
 
-proc drawLines*(
-  renderer: SdlRendererPtr, points: ptr tuple[x, y: cint], count: cint): cint {.
-    importc: "SDL_RenderDrawLines", discardable.}
+proc present*(renderer: SdlRendererPtr) {.importc: "SDL_RenderPresent".}
+
+
+# Emscripten wrapper
 
 proc emscripten_set_main_loop*(
   x: proc() {.cdecl.}, fps: int, simulateInfiniteLoop: bool) {.importc.}
@@ -42,8 +53,6 @@ proc emscripten_set_main_loop*(
 
 echo "hello from nim!"
 
-const INIT_VIDEO* = 0x00000020
-
 if init(INIT_VIDEO) == -1:
   quit("couldn't initialize sdl")
 
@@ -52,14 +61,22 @@ var renderer: SdlRendererPtr
 if createWindowAndRenderer(800, 600, 0, window, renderer) == -1:
   quit("couldn't create window and renderer")
 
+var shouldQuit = false
+
 proc frame() {.cdecl.} =
-  discard pollEvent(nil)
-  renderer.setDrawColor(0xff, 0, 0, 0xff)
+  var evt: SdlEvent
+  while pollEvent(evt):
+    if evt.kind == QuitEvent:
+      shouldQuit = true
+  renderer.setDrawColor(0xcc, 0xe4, 0xf5)
   renderer.clear()
   renderer.present()
 
 when defined(emscripten):
   emscripten_set_main_loop(frame, 0, true)
 else:
-  while true:
+  while not shouldQuit:
     frame()
+
+renderer.destroy()
+window.destroy()
