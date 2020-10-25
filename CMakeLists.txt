@@ -199,6 +199,7 @@ endif()
 
 # Static web files
 if(WEB)
+  configure_file(${NIM_JS_INDEX} nim_index.js COPYONLY)
   configure_file(web/index.html index.html COPYONLY)
   configure_file(web/index.css index.css COPYONLY)
 endif()

@@ -73,7 +73,8 @@ case "$1" in
   # Web
   web-release)
     nim c --compileOnly --nimcache:build/nim-c-web-release -d:danger -d:emscripten --cpu:wasm32 src/main.nim
-    $CMAKE -DNIM_C_DIR=build/nim-c-web-release -DWEB=ON -H. -Bbuild/web-release -GNinja
+    nim js --compileOnly --out:build/nim-js-web-release/nim_index.js -d:danger web/index.nim
+    $CMAKE -DNIM_C_DIR=build/nim-c-web-release -DNIM_JS_INDEX=build/nim-js-web-release/nim_index.js -DWEB=ON -H. -Bbuild/web-release -GNinja
     $CMAKE --build build/web-release
     ;;
 #  web-debug)

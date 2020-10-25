@@ -63,12 +63,26 @@
         canvas: document.getElementById('canvas'),
       };
 
-      // Try to force skipping cache
-      const s = document.createElement('script');
-      s.async = true;
-      s.type = 'text/javascript';
-      s.src = 'ng.js?ts=' + new Date().getTime();
-      document.getElementsByTagName('head')[0].appendChild(s);
+      (() => {
+        // Try to force skipping cache
+        const s = document.createElement('script');
+        s.async = true;
+        s.type = 'text/javascript';
+        s.src = 'ng.js?ts=' + new Date().getTime();
+        document.getElementsByTagName('head')[0].appendChild(s);
+      })();
+    </script>
+
+    <!-- JS -->
+    <script type="text/javascript">
+      (() => {
+        // Try to force skipping cache
+        const s = document.createElement('script');
+        s.async = true;
+        s.type = 'text/javascript';
+        s.src = 'nim_index.js?ts=' + new Date().getTime();
+        document.getElementsByTagName('head')[0].appendChild(s);
+      })();
     </script>
   </body>
 </html>

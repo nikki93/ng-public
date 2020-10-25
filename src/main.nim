@@ -56,7 +56,7 @@ proc emscripten_set_main_loop*(
 
 # main
 
-echo "hello from nim!"
+echo "hello from nim-c!"
 
 if init(INIT_VIDEO) == -1:
   quit("couldn't initialize sdl")
