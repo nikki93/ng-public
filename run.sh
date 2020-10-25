@@ -15,7 +15,7 @@ if [[ -f /proc/version ]]; then
   fi
 fi
 
-nim_c_srcs() {
+nim_c_srcs() { # Parse Nim's json output to get list of C sources
   cat $1/main.json | sed -e 's/[",]//g' -e 's/\.o$//g' -n -e '/\.c$/p' | tr '\n' ';'
 }
 
@@ -35,7 +35,6 @@ case "$1" in
   release)
     case $PLATFORM in
       lin|macOS)
-        echo $(nim_c_srcs build/nim-c-release)
         nim c --compileOnly --nimcache:build/nim-c-release -d:danger src/main.nim
         $CMAKE \
           -DNIM_C_SRCS=$(nim_c_srcs build/nim-c-release) \
@@ -50,32 +49,6 @@ case "$1" in
 #        ;;
     esac
     ;;
-#  debug)
-#    case $PLATFORM in
-#      lin|macOS)
-#        $CMAKE -DCMAKE_BUILD_TYPE=Debug -H. -Bbuild/debug -GNinja
-#        $CMAKE --build build/debug
-#        ./build/debug/ng
-#        ;;
-#      win)
-#        $CMAKE -H. -Bbuild/msvc -G"Visual Studio 16"
-#        $CMAKE --build build/msvc --config Debug
-#        ./build/msvc/Debug/ng.exe 
-#        ;;
-#    esac
-#    ;;
-
-  # Mobile
-#  ios-debug)
-#    $CMAKE -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM=6PUB3623F7 -H. -Bbuild/ios -GXcode
-#    cmake --build build/ios --config Debug
-#    ios-deploy --no-wifi --debug --bundle build/ios/Debug-iphoneos/ng.app
-#    ;;
-#  ios-release)
-#    $CMAKE -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM=6PUB3623F7 -H. -Bbuild/ios -GXcode
-#    cmake --build build/ios --config Release
-#    ios-deploy --no-wifi --justlaunch --bundle build/ios/Release-iphoneos/ng.app
-#    ;;
 
   # Web
   web-release)
@@ -88,24 +61,10 @@ case "$1" in
       -H. -Bbuild/web-release -GNinja
     $CMAKE --build build/web-release
     ;;
-#  web-debug)
-#    $CMAKE -DCMAKE_BUILD_TYPE=Debug -DWEB=ON -H. -Bbuild/web-debug -GNinja
-#    $CMAKE --build build/web-debug
-#    ;;
   web-watch-release)
     find CMakeLists.txt src web -type f | entr ./run.sh web-release
     ;;
-#  web-watch-debug)
-#    find CMakeLists.txt src web -type f | entr ./run.sh web-debug
-#    ;;
   web-serve-release)
     npx http-server -c-1 build/web-release
     ;;
-#  web-serve-debug)
-#    npx http-server -c-1 build/web-debug
-#    ;;
-#  web-publish)
-#    ./run.sh web-release
-#    rsync -avP build/web-release/{index.*,ng.*} # TODO(nikki): add host here...
-#    ;;
 esac
