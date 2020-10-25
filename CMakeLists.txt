@@ -42,7 +42,8 @@ else()
 endif()
 
 # Sources
-file(GLOB MY_SOURCES CONFIGURE_DEPENDS src/*.h src/*.c ${NIM_C_DIR}/*.c)
+file(GLOB MY_SOURCES CONFIGURE_DEPENDS src/*.h src/*.c)
+list(APPEND MY_SOURCES ${NIM_C_SRCS})
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "iOS")
   list(APPEND MY_SOURCES "src/platform.mm")
 endif()

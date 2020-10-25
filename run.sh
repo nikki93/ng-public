@@ -15,10 +15,14 @@ if [[ -f /proc/version ]]; then
   fi
 fi
 
+nim_c_srcs() {
+  cat $1/main.json | sed -e 's/[",]//g' -e 's/\.o$//g' -n -e '/\.c$/p' | tr '\n' ';'
+}
+
 case "$1" in
   # DB
   db)
-    $CMAKE -DNIM_C_DIR=build/nim-c-release --DCMAKE_EXPORT_COMPILE_COMMANDS=ON -H. -Bbuild/db -GNinja
+    $CMAKE -DNIM_C_SRCS=$(nim_c_srcs build/nim-c-release) --DCMAKE_EXPORT_COMPILE_COMMANDS=ON -H. -Bbuild/db -GNinja
     cp ./build/db/compile_commands.json .
     ;;
 
@@ -31,8 +35,9 @@ case "$1" in
   release)
     case $PLATFORM in
       lin|macOS)
+        echo $(nim_c_srcs build/nim-c-release)
         nim c --compileOnly --nimcache:build/nim-c-release -d:danger src/main.nim
-        $CMAKE -DNIM_C_DIR=build/nim-c-release -H. -Bbuild/release -GNinja
+        $CMAKE -DNIM_C_SRCS=$(nim_c_srcs build/nim-c-release) -H. -Bbuild/release -GNinja
         $CMAKE --build build/release
         ./build/release/ng
         ;;
@@ -74,7 +79,7 @@ case "$1" in
   web-release)
     nim c --compileOnly --nimcache:build/nim-c-web-release -d:danger -d:emscripten --cpu:wasm32 src/main.nim
     nim js --compileOnly --out:build/nim-js-web-release/nim_index.js -d:danger web/index.nim
-    $CMAKE -DNIM_C_DIR=build/nim-c-web-release -DNIM_JS_INDEX=build/nim-js-web-release/nim_index.js -DWEB=ON -H. -Bbuild/web-release -GNinja
+    $CMAKE -DNIM_C_SRCS=$(nim_c_srcs build/nim-c-web-release) -DNIM_JS_INDEX=build/nim-js-web-release/nim_index.js -DWEB=ON -H. -Bbuild/web-release -GNinja
     $CMAKE --build build/web-release
     ;;
 #  web-debug)
