@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <!-- Meta -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="dream hotel" />
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+
+    <!-- Dependencies -->
+    <script src="https://unpkg.com/incremental-dom@0.7.0/dist/incremental-dom.js"></script>
+
+    <!-- Styles -->
+    <script type="text/javascript">
+      // Try to force skipping cache
+      const l = document.createElement('link');
+      l.rel = 'stylesheet';
+      l.type = 'text/css';
+      l.href = 'index.css?ts=' + new Date().getTime();
+      document.getElementsByTagName('head')[0].appendChild(l);
+    </script>
+  </head>
+
+  <body>
+    <!-- Root -->
+    <div class="root-container">
+      <!-- Main -->
+      <div class="main-container">
+        <!-- Top -->
+        <div class="top-container">
+          <div class="top-panel" id="top"></div>
+        </div>
+
+        <!-- Scene -->
+        <div class="scene-container">
+          <div class="scene-aspect-ratio">
+            <canvas
+              class="scene"
+              id="canvas"
+              oncontextmenu="event.preventDefault()"
+              tabindex="0"
+              onclick="this.focus()"
+            />
+          </div>
+          <script>
+            document.getElementById('canvas').focus();
+          </script>
+        </div>
+
+        <!-- Bottom -->
+        <div class="bottom-container">
+          <div class="bottom-panel" id="bottom"></div>
+        </div>
+      </div>
+
+      <!-- Side -->
+      <div class="side-container">
+        <div class="side-panel" id="side"></div>
+      </div>
+    </div>
+
+    <!-- WASM -->
+    <script type="text/javascript">
+      // Emscripten needs this
+      var Module = {
+        canvas: document.getElementById('canvas'),
+      };
+
+      // Try to force skipping cache
+      const s = document.createElement('script');
+      s.async = true;
+      s.type = 'text/javascript';
+      s.src = 'ng.js?ts=' + new Date().getTime();
+      document.getElementsByTagName('head')[0].appendChild(s);
+    </script>
+  </body>
+</html>
