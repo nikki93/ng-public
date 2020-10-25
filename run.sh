@@ -37,7 +37,9 @@ case "$1" in
       lin|macOS)
         echo $(nim_c_srcs build/nim-c-release)
         nim c --compileOnly --nimcache:build/nim-c-release -d:danger src/main.nim
-        $CMAKE -DNIM_C_SRCS=$(nim_c_srcs build/nim-c-release) -H. -Bbuild/release -GNinja
+        $CMAKE \
+          -DNIM_C_SRCS=$(nim_c_srcs build/nim-c-release) \
+          -H. -Bbuild/release -GNinja
         $CMAKE --build build/release
         ./build/release/ng
         ;;
@@ -79,7 +81,11 @@ case "$1" in
   web-release)
     nim c --compileOnly --nimcache:build/nim-c-web-release -d:danger -d:emscripten --cpu:wasm32 src/main.nim
     nim js --compileOnly --out:build/nim-js-web-release/nim_index.js -d:danger web/index.nim
-    $CMAKE -DNIM_C_SRCS=$(nim_c_srcs build/nim-c-web-release) -DNIM_JS_INDEX=build/nim-js-web-release/nim_index.js -DWEB=ON -H. -Bbuild/web-release -GNinja
+    $CMAKE \
+      -DNIM_C_SRCS=$(nim_c_srcs build/nim-c-web-release) \
+      -DNIM_JS_INDEX=build/nim-js-web-release/nim_index.js \
+      -DWEB=ON \
+      -H. -Bbuild/web-release -GNinja
     $CMAKE --build build/web-release
     ;;
 #  web-debug)
