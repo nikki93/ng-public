@@ -118,21 +118,21 @@ else()
 endif()
 
 # SDL2
-#if(WEB)
-#  target_compile_options(ng PRIVATE "SHELL:-s USE_SDL=2")
-#  target_link_options(ng PRIVATE "SHELL:-s USE_SDL=2")
-#elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "iOS")
-#  target_include_directories(ng PRIVATE vendor/SDL2/include)
-#  target_link_libraries(ng PRIVATE
-#    "-L${PROJECT_SOURCE_DIR}/vendor/prebuilt-ios" SDL2
-#    "-framework AVFoundation" "-framework AudioToolbox" "-framework CoreBluetooth" "-framework CoreGraphics" "-framework CoreMotion"
-#    "-framework Foundation" "-framework GameController" "-framework Metal" "-framework OpenGLES" "-framework QuartzCore" "-framework UIKit")
-#else()
-#  set(SDL_STATIC ON CACHE BOOL "" FORCE)
-#  set(SDL_SHARED OFF CACHE BOOL "" FORCE)
-#  add_subdirectory(vendor/SDL2 EXCLUDE_FROM_ALL)
-#  target_link_libraries(ng PRIVATE SDL2-static)
-#endif()
+if(WEB)
+  target_compile_options(ng PRIVATE "SHELL:-s USE_SDL=2")
+  target_link_options(ng PRIVATE "SHELL:-s USE_SDL=2")
+elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "iOS")
+  target_include_directories(ng PRIVATE vendor/SDL2/include)
+  target_link_libraries(ng PRIVATE
+    "-L${PROJECT_SOURCE_DIR}/vendor/prebuilt-ios" SDL2
+    "-framework AVFoundation" "-framework AudioToolbox" "-framework CoreBluetooth" "-framework CoreGraphics" "-framework CoreMotion"
+    "-framework Foundation" "-framework GameController" "-framework Metal" "-framework OpenGLES" "-framework QuartzCore" "-framework UIKit")
+else()
+  set(SDL_STATIC ON CACHE BOOL "" FORCE)
+  set(SDL_SHARED OFF CACHE BOOL "" FORCE)
+  add_subdirectory(vendor/SDL2 EXCLUDE_FROM_ALL)
+  target_link_libraries(ng PRIVATE SDL2-static)
+endif()
 
 # sdl-gpu
 #target_include_directories(ng PRIVATE vendor/sdl-gpu/include)
