@@ -42,7 +42,7 @@ else()
 endif()
 
 # Sources
-file(GLOB MY_SOURCES CONFIGURE_DEPENDS src/*.h src/*.c)
+file(GLOB MY_SOURCES CONFIGURE_DEPENDS src/*.h src/*.c ${NIM_C_DIR}/*.c)
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "iOS")
   list(APPEND MY_SOURCES "src/platform.mm")
 endif()
@@ -68,7 +68,8 @@ if(MSVC)
     )
   target_link_options(ng PRIVATE /WX)
 else()
-  target_compile_options(ng PRIVATE -fcolor-diagnostics -pedantic-errors -Wall -Wextra -Wno-missing-braces -Wno-gnu-zero-variadic-macro-arguments)
+  target_compile_options(ng PRIVATE -fcolor-diagnostics -pedantic-errors -Wall -Wextra -Wno-missing-braces -Wno-gnu-zero-variadic-macro-arguments
+    -Wno-unused-parameter -Wno-unused-label)
   target_link_options(ng PRIVATE -fcolor-diagnostics -pedantic-errors -Wall -Wextra -Wno-missing-braces)
   if(WIN32)
     target_compile_options(ng PRIVATE -Wno-language-extension-token)
@@ -108,6 +109,13 @@ endif()
 #
 # Dependencies
 #
+
+# Nim
+if(WIN32)
+  # TODO(nikki): Windows Nim include paths...
+else()
+  target_include_directories(ng PRIVATE ~/.choosenim/toolchains/nim-1.4.0/lib)
+endif()
 
 # SDL2
 #if(WEB)

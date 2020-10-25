@@ -31,7 +31,8 @@ case "$1" in
   release)
     case $PLATFORM in
       lin|macOS)
-        $CMAKE -H. -Bbuild/release -GNinja
+        nim c --compileOnly --nimcache:build/nim-c-release -d:danger src/main.nim
+        $CMAKE -DNIM_C_DIR=build/nim-c-release -H. -Bbuild/release -GNinja
         $CMAKE --build build/release
         ./build/release/ng
         ;;
@@ -71,7 +72,8 @@ case "$1" in
 
   # Web
   web-release)
-    $CMAKE -DWEB=ON -H. -Bbuild/web-release -GNinja
+    nim c --compileOnly --nimcache:build/nim-c-web-release -d:danger -d:emscripten --cpu:wasm32 src/main.nim
+    $CMAKE -DNIM_C_DIR=build/nim-c-web-release -DWEB=ON -H. -Bbuild/web-release -GNinja
     $CMAKE --build build/web-release
     ;;
 #  web-debug)

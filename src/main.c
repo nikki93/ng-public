@@ -1,6 +1,5 @@
 #include "precomp.h"
 
-int main() {
-  printf("hello from c!\n");
-  return 0;
+void echoInC(const char *msg) {
+  printf("saying in c: %s\n", msg);
 }
