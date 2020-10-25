@@ -69,7 +69,7 @@ if(MSVC)
   target_link_options(ng PRIVATE /WX)
 else()
   target_compile_options(ng PRIVATE -fcolor-diagnostics -pedantic-errors -Wall -Wextra -Wno-missing-braces -Wno-gnu-zero-variadic-macro-arguments
-    -Wno-unused-parameter -Wno-unused-label)
+    -Wno-unused-parameter -Wno-unused-label -Wno-gnu-case-range)
   target_link_options(ng PRIVATE -fcolor-diagnostics -pedantic-errors -Wall -Wextra -Wno-missing-braces)
   if(WIN32)
     target_compile_options(ng PRIVATE -Wno-language-extension-token)
