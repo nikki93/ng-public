@@ -8,7 +8,7 @@ type
   SdlRendererPtr* = ptr SdlRenderer
 
   SdlEventType* {.size: sizeof(uint32).} = enum
-    QuitEvent = 0x100, AppTerminating, AppLowMemory, AppWillEnterBackground,
+    QuitEvent = 0x100
 
   SdlEvent* = object
     kind*: SdlEventType
@@ -17,28 +17,33 @@ type
 const
   INIT_VIDEO* = 0x00000020
 
-proc init*(flags: uint32): cint {.importc: "SDL_Init".}
+proc init*(flags: uint32): cint
+  {.importc: "SDL_Init".}
 
-proc quit*() {.importc: "SDL_Quit".}
+proc quit*()
+  {.importc: "SDL_Quit".}
 
 proc createWindowAndRenderer*(
   width, height: cint,
   window_flags: cuint,
-  window: var SdlWindowPtr, renderer: var SdlRendererPtr): cint {.
-    importc: "SDL_CreateWindowAndRenderer".}
+  window: var SdlWindowPtr, renderer: var SdlRendererPtr): cint
+  {.importc: "SDL_CreateWindowAndRenderer".}
 
-proc destroy*(window: SdlWindowPtr) {.importc: "SDL_DestroyWindow".}
+proc destroy*(window: SdlWindowPtr)
+  {.importc: "SDL_DestroyWindow".}
 
-proc destroy*(renderer: SdlRendererPtr) {.importc: "SDL_DestroyRenderer".}
+proc destroy*(renderer: SdlRendererPtr)
+  {.importc: "SDL_DestroyRenderer".}
 
-proc pollEvent*(event: var SdlEvent): bool {.importc: "SDL_PollEvent".}
+proc pollEvent*(event: var SdlEvent): bool
+  {.importc: "SDL_PollEvent".}
 
 proc setDrawColor*(
-  renderer: SdlRendererPtr, r, g, b: uint8, a: uint8 = 0xff): cint {.
-    importc: "SDL_SetRenderDrawColor", discardable.}
+  renderer: SdlRendererPtr, r, g, b: uint8, a: uint8 = 0xff): cint
+  {.importc: "SDL_SetRenderDrawColor", discardable.}
 
-proc clear*(renderer: SdlRendererPtr): cint {.
-  importc: "SDL_RenderClear", discardable.}
+proc clear*(renderer: SdlRendererPtr): cint
+  {.importc: "SDL_RenderClear", discardable.}
 
 proc present*(renderer: SdlRendererPtr) {.importc: "SDL_RenderPresent".}
 
