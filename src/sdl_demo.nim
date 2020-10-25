@@ -53,20 +53,24 @@ proc setDrawColor(
 proc clear(renderer: SdlRendererPtr): cint
   {.importc: "SDL_RenderClear", discardable.}
 
-proc present(renderer: SdlRendererPtr) {.importc: "SDL_RenderPresent".}
+proc present(renderer: SdlRendererPtr)
+  {.importc: "SDL_RenderPresent".}
 
 
 # Emscripten
 
 proc emscripten_set_main_loop(
-  x: proc() {.cdecl.}, fps: int, simulateInfiniteLoop: bool) {.importc.}
+  x: proc() {.cdecl.},
+  fps: int, simulateInfiniteLoop: bool,
+)
+  {.importc.}
 
-var theFrameCb: proc()
+var theFrameProc: proc()
 
-proc setMainLoop(frameCb: proc()) =
-  theFrameCb = frameCb
+proc setMainLoop(frame: proc()) =
+  theFrameProc = frame
   proc cFrame() {.cdecl.} =
-    theFrameCb()
+    theFrameProc()
   emscripten_set_main_loop(cFrame, 0, true)
 
 
