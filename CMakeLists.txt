@@ -78,9 +78,9 @@ else()
 endif()
 
 # Precompiled header
-if(NOT CMAKE_EXPORT_COMPILE_COMMANDS)
-  target_precompile_headers(ng PRIVATE src/precomp.h)
-endif()
+#if(NOT CMAKE_EXPORT_COMPILE_COMMANDS)
+#  target_precompile_headers(ng PRIVATE src/precomp.h)
+#endif()
 
 # Web flags
 if(WEB)

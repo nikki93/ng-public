@@ -1,5 +1,5 @@
-#include "precomp.h"
+#include <stdio.h>
 
 void echoInC(const char *msg) {
-  printf("saying in c: %s\n", msg);
+  printf("echoing in c: %s\n", msg);
 }
