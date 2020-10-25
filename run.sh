@@ -18,7 +18,7 @@ fi
 case "$1" in
   # DB
   db)
-    $CMAKE -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Debug -H. -Bbuild/db -GNinja
+    $CMAKE -DNIM_C_DIR=build/nim-c-release --DCMAKE_EXPORT_COMPILE_COMMANDS=ON -H. -Bbuild/db -GNinja
     cp ./build/db/compile_commands.json .
     ;;
 
