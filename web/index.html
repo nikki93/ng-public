@@ -75,6 +75,21 @@
 
     <!-- JS -->
     <script type="text/javascript">
+      setTimeout(() => {
+        const fib = (n) => {
+          if (n <= 1) {
+            return 1;
+          } else {
+            return fib(n - 1) + fib(n - 2);
+          }
+        };
+
+        const before = performance.now();
+        const res = fib(42);
+        const after = performance.now();
+        console.log('js: res: ' + res + ', took: ' + Math.round(after - before) + 'ms');
+      }, 200);
+
       (() => {
         // Try to force skipping cache
         const s = document.createElement('script');

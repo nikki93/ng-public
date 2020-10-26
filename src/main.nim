@@ -1,5 +1,12 @@
-from sdl_demo import nil
+import times
 
-echo "hello from nim-c!"
+proc fib(n: int): int =
+  if n <= 1:
+    1
+  else:
+    fib(n - 1) + fib(n - 2)
 
-sdl_demo.run()
+let before = getTime()
+let res = fib(42)
+let after = getTime()
+echo("nim-c: res: ", res, ", took: ", (after - before).inMilliseconds(), "ms")
