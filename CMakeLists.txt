@@ -201,8 +201,8 @@ endif()
 
 # Static web files
 if(WEB)
-  configure_file(web/index.html index.html COPYONLY)
-  configure_file(web/index.css index.css COPYONLY)
+  configure_file(src/index.html index.html COPYONLY)
+  configure_file(src/index.css index.css COPYONLY)
 endif()
 
 # iOS launch screen

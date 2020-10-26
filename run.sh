@@ -60,7 +60,7 @@ case "$1" in
     $CMAKE --build build/web-release
     ;;
   web-watch-release)
-    find CMakeLists.txt src web -type f | entr ./run.sh web-release
+    find CMakeLists.txt src -type f | entr ./run.sh web-release
     ;;
   web-serve-release)
     npx http-server -c-1 build/web-release
