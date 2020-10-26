@@ -93,6 +93,7 @@ if(WEB)
     target_compile_options(ng PRIVATE "SHELL:-g4 --source-map-base file://${CMAKE_BINARY_DIR}/ -fsanitize=leak")
     target_link_options(ng PRIVATE "SHELL:-g4 --source-map-base file://${CMAKE_BINARY_DIR}/ -fsanitize=leak")
   else()
+    target_link_options(ng PRIVATE -O0) # Makes link step much faster
     target_compile_options(ng PRIVATE "SHELL:--profiling")
     target_link_options(ng PRIVATE "SHELL:--profiling")
   endif()
