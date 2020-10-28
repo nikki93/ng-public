@@ -43,7 +43,7 @@ endif()
 
 # Sources
 file(GLOB MY_SOURCES CONFIGURE_DEPENDS src/*.h src/*.c)
-list(APPEND MY_SOURCES ${NIM_C_SRCS})
+list(APPEND MY_SOURCES ${NIM_GEN_SRCS})
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "iOS")
   list(APPEND MY_SOURCES "src/platform.mm")
 endif()
@@ -69,8 +69,10 @@ if(MSVC)
     )
   target_link_options(ng PRIVATE /WX)
 else()
-  target_compile_options(ng PRIVATE -fcolor-diagnostics -pedantic-errors -Wall -Wextra -Wno-missing-braces -Wno-gnu-zero-variadic-macro-arguments
-    -Wno-unused-parameter -Wno-unused-label -Wno-gnu-case-range)
+  target_compile_options(ng PRIVATE
+    -fcolor-diagnostics -pedantic-errors -Wall -Wextra -Wno-missing-braces -Wno-gnu-zero-variadic-macro-arguments
+    # Warnings in Nim-generated code
+    -Wno-unused-parameter -Wno-unused-label -Wno-gnu-case-range -Wno-c99-extensions)
   target_link_options(ng PRIVATE -fcolor-diagnostics -pedantic-errors -Wall -Wextra -Wno-missing-braces)
   if(WIN32)
     target_compile_options(ng PRIVATE -Wno-language-extension-token)
