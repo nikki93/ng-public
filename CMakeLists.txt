@@ -78,6 +78,12 @@ else()
   endif()
 endif()
 
+# Debugging symbols in desktop release builds
+if(NOT (MSVC OR WEB))
+  target_compile_options(ng PRIVATE -g)
+  target_link_options(ng PRIVATE -g)
+endif()
+
 # Precompiled header
 #if(NOT CMAKE_EXPORT_COMPILE_COMMANDS)
 #  target_precompile_headers(ng PRIVATE src/precomp.h)
