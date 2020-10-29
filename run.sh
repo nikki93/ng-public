@@ -34,6 +34,7 @@ case "$1" in
           --compileOnly \
           --nimcache:build/nim-gen-release \
           -d:danger \
+          ${TESTS:+-d:runTests} \
           ${VALGRIND:+-d:useMalloc} \
           src/main.nim
         $CMAKE \
@@ -66,6 +67,7 @@ case "$1" in
       -d:danger \
       -d:emscripten \
       --cpu:wasm32 \
+      ${TESTS:+-d:runTests} \
       src/main.nim
     $CMAKE \
       -DWEB=ON \

@@ -130,9 +130,9 @@ iterator each*(ker: var Kernel, T1, T2, T3, T4: typedesc): (Entity, ptr T1, ptr 
     {.emit: "}".}
 
 
-const testing = false
+when defined(runTests):
+  import times
 
-when testing:
   proc basicTest() =
     type Position = object
       x: float
@@ -199,11 +199,13 @@ when testing:
     block: # Destroy
       ker.destroy(ent)
 
-    echo "all tests passed!"
+    echo "basic tests passed!"
 
 
   proc bench() =
-    const N = 100000000
+    echo "benchmarking..."
+
+    const N = 0xfffff - 20 # Close to maximum
 
     type
       C1 = object
@@ -216,7 +218,7 @@ when testing:
         y: float
         z: float
 
-    var nAll = 0
+    var expected = 0
 
     block:
       let before = getTime()
@@ -228,7 +230,7 @@ when testing:
         if i mod 3 == 0:
           discard ker.add(C3, e)
         if i mod 2 == 0 and i mod 3 == 0:
-          inc nAll
+          inc expected
       let after = getTime()
       echo("creation took ", (after - before).inMilliseconds, "ms")
 
@@ -239,8 +241,10 @@ when testing:
         inc found
       let after = getTime()
       echo("iteration took ", (after - before).inMilliseconds, "ms")
-      doAssert found == nAll
+      doAssert found == expected
+
+    echo "benchmark passed!"
 
 
   basicTest()
-  #bench()
+  bench()
