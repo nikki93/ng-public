@@ -22,7 +22,7 @@ nim_c_srcs() { # Parse Nim's json output to get list of C sources
 case "$1" in
   # DB
   db)
-    $CMAKE -DNIM_C_SRCS=$(nim_c_srcs build/nim-c-release) --DCMAKE_EXPORT_COMPILE_COMMANDS=ON -H. -Bbuild/db -GNinja
+    $CMAKE -DNIM_C_SRCS=$(nim_c_srcs build/nim-c-release) -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -H. -Bbuild/db -GNinja
     cp ./build/db/compile_commands.json .
     ;;
 
