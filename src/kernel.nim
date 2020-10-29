@@ -20,6 +20,12 @@ let null* {.importcpp: "kernel_null".}: Entity
 
 proc `==`*(a: Entity, b: Entity): bool {.importcpp: "# == #".}
 
+proc toIntegral(ent: Entity): uint32
+  {.importcpp: "entt::to_integral".}
+
+proc `$`*(ent: Entity): string {.inline.} =
+  $ent.toIntegral
+
 
 proc create*(ker: var Kernel): Entity {.inline.} =
   proc create(reg: var Registry): Entity
