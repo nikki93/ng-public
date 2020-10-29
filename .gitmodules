@@ -1,3 +1,6 @@
 [submodule "vendor/SDL2"]
 	path = vendor/SDL2
 	url = https://github.com/spurious/SDL-mirror.git
+[submodule "vendor/entt"]
+	path = vendor/entt
+	url = https://github.com/skypjack/entt.git

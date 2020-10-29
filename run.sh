@@ -35,12 +35,25 @@ case "$1" in
   release)
     case $PLATFORM in
       lin|macOS)
-        nim cpp --compileOnly --nimcache:build/nim-gen-release -d:danger src/main.nim
+        nim cpp \
+          --compileOnly \
+          --nimcache:build/nim-gen-release \
+          -d:danger \
+          ${VALGRIND:+-d:useMalloc} \
+          src/main.nim
         $CMAKE \
           -DNIM_GEN_SRCS=$(nim_gen_srcs build/nim-gen-release) \
           -H. -Bbuild/release -GNinja
         $CMAKE --build build/release
-        ./build/release/ng
+        if [[ -z "$VALGRIND" ]]; then
+          ./build/release/ng
+        else
+          valgrind \
+            --suppressions=<(echo -e '{\n ignore_versioned_libs\n Memcheck:Leak\n ...\n obj:*/lib*/lib*.so.*\n }\n') \
+            --leak-check=full \
+            -s \
+            ./build/release/ng
+        fi
         ;;
 #      win)
 #        $CMAKE -H. -Bbuild/msvc -G"Visual Studio 16"
@@ -52,7 +65,13 @@ case "$1" in
 
   # Web
   web-release)
-    nim cpp --compileOnly --nimcache:build/nim-gen-web-release -d:danger -d:emscripten --cpu:wasm32 src/main.nim
+    nim cpp \
+      --compileOnly \
+      --nimcache:build/nim-gen-web-release \
+      -d:danger \
+      -d:emscripten \
+      --cpu:wasm32 \
+      src/main.nim
     $CMAKE \
       -DWEB=ON \
       -DNIM_GEN_SRCS=$(nim_gen_srcs build/nim-gen-web-release) \

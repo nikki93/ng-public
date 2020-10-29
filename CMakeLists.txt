@@ -87,9 +87,9 @@ if(NOT (MSVC OR WEB))
 endif()
 
 # Precompiled header
-#if(NOT CMAKE_EXPORT_COMPILE_COMMANDS)
-#  target_precompile_headers(ng PRIVATE src/precomp.h)
-#endif()
+if(NOT CMAKE_EXPORT_COMPILE_COMMANDS)
+  target_precompile_headers(ng PRIVATE src/precomp.h)
+endif()
 
 # Web flags
 if(WEB)
@@ -179,7 +179,7 @@ endif()
 #target_include_directories(ng PRIVATE vendor/stb)
 
 # entt
-#target_include_directories(ng PRIVATE vendor/entt/src)
+target_include_directories(ng PRIVATE vendor/entt/src)
 
 # Chipmunk2D
 #set(BUILD_DEMOS OFF CACHE BOOL "" FORCE)
