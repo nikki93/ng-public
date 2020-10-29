@@ -26,11 +26,6 @@ case "$1" in
     cp ./build/db/compile_commands.json .
     ;;
 
-  # Format
-  format)
-    clang-format -i -style=file src/*.h src/*.c
-    ;;
-
   # Desktop
   release)
     case $PLATFORM in
