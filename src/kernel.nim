@@ -3,6 +3,8 @@
 const enttH = "<entt/entt.hpp>"
 
 
+# Types
+
 type
   Entity* {.importcpp: "entt::entity", header: enttH.} = object
 
@@ -12,12 +14,16 @@ type
     reg: Registry
 
 
+# Kernel instance
+
 proc `=destroy`(ker: var Kernel) =
   # TODO(nikki): Explicitly clear tracked types
   discard
 
 var ker*: Kernel
 
+
+# Ids
 
 let null* {.importcpp: "kernel_null".}: Entity
 {.emit: "entt::entity kernel_null = entt::null;".}
@@ -31,6 +37,8 @@ proc `$`*(ent: Entity): string {.inline.} =
   $ent.toIntegral
 
 
+# Create / destroy
+
 proc create*(ker: var Kernel): Entity {.inline.} =
   proc create(reg: var Registry): Entity
     {.importcpp.}
@@ -41,6 +49,8 @@ proc destroy*(ker: var Kernel, ent: Entity) {.inline.} =
     {.importcpp.}
   ker.reg.destroy(ent)
 
+
+# Add / remove
 
 proc add*(ker: var Kernel, T: typedesc, ent: Entity): ptr T {.inline.} =
   proc emplace[T](reg: var Registry, ent: Entity): ptr T
@@ -59,6 +69,8 @@ proc remove*(ker: var Kernel, T: typedesc, ent: Entity) {.inline.} =
     ker.reg.remove[:T](ent, nil)
 
 
+# Has / get
+
 proc has*(ker: var Kernel, T: typedesc, ent: Entity): bool {.inline.} =
   proc has[T](reg: var Registry, ent: Entity, _: ptr T): bool
     {.importcpp: "#.has<'*3>(#)".}
@@ -69,6 +81,8 @@ proc get*(ker: var Kernel, T: typedesc, ent: Entity): ptr T {.inline.} =
     {.importcpp: "&#.get<'*0>(#)".}
   ker.reg.get[:T](ent)
 
+
+# Queries
 
 const useLambdaEach = true
 
@@ -145,10 +159,14 @@ iterator each*(ker: var Kernel, T1, T2, T3, T4: typedesc): (Entity, ptr T1, ptr 
     {.emit: "}".}
 
 
+# Clear
+
 proc clear*[T](ker: var Kernel, _: typedesc[T]) =
   for ent, _ in ker.each(T):
     ker.remove(T, ent)
 
+
+# Tests
 
 when defined(runTests):
   import times
