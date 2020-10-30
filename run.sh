@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+TIME="time --format=%es\n"
 
 PLATFORM="macOS"
 CMAKE="cmake"
@@ -30,17 +31,17 @@ case "$1" in
   release)
     case $PLATFORM in
       lin|macOS)
-        nim cpp \
+        $TIME nim cpp \
           --compileOnly \
           --nimcache:build/nim-gen-release \
           -d:danger \
           ${TESTS:+-d:runTests} \
           ${VALGRIND:+-d:useMalloc} \
           src/main.nim
-        $CMAKE \
+        $TIME $CMAKE \
           -DNIM_GEN_SRCS=$(nim_gen_srcs build/nim-gen-release) \
           -H. -Bbuild/release -GNinja
-        $CMAKE --build build/release
+        $TIME $CMAKE --build build/release
         if [[ -z "$VALGRIND" ]]; then
           ./build/release/ng
         else
@@ -61,7 +62,7 @@ case "$1" in
 
   # Web
   web-release)
-    nim cpp \
+    $TIME nim cpp \
       --compileOnly \
       --nimcache:build/nim-gen-web-release \
       -d:danger \
@@ -69,11 +70,11 @@ case "$1" in
       --cpu:wasm32 \
       ${TESTS:+-d:runTests} \
       src/main.nim
-    $CMAKE \
+    $TIME $CMAKE \
       -DWEB=ON \
       -DNIM_GEN_SRCS=$(nim_gen_srcs build/nim-gen-web-release) \
       -H. -Bbuild/web-release -GNinja
-    $CMAKE --build build/web-release
+    $TIME $CMAKE --build build/web-release
     ;;
   web-watch-release)
     find CMakeLists.txt src -type f | entr ./run.sh web-release
