@@ -139,7 +139,7 @@ iterator each*(ker: var Kernel, T1, T2, T3, T4: typedesc): (Entity, ptr T1, ptr 
 when defined(runTests):
   import times
 
-  proc basicTest() =
+  proc basic() =
     type Position = object
       x: float
       y: float
@@ -252,5 +252,5 @@ when defined(runTests):
     echo "benchmark passed!"
 
 
-  basicTest()
+  basic()
   bench()
