@@ -202,7 +202,7 @@ when defined(runTests):
         inc found
       doAssert found == 0
 
-    block: # Destroy
+    block: # destroy
       ker.destroy(ent)
 
     echo "basic tests passed!"
