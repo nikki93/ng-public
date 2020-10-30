@@ -84,7 +84,7 @@ proc get*(ker: var Kernel, T: typedesc, ent: Entity): ptr T {.inline.} =
 
 # Queries
 
-const useLambdaEach = true
+const useLambdaEach = false
 
 iterator each*(ker: var Kernel, T1: typedesc): (Entity, ptr T1) =
   when useLambdaEach:
