@@ -1,6 +1,6 @@
 # entt
 
-const enttH = "<entt/entt.hpp>"
+const enttH = "\"precomp.h\""
 
 
 # Types

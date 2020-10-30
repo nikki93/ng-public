@@ -63,6 +63,7 @@ if(LIB)
   list(REMOVE_ITEM MY_SOURCES "${CMAKE_SOURCE_DIR}/src/main.c")
 endif()
 target_sources(ng PRIVATE ${MY_SOURCES})
+target_include_directories(ng PRIVATE src)
 
 # Standard
 target_compile_features(ng PRIVATE cxx_std_17)
