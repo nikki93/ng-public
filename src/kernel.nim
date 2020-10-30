@@ -12,6 +12,10 @@ type
     reg: Registry
 
 
+proc `=destroy`(ker: var Kernel) =
+  # TODO(nikki): Explicitly clear tracked types
+  discard
+
 var ker*: Kernel
 
 
@@ -45,9 +49,14 @@ proc add*(ker: var Kernel, T: typedesc, ent: Entity): ptr T {.inline.} =
   zeroMem(result, sizeof(T))
 
 proc remove*(ker: var Kernel, T: typedesc, ent: Entity) {.inline.} =
+  proc tryGet[T](reg: var Registry, ent: Entity): ptr T
+    {.importcpp: "#.try_get<'*0>(#)".}
   proc remove[T](reg: var Registry, ent: Entity, _: ptr T)
     {.importcpp: "#.remove<'*3>(#)".}
-  ker.reg.remove[:T](ent, nil)
+  var got = ker.reg.tryGet[:T](ent)
+  if got != nil:
+    `=destroy`(got[])
+    ker.reg.remove[:T](ent, nil)
 
 
 proc has*(ker: var Kernel, T: typedesc, ent: Entity): bool {.inline.} =
@@ -136,6 +145,11 @@ iterator each*(ker: var Kernel, T1, T2, T3, T4: typedesc): (Entity, ptr T1, ptr 
     {.emit: "}".}
 
 
+proc clear*[T](ker: var Kernel, _: typedesc[T]) =
+  for ent, _ in ker.each(T):
+    ker.remove(T, ent)
+
+
 when defined(runTests):
   import times
 
@@ -194,7 +208,6 @@ when defined(runTests):
 
     block: # has, remove
       doAssert ker.has(Sprite, ent)
-      `=destroy`(ker.get(Sprite, ent)[]) # TODO(nikki): Make this automatic...
       ker.remove(Sprite, ent)
       doAssert not ker.has(Sprite, ent)
       var found = 0
@@ -252,5 +265,50 @@ when defined(runTests):
     echo "benchmark passed!"
 
 
+  proc leaks() =
+    type
+      ResourceObj = object
+        name: string
+      Resource = ref ResourceObj
+
+      Stuff1 = object
+        name: string
+        nums: seq[int]
+        ress: seq[Resource]
+
+      Stuff2 = object
+        name: string
+        nums: seq[int]
+        ress: seq[Resource]
+
+    block:
+      var ress: seq[Resource]
+      for i in 0..<20:
+        let res = Resource()
+        res.name.add("res" & $i)
+        ress.add(res)
+
+      for i in 0..<400:
+        let e = ker.create()
+        let s1 = ker.add(Stuff1, e)
+        s1.name.add("stuff1" & $i)
+        for j in 0..<(i mod 10):
+          s1.nums.add(j)
+        for j in 0..<(i mod 5):
+          s1.ress.add(ress[(i + j * i) mod ress.len])
+        if i mod 2 == 0:
+          let s2 = ker.add(Stuff2, e)
+          s2.name.add("stuff2" & $i)
+          for j in 0..<(i mod 20):
+            s2.nums.add(j)
+          for j in 0..<(i mod 10):
+            s2.ress.add(ress[(2 * i + 3 * j * i) mod ress.len])
+
+    # TODO(nikki): Leave some uncleared to test `Kernel` destructor
+    ker.clear(Stuff1)
+    ker.clear(Stuff2)
+
+
   basic()
   bench()
+  leaks()
