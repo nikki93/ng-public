@@ -299,6 +299,8 @@ when defined(runTests):
         nums: seq[int]
         ress: seq[Resource]
 
+    var es: seq[Entity]
+
     block:
       var ress: seq[Resource]
       for i in 0..<20:
@@ -308,6 +310,7 @@ when defined(runTests):
 
       for i in 0..<400:
         let e = ker.create()
+        es.add(e)
         let s1 = ker.add(Stuff1, e)
         s1.name.add("stuff1" & $i)
         for j in 0..<(i mod 10):
@@ -322,9 +325,19 @@ when defined(runTests):
           for j in 0..<(i mod 10):
             s2.ress.add(ress[(2 * i + 3 * j * i) mod ress.len])
 
-    # TODO(nikki): Leave some uncleared to test `Kernel` destructor
-    ker.clear(Stuff1)
-    ker.clear(Stuff2)
+    const fullTest = false # TODO(nikki): Shouldn't leak when `true`
+    if fullTest: # Tests destroy, clear, remove, shutdown
+      for i in 0..<(es.len div 2):
+        ker.destroy(es[i])
+      var i = 0
+      for e, _ in ker.each(Stuff1):
+        inc i
+        if i mod 2 == 0: # Leave some unremoved to test shutdown
+          ker.remove(Stuff1, e)
+      ker.clear(Stuff2)
+    else: # Only tests clear
+      ker.clear(Stuff1)
+      ker.clear(Stuff2)
 
 
   basic()
