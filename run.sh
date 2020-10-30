@@ -5,11 +5,13 @@ set -e
 PLATFORM="macOS"
 CMAKE="cmake"
 TIME="time"
+TIME_TOTAL="time"
 
 if [[ -f /proc/version ]]; then
   if grep -q Linux /proc/version; then
     PLATFORM="lin"
     TIME="time --format=%es\n"
+    TIME_TOTAL="time --format=total\t%es\n"
   fi
   if grep -q Microsoft /proc/version; then
     PLATFORM="win"
@@ -78,7 +80,7 @@ case "$1" in
     $TIME $CMAKE --build build/web-release
     ;;
   web-watch-release)
-    find CMakeLists.txt src -type f | entr ./run.sh web-release
+    find CMakeLists.txt src -type f | entr $TIME_TOTAL ./run.sh web-release
     ;;
   web-serve-release)
     npx http-server -c-1 build/web-release
