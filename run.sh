@@ -1,14 +1,15 @@
 #!/bin/bash
 
 set -e
-TIME="time --format=%es\n"
 
 PLATFORM="macOS"
 CMAKE="cmake"
+TIME="time"
 
 if [[ -f /proc/version ]]; then
   if grep -q Linux /proc/version; then
     PLATFORM="lin"
+    TIME="time --format=%es\n"
   fi
   if grep -q Microsoft /proc/version; then
     PLATFORM="win"
