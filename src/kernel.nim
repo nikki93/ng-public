@@ -336,7 +336,7 @@ when defined(runTests):
             s2.ress.add(ress[(2 * i + 3 * j * i) mod ress.len])
 
     const fullTest = false # TODO(nikki): Shouldn't leak when `true`
-    if fullTest: # Tests destroy, clear, remove, shutdown
+    if fullTest: # Tests destroy, remove, clear, shutdown
       for i in 0..<(es.len div 2):
         ker.destroy(es[i])
       var i = 0
