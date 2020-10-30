@@ -88,9 +88,11 @@ const useLambdaEach = true
 
 iterator each*(ker: var Kernel, T1: typedesc): (Entity, ptr T1) =
   when useLambdaEach:
-    {.emit: [ker.reg, ".view<", T1, ">().each([&](auto pe_, auto &pc1_) {"].}
+    {.emit: [ker.reg, ".view<", T1, ">()",
+      ".each([&](auto pe_, auto &pc1_) {"].}
   else:
-    {.emit: ["for (auto [pe_, pc1_] : ", ker.reg, ".view<", T1, ">().proxy()) {"].}
+    {.emit: ["for (auto [pe_, pc1_] : ",
+      ker.reg, ".view<", T1, ">().proxy()) {"].}
   var e: Entity
   {.emit: [e, " = pe_;"].}
   var c1: ptr T1
@@ -103,9 +105,11 @@ iterator each*(ker: var Kernel, T1: typedesc): (Entity, ptr T1) =
 
 iterator each*(ker: var Kernel, T1, T2: typedesc): (Entity, ptr T1, ptr T2) =
   when useLambdaEach:
-    {.emit: [ker.reg, ".view<", T1, ", ", T2, ">().each([&](auto pe_, auto &pc1_, auto &pc2_) {"].}
+    {.emit: [ker.reg, ".view<", T1, ", ", T2, ">()",
+      ".each([&](auto pe_, auto &pc1_, auto &pc2_) {"].}
   else:
-    {.emit: ["for (auto [pe_, pc1_, pc2_] : ", ker.reg, ".view<", T1, ", ", T2, ">().proxy()) {"].}
+    {.emit: ["for (auto [pe_, pc1_, pc2_] : ",
+      ker.reg, ".view<", T1, ", ", T2, ">().proxy()) {"].}
   var e: Entity
   {.emit: [e, " = pe_;"].}
   var c1: ptr T1
@@ -118,11 +122,14 @@ iterator each*(ker: var Kernel, T1, T2: typedesc): (Entity, ptr T1, ptr T2) =
   else:
     {.emit: "}".}
 
-iterator each*(ker: var Kernel, T1, T2, T3: typedesc): (Entity, ptr T1, ptr T2, ptr T3) =
+iterator each*(ker: var Kernel, T1, T2, T3: typedesc):
+    (Entity, ptr T1, ptr T2, ptr T3) =
   when useLambdaEach:
-    {.emit: [ker.reg, ".view<", T1, ", ", T2, ", ", T3, ">().each([&](auto pe_, auto &pc1_, auto &pc2_, auto &pc3_) {"].}
+    {.emit: [ker.reg, ".view<", T1, ", ", T2, ", ", T3, ">()",
+      ".each([&](auto pe_, auto &pc1_, auto &pc2_, auto &pc3_) {"].}
   else:
-    {.emit: ["for (auto [pe_, pc1_, pc2_, pc3_] : ", ker.reg, ".view<", T1, ", ", T2, ", ", T3, ">().proxy()) {"].}
+    {.emit: ["for (auto [pe_, pc1_, pc2_, pc3_] : ",
+      ker.reg, ".view<", T1, ", ", T2, ", ", T3, ">().proxy()) {"].}
   var e: Entity
   {.emit: [e, " = pe_;"].}
   var c1: ptr T1
@@ -137,11 +144,14 @@ iterator each*(ker: var Kernel, T1, T2, T3: typedesc): (Entity, ptr T1, ptr T2, 
   else:
     {.emit: "}".}
 
-iterator each*(ker: var Kernel, T1, T2, T3, T4: typedesc): (Entity, ptr T1, ptr T2, ptr T3, ptr T4) =
+iterator each*(ker: var Kernel, T1, T2, T3, T4: typedesc):
+    (Entity, ptr T1, ptr T2, ptr T3, ptr T4) =
   when useLambdaEach:
-    {.emit: [ker.reg, ".view<", T1, ", ", T2, ", ", T3, ", ", T4, ">().each([&](auto pe_, auto &pc1_, auto &pc2_, auto &pc3_, auto &pc4_) {"].}
+    {.emit: [ker.reg, ".view<", T1, ", ", T2, ", ", T3, ", ", T4, ">()",
+      ".each([&](auto pe_, auto &pc1_, auto &pc2_, auto &pc3_, auto &pc4_) {"].}
   else:
-    {.emit: ["for (auto [pe_, pc1_, pc2_, pc3_, pc4_] : ", ker.reg, ".view<", T1, ", ", T2, ", ", T3, ", ", T4, ">().proxy()) {"].}
+    {.emit: ["for (auto [pe_, pc1_, pc2_, pc3_, pc4_] : ",
+      ker.reg, ".view<", T1, ", ", T2, ", ", T3, ", ", T4, ">().proxy()) {"].}
   var e: Entity
   {.emit: [e, " = pe_;"].}
   var c1: ptr T1
