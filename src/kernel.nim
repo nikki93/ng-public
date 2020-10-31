@@ -176,6 +176,18 @@ proc clear*[T](ker: var Kernel, _: typedesc[T]) =
     ker.remove(T, ent)
 
 
+# Sort
+
+proc isort*[T](
+  ker: var Kernel,
+  _: typedesc[T],
+  compare: proc (a: ptr T, b: ptr T): bool {.cdecl.},
+) =
+  {.emit: [ker.reg, ".sort<", T, ">([&](const auto &a, const auto &b) {",
+    "return ", compare, "(const_cast<", T, "*>(&a), const_cast<", T, "*>(&b));",
+  "}, entt::insertion_sort{});"].}
+
+
 # Tests
 
 when defined(runTests):
@@ -349,7 +361,32 @@ when defined(runTests):
       ker.clear(Stuff1)
       ker.clear(Stuff2)
 
+    echo "leak check passed!"
+
+
+  proc sort() =
+    type
+      Stuff = object
+        i: int
+
+    for i in 0..<10:
+      let e = ker.create();
+      let s = ker.add(Stuff, e)
+      s.i = 10 - i
+
+    ker.isort(Stuff, proc (a: auto, b: auto): auto {.cdecl.} =
+      a.i < b.i)
+
+    var order: seq[int]
+    for _, s in ker.each(Stuff):
+      order.add(s.i)
+    for i in 0..<(order.len - 1):
+      doAssert order[i] < order[i + 1]
+
+    echo "sort test passed!"
+
 
   basic()
   bench()
   leaks()
+  sort()
