@@ -69,30 +69,6 @@ target_include_directories(ng PRIVATE src)
 target_compile_features(ng PRIVATE cxx_std_17)
 set_target_properties(ng PROPERTIES CXX_EXTENSIONS OFF)
 
-# Warnings
-if(MSVC)
-  target_compile_options(ng PRIVATE /W4 /WX
-    #/wd4100 # Disable 'unreferenced formal parameter'
-    /wd4244 # Disable 'possible loss of data'
-    /wd4307 # Disable 'integral constant overflow'
-    /wd4702 # Disable 'unreachable code'
-    /wd4456 # Disable 'declaration hides previous local declaration'
-    /wd4005 # Disable 'macro redefinition'
-    /wd4505 # Disable 'unreferenced local function has been removed'
-    )
-  target_link_options(ng PRIVATE /WX)
-else()
-  target_compile_options(ng PRIVATE
-    -fcolor-diagnostics -pedantic-errors -Wall -Wextra -Wno-missing-braces -Wno-gnu-zero-variadic-macro-arguments
-    # Warnings in Nim-generated code
-    -Wno-unused-parameter -Wno-unused-label -Wno-gnu-case-range -Wno-c99-extensions)
-  target_link_options(ng PRIVATE -fcolor-diagnostics -pedantic-errors -Wall -Wextra -Wno-missing-braces)
-  if(WIN32)
-    target_compile_options(ng PRIVATE -Wno-language-extension-token)
-    target_link_options(ng PRIVATE -Wno-language-extension-token)
-  endif()
-endif()
-
 # Debugging symbols in desktop release builds
 if(NOT (MSVC OR WEB))
   target_compile_options(ng PRIVATE -g)
@@ -134,11 +110,7 @@ endif()
 #
 
 # Nim
-if(WIN32)
-  # TODO(nikki): Windows Nim include paths...
-else()
-  target_include_directories(ng PRIVATE ~/.choosenim/toolchains/nim-1.4.0/lib)
-endif()
+target_include_directories(ng PRIVATE ../../.choosenim/toolchains/nim-1.4.0/lib)
 
 # SDL2
 if(WEB)

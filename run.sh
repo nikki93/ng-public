@@ -6,6 +6,8 @@ PLATFORM="macOS"
 CMAKE="cmake"
 TIME="time"
 TIME_TOTAL="time"
+NIM="nim"
+NIM_CC="clang"
 
 if [[ -f /proc/version ]]; then
   if grep -q Linux /proc/version; then
@@ -16,11 +18,13 @@ if [[ -f /proc/version ]]; then
   if grep -q Microsoft /proc/version; then
     PLATFORM="win"
     CMAKE="cmake.exe"
+    NIM="nim.exe"
+    NIM_CC="vcc"
   fi
 fi
 
 nim_gen_srcs() { # Parse Nim's JSON output to get list of C/C++ sources
-  cat $1/main.json | sed -e 's/[",]//g' -e 's/\.o$//g' -n -e '/\.cp*$/p' | tr '\n' ';'
+  cat $1/main.json | sed -e 's/[",]//g' -e 's/\.o[bj]*$//g' -n -e '/\.cp*$/p' | tr '\n' ';'
 }
 
 case "$1" in
@@ -32,15 +36,16 @@ case "$1" in
 
   # Desktop
   release)
+    $TIME $NIM cpp \
+      --compileOnly \
+      --cc:$NIM_CC \
+      --nimcache:build/nim-gen-release \
+      -d:danger \
+      ${TESTS:+-d:runTests} \
+      ${VALGRIND:+-d:useMalloc} \
+      src/main.nim
     case $PLATFORM in
       lin|macOS)
-        $TIME nim cpp \
-          --compileOnly \
-          --nimcache:build/nim-gen-release \
-          -d:danger \
-          ${TESTS:+-d:runTests} \
-          ${VALGRIND:+-d:useMalloc} \
-          src/main.nim
         $TIME $CMAKE \
           -DNIM_GEN_SRCS=$(nim_gen_srcs build/nim-gen-release) \
           -H. -Bbuild/release -GNinja
@@ -55,22 +60,25 @@ case "$1" in
             ./build/release/ng
         fi
         ;;
-#      win)
-#        $CMAKE -H. -Bbuild/msvc -G"Visual Studio 16"
-#        $CMAKE --build build/msvc --config Release
-#        ./build/msvc/Release/ng.exe 
-#        ;;
+      win)
+        $TIME $CMAKE \
+          -DNIM_GEN_SRCS=$(nim_gen_srcs build/nim-gen-release) \
+          -H. -Bbuild/msvc -G"Visual Studio 16"
+        $TIME $CMAKE --build build/msvc --config Release
+        ./build/msvc/Release/ng.exe 
+        ;;
     esac
     ;;
 
   # Web
   web-release)
-    $TIME nim cpp \
+    $TIME $NIM cpp \
       --compileOnly \
       --nimcache:build/nim-gen-web-release \
       -d:danger \
       -d:emscripten \
       --cpu:wasm32 \
+      --os:Linux \
       ${TESTS:+-d:runTests} \
       src/main.nim
     $TIME $CMAKE \
