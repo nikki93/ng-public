@@ -4,3 +4,6 @@
 [submodule "vendor/entt"]
 	path = vendor/entt
 	url = https://github.com/skypjack/entt.git
+[submodule "vendor/sdl-gpu"]
+	path = vendor/sdl-gpu
+	url = https://github.com/grimfang4/sdl-gpu.git

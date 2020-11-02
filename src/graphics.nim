@@ -1,7 +1,11 @@
 const sdlH = "\"precomp.h\""
 
+const gpuH = "\"precomp.h\""
+
 type
   SDLWindow {.importc: "SDL_Window", header: sdlH.} = object
+
+  GPUTarget {.importc: "GPU_Target", header: gpuH.} = object
 
   State = object
     r, g, b, a: uint8
@@ -10,6 +14,7 @@ type
 
   Graphics* = object
     window: ptr SDLWindow
+    screen: ptr GPUTarget
     dpiScale: float
     state: State
 
@@ -48,16 +53,39 @@ proc initGraphics*(title: string, viewWidth, viewHeight: float): Graphics =
   when defined(emscripten):
     proc SDL_SetHint(nane: cstring, value: cstring): bool
       {.importc, header: sdlH.}
-    discard SDL_SetHint("SDL_HINT_EMSCRIPTEN_KEYBOARD_ELEMENT", "#canvas")
+    discard SDL_SetHint("SDL_EMSCRIPTEN_KEYBOARD_ELEMENT", "#canvas")
 
   # Create window
   let (bestW, bestH) = result.selectWindowSize()
-  const SDL_WINDOWPOS_UNDEFINED = 0x1FFF0000
   proc SDL_CreateWindow(title: cstring, x, y, w, h: int,
       flags: uint32): ptr SDLWindow
     {.importc, header: sdlH.}
-  result.window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED,
-      SDL_WINDOWPOS_UNDEFINED, bestW, bestH, 0)
+  const SDL_WINDOWPOS_UNDEFINED = 0x1FFF0000
+  const SDL_WINDOW_ALLOW_HIGHDPI = 0x00002000
+  const SDL_WINDOW_OPENGL = 0x00000002
+  result.window = SDL_CreateWindow(title,
+      SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+      bestW, bestH,
+      SDL_WINDOW_ALLOW_HIGHDPI or SDL_WINDOW_OPENGL)
+
+  # Create renderer
+  proc SDL_GetWindowID(window: ptr SDLWindow): uint32
+    {.importc, header: sdlH.}
+  proc GPU_SetInitWindow(windowId: uint32)
+    {.importc, header: gpuH.}
+  GPU_SetInitWindow(SDL_GetWindowID(result.window))
+  var w, h: cint
+  proc SDL_GetWindowSize(window: ptr SDLWindow, w, h: var cint)
+    {.importc, header: sdLH.}
+  SDL_GetWindowSize(result.window, w, h)
+  proc GPU_Init(w, h: uint16, flags: uint32): ptr GPUTarget
+    {.importc, header: gpuH.}
+  const GPU_DEFAULT_INIT_FLAGS = 0
+  result.screen = GPU_Init(cast[uint16](w), cast[uint16](h),
+    GPU_DEFAULT_INIT_FLAGS)
+  proc GPU_SetWindowResolution(w, h: uint16)
+    {.importc, header: gpuH.}
+  GPU_SetWindowResolution(cast[uint16](w), cast[uint16](h))
 
   # Apply initial state
   result.setState(result.state)
@@ -65,7 +93,13 @@ proc initGraphics*(title: string, viewWidth, viewHeight: float): Graphics =
   echo "initialized graphics"
 
 proc `=destroy`(gfx: var Graphics) =
-  # If we're the owner, destroy window and deinit SDL video
+  # Destroy renderer
+  if gfx.screen != nil:
+    proc GPU_Quit()
+      {.importc, header: gpuH.}
+    GPU_Quit()
+
+  # Destroy window and deinit SDL video
   if gfx.window != nil:
     proc SDL_DestroyWindow(window: ptr SDLWindow)
       {.importc, header: sdlH.}
@@ -75,3 +109,27 @@ proc `=destroy`(gfx: var Graphics) =
     SDL_QuitSubSystem(SDL_INIT_VIDEO)
 
   echo "deinitialized graphics"
+
+
+# Draw
+
+proc clear*(gfx: var Graphics, r, g, b: uint8) =
+  proc GPU_ClearRGB(target: ptr GPUTarget, r, g, b: uint8)
+    {.importc, header: gpuH.}
+  GPU_ClearRGB(gfx.screen, r, g, b)
+
+
+# Frame
+
+proc beginFrame(gfx: var Graphics) =
+  gfx.clear(0xff, 0xff, 0xff)
+
+proc endFrame(gfx: var Graphics) =
+  proc GPU_Flip(target: ptr GPUTarget)
+    {.importc, header: gpuH.}
+  GPU_Flip(gfx.screen)
+
+template frame*(gfx: var Graphics, body: untyped) =
+  beginFrame(gfx)
+  body
+  endFrame(gfx)
