@@ -8,4 +8,5 @@ ev.loop:
   tim.frame
 
   gfx.frame:
-    gfx.clear(cast[uint8]((0xff * (tim.t - tim.t.floor)).toInt), 0xe4, 0xf5)
+    let r = 0xff * (tim.t - tim.t.floor)
+    gfx.clear(cast[uint8](r.toInt), 0xe4, 0xf5)
