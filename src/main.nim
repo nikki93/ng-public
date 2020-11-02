@@ -1,3 +1,5 @@
-import kernel
+import common, os
 
-echo "hello from nim->c++"
+echo "in main!"
+
+sleep(2000)
