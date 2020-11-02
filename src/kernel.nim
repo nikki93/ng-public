@@ -1,9 +1,4 @@
-# entt
-
 const enttH = "\"precomp.h\""
-
-
-# Types
 
 type
   Entity* {.importcpp: "entt::entity", header: enttH.} = object
