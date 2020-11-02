@@ -1,6 +1,5 @@
 const sdlH = "\"precomp.h\""
 
-
 type
   SDLWindow {.importc: "SDL_Window", header: sdlH.} = object
 
@@ -29,7 +28,7 @@ proc selectWindowSize(gfx: var Graphics): (int, int) =
   (bestW, (bestW.toFloat * gfx.state.viewHeight / gfx.state.viewWidth).toInt)
 
 
-# Graphics instance
+# Init / deinit
 
 const SDL_INIT_VIDEO = 0x00000020
 
@@ -47,7 +46,7 @@ proc initGraphics*(title: string, viewWidth, viewHeight: float): Graphics =
 
   # Emscripten particulars
   when defined(emscripten):
-    proc SDL_SetHint(nane: cstring, value: cstring): cint
+    proc SDL_SetHint(nane: cstring, value: cstring): bool
       {.importc, header: sdlH.}
     SDL_SetHint("SDL_HINT_EMSCRIPTEN_KEYBOARD_ELEMENT", "#canvas")
 

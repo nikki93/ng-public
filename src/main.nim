@@ -1,5 +1,6 @@
-import common, os
+import common
 
-echo "in main!"
+import events
 
-sleep(2000)
+ev.frame:
+  discard
