@@ -48,7 +48,7 @@ proc initGraphics*(title: string, viewWidth, viewHeight: float): Graphics =
   when defined(emscripten):
     proc SDL_SetHint(nane: cstring, value: cstring): bool
       {.importc, header: sdlH.}
-    SDL_SetHint("SDL_HINT_EMSCRIPTEN_KEYBOARD_ELEMENT", "#canvas")
+    discard SDL_SetHint("SDL_HINT_EMSCRIPTEN_KEYBOARD_ELEMENT", "#canvas")
 
   # Create window
   let (bestW, bestH) = result.selectWindowSize()

@@ -1,3 +1,6 @@
+import timing
+var tim* = initTiming()
+
 import graphics
 var gfx* = initGraphics("dream hotel", 800, 450)
 

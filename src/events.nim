@@ -1,3 +1,5 @@
+import std/times
+
 import graphics
 
 
@@ -25,6 +27,10 @@ type
 
     quitting: bool
 
+    refreshBase: Time
+    refreshCount: int
+    refreshRate: int
+
     touches: seq[Touch]
 
 
@@ -34,6 +40,11 @@ const SDL_INIT_EVENTS = 0x00004000
 
 proc initEvents*(gfx: var Graphics): Events =
   result.gfx = gfx
+
+  # Refresh rate
+  result.refreshBase = getTime()
+  result.refreshCount = 1
+  result.refreshRate = 60
 
   # Init SDL events
   proc SDL_InitSubSystem(flags: uint32): int
@@ -63,17 +74,27 @@ proc beginFrame(ev: var Events) =
       ev.quitting = true
 
 proc endFrame(ev: var Events) =
-  discard
+  let refreshOffset = (1000 * ev.refreshCount div ev.refreshRate).milliseconds
+  let sleepUntil = ev.refreshBase + refreshOffset
+  let now = getTime()
+  if sleepUntil > now:
+    proc SDL_Delay(ms: uint32)
+      {.importc, header: sdlH.}
+    SDL_Delay(cast[uint32]((sleepUntil - now).inMilliseconds))
+    inc ev.refreshCount
+  else:
+    ev.refreshBase = now
+    ev.refreshCount = 1
 
-var theFrameProc = proc() = discard
+var theFrameProc: proc()
 
 template frame*(ev: var Events, body: untyped) =
-  proc frame() =
+  proc frameProc() =
     beginFrame(ev)
     body
     endFrame(ev)
   when defined(emscripten):
-    theFrameProc = frame
+    theFrameProc = frameProc
     proc cFrame() {.cdecl.} =
       theFrameProc()
     proc emscripten_set_main_loop(
@@ -83,4 +104,4 @@ template frame*(ev: var Events, body: untyped) =
     emscripten_set_main_loop(cFrame, 0, true)
   else:
     while not ev.quitting:
-      frame()
+      frameProc()

@@ -1,6 +1,6 @@
 import common
 
-import events
+import timing, events
 
 ev.frame:
-  discard
+  tim.frame()
