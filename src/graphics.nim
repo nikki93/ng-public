@@ -19,6 +19,11 @@ type
     state: State
 
 
+# Prevent copies
+
+proc `=copy`(a: var Graphics, b: Graphics) {.error.}
+
+
 # State
 
 proc setState(gfx: var Graphics, state: State) =

@@ -23,8 +23,6 @@ type
     release: bool
 
   Events* = object
-    gfx: Graphics
-
     quitting: bool
 
     refreshBase: Time
@@ -34,13 +32,16 @@ type
     touches: seq[Touch]
 
 
+# Prevent copies
+
+proc `=copy`(a: var Events, b: Events) {.error.}
+
+
 # Init / deinit
 
 const SDL_INIT_EVENTS = 0x00004000
 
 proc initEvents*(gfx: var Graphics): Events =
-  result.gfx = gfx
-
   # Refresh rate
   result.refreshBase = getTime()
   result.refreshCount = 1

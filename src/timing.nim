@@ -13,6 +13,11 @@ type
     fps: float
 
 
+# Prevent copies
+
+proc `=copy`(a: var Timing, b: Timing) {.error.}
+
+
 # Time
 
 proc t*(tim: Timing): float {.inline.} =

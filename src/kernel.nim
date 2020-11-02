@@ -14,6 +14,11 @@ type
     reg: Registry
 
 
+# Prevent copies
+
+proc `=copy`(a: var Kernel, b: Kernel) {.error.}
+
+
 # Kernel instance
 
 proc `=destroy`(ker: var Kernel) =
