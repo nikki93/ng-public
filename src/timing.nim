@@ -2,7 +2,7 @@ import std/[times, math]
 
 
 type
-  Timing* = object
+  Timing = object
     start: Time
     seconds: float
     lastFrame: Time
@@ -11,11 +11,6 @@ type
     lastFPSUpdate: Time
     framesSinceFPSUpdate: int
     fps: float
-
-
-# Prevent copies
-
-proc `=copy`(a: var Timing, b: Timing) {.error.}
 
 
 # Time
@@ -29,10 +24,15 @@ proc dt*(tim: Timing): float {.inline.} =
 
 # Init / deinit
 
-proc initTiming*(): Timing =
-  result.start = getTime()
-  result.lastFrame = result.start
-  result.lastFPSUpdate = result.start
+proc init(tim: var Timing) =
+  tim.start = getTime()
+  tim.lastFrame = tim.start
+  tim.lastFPSUpdate = tim.start
+
+  echo "initialized timing"
+
+proc `=destroy`(tim: var Timing) =
+  echo "deinitialized timing"
 
 
 # Frame
@@ -55,3 +55,11 @@ proc frame*(tim: var Timing) =
     tim.fps = tim.framesSinceFPSUpdate.toFloat / secSinceFPSUpdate
     tim.framesSinceFPSUpdate = 0
     echo "fps: ", tim.fps.round.toInt
+
+
+# Singleton
+
+proc `=copy`(a: var Timing, b: Timing) {.error.}
+
+var tim*: Timing
+tim.init()

@@ -14,18 +14,14 @@ type
     reg: Registry
 
 
-# Prevent copies
+# Init / deinit
 
-proc `=copy`(a: var Kernel, b: Kernel) {.error.}
-
-
-# Kernel instance
+proc init(ker: var Kernel) =
+  echo "initialized kernel"
 
 proc `=destroy`(ker: var Kernel) =
   # TODO(nikki): Explicitly clear tracked types
-  discard
-
-var ker*: Kernel
+  echo "deinitialized kernel"
 
 
 # Ids
@@ -191,6 +187,14 @@ proc isort*[T](
   {.emit: [ker.reg, ".sort<", T, ">([&](const auto &a, const auto &b) {",
     "return ", compare, "(const_cast<", T, "*>(&a), const_cast<", T, "*>(&b));",
   "}, entt::insertion_sort{});"].}
+
+
+# Singleton
+
+proc `=copy`(a: var Kernel, b: Kernel) {.error.}
+
+var ker*: Kernel
+ker.init()
 
 
 # Tests

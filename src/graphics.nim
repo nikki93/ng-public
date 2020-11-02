@@ -12,16 +12,11 @@ type
     viewX, viewY: float
     viewWidth, viewHeight: float
 
-  Graphics* = object
+  Graphics = object
     window: ptr SDLWindow
     screen: ptr GPUTarget
     dpiScale: float
     state: State
-
-
-# Prevent copies
-
-proc `=copy`(a: var Graphics, b: Graphics) {.error.}
 
 
 # State
@@ -42,12 +37,12 @@ proc selectWindowSize(gfx: var Graphics): (int, int) =
 
 const SDL_INIT_VIDEO = 0x00000020
 
-proc initGraphics*(title: string, viewWidth, viewHeight: float): Graphics =
+proc init(gfx: var Graphics) =
   # Initial state
-  result.state = State(
+  gfx.state = State(
     r: 0xff, g: 0xff, b: 0xff, a: 0xff,
-    viewX: 400, viewY: 255,
-    viewWidth: viewWidth, viewHeight: viewHeight)
+    viewX: 400, viewY: 225,
+    viewWidth: 800, viewHeight: 450)
 
   # Init SDL video
   proc SDL_InitSubSystem(flags: uint32): int
@@ -61,14 +56,14 @@ proc initGraphics*(title: string, viewWidth, viewHeight: float): Graphics =
     discard SDL_SetHint("SDL_EMSCRIPTEN_KEYBOARD_ELEMENT", "#canvas")
 
   # Create window
-  let (bestW, bestH) = result.selectWindowSize()
+  let (bestW, bestH) = gfx.selectWindowSize()
   proc SDL_CreateWindow(title: cstring, x, y, w, h: int,
       flags: uint32): ptr SDLWindow
     {.importc, header: sdlH.}
   const SDL_WINDOWPOS_UNDEFINED = 0x1FFF0000
   const SDL_WINDOW_ALLOW_HIGHDPI = 0x00002000
   const SDL_WINDOW_OPENGL = 0x00000002
-  result.window = SDL_CreateWindow(title,
+  gfx.window = SDL_CreateWindow("ng",
       SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
       bestW, bestH,
       SDL_WINDOW_ALLOW_HIGHDPI or SDL_WINDOW_OPENGL)
@@ -78,22 +73,22 @@ proc initGraphics*(title: string, viewWidth, viewHeight: float): Graphics =
     {.importc, header: sdlH.}
   proc GPU_SetInitWindow(windowId: uint32)
     {.importc, header: gpuH.}
-  GPU_SetInitWindow(SDL_GetWindowID(result.window))
+  GPU_SetInitWindow(SDL_GetWindowID(gfx.window))
   var w, h: cint
   proc SDL_GetWindowSize(window: ptr SDLWindow, w, h: var cint)
     {.importc, header: sdLH.}
-  SDL_GetWindowSize(result.window, w, h)
+  SDL_GetWindowSize(gfx.window, w, h)
   proc GPU_Init(w, h: uint16, flags: uint32): ptr GPUTarget
     {.importc, header: gpuH.}
   const GPU_DEFAULT_INIT_FLAGS = 0
-  result.screen = GPU_Init(cast[uint16](w), cast[uint16](h),
+  gfx.screen = GPU_Init(cast[uint16](w), cast[uint16](h),
     GPU_DEFAULT_INIT_FLAGS)
   proc GPU_SetWindowResolution(w, h: uint16)
     {.importc, header: gpuH.}
   GPU_SetWindowResolution(cast[uint16](w), cast[uint16](h))
 
   # Apply initial state
-  result.setState(result.state)
+  gfx.setState(gfx.state)
 
   echo "initialized graphics"
 
@@ -138,3 +133,11 @@ template frame*(gfx: var Graphics, body: untyped) =
   beginFrame(gfx)
   body
   endFrame(gfx)
+
+
+# Singleton
+
+proc `=copy`(a: var Graphics, b: Graphics) {.error.}
+
+var gfx*: Graphics
+gfx.init()

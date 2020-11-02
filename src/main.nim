@@ -1,6 +1,7 @@
 import std/math
 
-import common
+import boot
+
 import timing, graphics, events
 
 

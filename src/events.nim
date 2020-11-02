@@ -1,7 +1,5 @@
 import std/times
 
-import graphics
-
 
 const sdlH = "\"precomp.h\""
 
@@ -22,7 +20,7 @@ type
     pressed: bool
     release: bool
 
-  Events* = object
+  Events = object
     quitting: bool
 
     refreshBase: Time
@@ -32,20 +30,15 @@ type
     touches: seq[Touch]
 
 
-# Prevent copies
-
-proc `=copy`(a: var Events, b: Events) {.error.}
-
-
 # Init / deinit
 
 const SDL_INIT_EVENTS = 0x00004000
 
-proc initEvents*(gfx: var Graphics): Events =
+proc init(ev: var Events) =
   # Refresh rate
-  result.refreshBase = getTime()
-  result.refreshCount = 1
-  result.refreshRate = 60 # TODO(nikki): Read refresh rate from graphics
+  ev.refreshBase = getTime()
+  ev.refreshCount = 1
+  ev.refreshRate = 60 # TODO(nikki): Read refresh rate from graphics
 
   # Init SDL events
   proc SDL_InitSubSystem(flags: uint32): int
@@ -109,3 +102,11 @@ template loop*(ev: var Events, body: untyped) =
   else:
     while not ev.quitting:
       frameProc()
+
+
+# Singleton
+
+proc `=copy`(a: var Events, b: Events) {.error.}
+
+var ev*: Events
+ev.init()
