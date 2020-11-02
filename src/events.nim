@@ -91,7 +91,7 @@ proc endFrame(ev: var Events) =
 
 var theFrameProc: proc()
 
-template frame*(ev: var Events, body: untyped) =
+template loop*(ev: var Events, body: untyped) =
   proc frameProc() =
     beginFrame(ev)
     body
