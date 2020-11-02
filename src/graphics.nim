@@ -40,7 +40,7 @@ proc initGraphics*(title: string, viewWidth, viewHeight: float): Graphics =
     viewX: 400, viewY: 255,
     viewWidth: viewWidth, viewHeight: viewHeight)
 
-  # SDL init
+  # Init SDL video
   proc SDL_InitSubSystem(flags: uint32): int
     {.importc, header: sdlH.}
   discard SDL_InitSubSystem(SDL_INIT_VIDEO)
@@ -66,11 +66,12 @@ proc initGraphics*(title: string, viewWidth, viewHeight: float): Graphics =
   echo "initialized graphics"
 
 proc `=destroy`(gfx: var Graphics) =
-  proc SDL_DestroyWindow(window: ptr SDLWindow)
-    {.importc, header: sdlH.}
-  proc SDL_QuitSubSystem(flags: uint32)
-    {.importc, header: sdlH.}
+  # If we're the owner, destroy window and deinit SDL video
   if gfx.window != nil:
+    proc SDL_DestroyWindow(window: ptr SDLWindow)
+      {.importc, header: sdlH.}
+    proc SDL_QuitSubSystem(flags: uint32)
+      {.importc, header: sdlH.}
     SDL_DestroyWindow(gfx.window)
     SDL_QuitSubSystem(SDL_INIT_VIDEO)
 
