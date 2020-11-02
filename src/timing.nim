@@ -1,4 +1,4 @@
-import std/times
+import std/[times, math]
 
 
 type
@@ -32,20 +32,21 @@ proc initTiming*(): Timing =
 
 # Frame
 
+func inSecondsFloat(dur: Duration): float =
+  1.0e-6 * dur.inMicroseconds.toBiggestFloat
+
 proc frame*(tim: var Timing) =
   # Time
   let now = getTime()
-  tim.seconds = 1.0e-6 *
-    (now - tim.start).inMicroseconds.toBiggestFloat
-  tim.deltaSeconds = 1.0e-6 *
-    (now - tim.lastFrame).inMicroseconds.toBiggestFloat
+  tim.seconds = (now - tim.start).inSecondsFloat
+  tim.deltaSeconds = (now - tim.lastFrame).inSecondsFloat
   tim.lastFrame = now
 
   # FPS
   inc tim.framesSinceFPSUpdate
-  let secSinceFPSUpdate = (now - tim.lastFPSUpdate).inSeconds.toBiggestFloat
+  let secSinceFPSUpdate = (now - tim.lastFPSUpdate).inSecondsFloat
   if secSinceFPSUpdate > 1:
     tim.lastFPSUpdate = now
     tim.fps = tim.framesSinceFPSUpdate.toFloat / secSinceFPSUpdate
     tim.framesSinceFPSUpdate = 0
-    echo "fps: ", tim.fps
+    echo "fps: ", tim.fps.round.toInt
