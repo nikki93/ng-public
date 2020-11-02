@@ -74,17 +74,20 @@ proc beginFrame(ev: var Events) =
       ev.quitting = true
 
 proc endFrame(ev: var Events) =
-  let refreshOffset = (1000 * ev.refreshCount div ev.refreshRate).milliseconds
-  let sleepUntil = ev.refreshBase + refreshOffset
-  let now = getTime()
-  if sleepUntil > now:
-    proc SDL_Delay(ms: uint32)
-      {.importc, header: sdlH.}
-    SDL_Delay(cast[uint32]((sleepUntil - now).inMilliseconds))
-    inc ev.refreshCount
-  else:
-    ev.refreshBase = now
-    ev.refreshCount = 1
+  # Maintain refresh rate by waiting till next beat. In Emscripten the
+  # browser manages this for us.
+  when not defined(emscripten):
+    let refreshOffset = (1000 * ev.refreshCount div ev.refreshRate).milliseconds
+    let sleepUntil = ev.refreshBase + refreshOffset
+    let now = getTime()
+    if sleepUntil > now:
+      proc SDL_Delay(ms: uint32)
+        {.importc, header: sdlH.}
+      SDL_Delay(cast[uint32]((sleepUntil - now).inMilliseconds))
+      inc ev.refreshCount
+    else:
+      ev.refreshBase = now
+      ev.refreshCount = 1
 
 var theFrameProc: proc()
 
