@@ -44,7 +44,7 @@ proc initEvents*(gfx: var Graphics): Events =
   # Refresh rate
   result.refreshBase = getTime()
   result.refreshCount = 1
-  result.refreshRate = 60
+  result.refreshRate = 60 # TODO(nikki): Read refresh rate from graphics
 
   # Init SDL events
   proc SDL_InitSubSystem(flags: uint32): int
