@@ -1,14 +1,38 @@
-import std/times
+import std/[times, sequtils]
+
+
+import graphics
 
 
 const sdlH = "\"precomp.h\""
 
 type
-  SdlEventType {.importc: "SDL_EventType", header: sdlH.} = enum
-    QuitEvent = 0x100
+  SDLEventType {.importc: "SDL_EventType", header: sdlH.} = enum
+    Quit = 0x100
+
+    MouseMotion = 0x400
+    MouseButtonDown
+    MouseButtonUp
+
+    FingerDown = 0x700
+    FingerUp
+    FingerMotion
+
+  SDLMouseButtonEvent
+    {.importc: "SDL_MouseMotionEvent", header: sdlH.} = object
+    x: int32
+    y: int32
+
+  SDLTouchFingerEvent
+    {.importc: "SDL_TouchFingerEvent", header: sdlH.} = object
+    fingerId: int64
+    x: float32
+    y: float32
 
   SDLEvent {.importc: "SDL_Event", header: sdlH.} = object
-    `type`: SdlEventType
+    `type`: SDLEventType
+    button: SDLMouseButtonEvent
+    tfinger: SDLTouchFingerEvent
 
   Touch = object
     id: int64
@@ -18,7 +42,7 @@ type
     x, y: float
     dx, dy: float
     pressed: bool
-    release: bool
+    released: bool
 
   Events = object
     quitting: bool
@@ -27,7 +51,7 @@ type
     refreshCount: int
     refreshRate: int
 
-    touches: seq[Touch]
+    touches*: seq[Touch]
 
 
 # Init / deinit
@@ -58,18 +82,80 @@ proc `=destroy`(ev: var Events) =
 
 # Frame
 
+proc addTouch(ev: var Events, id: int64, screenX, screenY: float) {.inline.} =
+  ev.touches.keepItIf(it.id == id)
+  ev.touches.add(Touch(
+    id: id,
+    screenX: screenX, screenY: screenY,
+    pressed: true,
+  ))
+
+proc setTouch(ev: var Events,
+  id: int64, screenX, screenY: float, released: bool) {.inline.} =
+  for touch in ev.touches.mitems:
+    if touch.id == id:
+      touch.screenX = screenX
+      touch.screenY = screenY
+      if released:
+        touch.released = true
+
 proc beginFrame(ev: var Events) =
+  # Check SDL events
   var event: SDLEvent
   proc SDL_PollEvent(event: var SdlEvent): bool
     {.importc, header: sdlH.}
   while SDL_PollEvent(event):
-    case event.`type`:
-    of QuitEvent:
+    case event.type:
+      # Quit
+    of Quit:
       ev.quitting = true
 
+      # Mouse
+    of MouseButtonDown, MouseMotion, MouseButtonUp:
+      const id = -1 # Based on `SDL_MOUSE_TOUCHID`
+      let (ww, wh) = gfx.windowSize
+      let (_, _, vw, vh) = gfx.view
+      let screenX = event.button.x.toFloat * vw / ww;
+      let screeny = event.button.y.toFloat * vh / wh;
+      if event.type == MouseButtonDown:
+        ev.addTouch(id, screenX, screenY)
+      else:
+        ev.setTouch(id, screenX, screenY, event.type == MouseButtonUp)
+
+      # Touch
+    of FingerDown, FingerMotion, FingerUp:
+      let id = event.tfinger.fingerId
+      let (ww, wh) = gfx.windowSize
+      let (_, _, vw, _) = gfx.view
+      let screenX = event.tfinger.x * vw;
+      let screenY = event.tfinger.y * wh * vw / ww;
+      if event.type == FingerDown:
+        ev.addTouch(id, screenX, screenY)
+      else:
+        ev.setTouch(id, screenX, screenY, event.type == FingerUp)
+
+  # Update touch deltas and world-space coordinates
+  for touch in ev.touches.mitems:
+    touch.screenDX = touch.screenX - touch.prevScreenX
+    touch.screenDY = touch.screenY - touch.prevScreenY
+    touch.prevScreenX = touch.screenX
+    touch.prevScreenY = touch.screenY
+    let (newX, newY) = gfx.viewToWorld(touch.screenX, touch.screenY)
+    touch.dx = newX - touch.x
+    touch.dy = newY - touch.y
+    touch.x = newX
+    touch.y = newY
+
 proc endFrame(ev: var Events) =
+  # Remove released touches
+  ev.touches.keepItIf(not it.released)
+
+  # Reset pressed state
+  for touch in ev.touches.mitems:
+    touch.pressed = false
+
   # Maintain refresh rate by waiting till next beat. In Emscripten the
-  # browser manages this for us.
+  # browser manages the frame rate and we don't have to do this.
   when not defined(emscripten):
     let refreshOffset = (1000 * ev.refreshCount div ev.refreshRate).milliseconds
     let sleepUntil = ev.refreshBase + refreshOffset
@@ -83,14 +169,18 @@ proc endFrame(ev: var Events) =
       ev.refreshBase = now
       ev.refreshCount = 1
 
-var theFrameProc: proc()
+var theFrameProc: proc() # Needed for the Emscripten case below
 
 template loop*(ev: var Events, body: untyped) =
+  # Run this on each iteration
   proc frameProc() =
     beginFrame(ev)
     body
     endFrame(ev)
+
   when defined(emscripten):
+    # Emscripten maanges the main loop and needs us to just pass it a
+    # frame callback
     theFrameProc = frameProc
     proc cFrame() {.cdecl.} =
       theFrameProc()
@@ -100,6 +190,7 @@ template loop*(ev: var Events, body: untyped) =
       {.importc.}
     emscripten_set_main_loop(cFrame, 0, true)
   else:
+    # Regular loop
     while not ev.quitting:
       frameProc()
 

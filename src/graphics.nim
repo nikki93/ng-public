@@ -27,7 +27,24 @@ proc setState(gfx: var Graphics, state: State) =
 
 # Coordinates
 
-proc selectWindowSize(gfx: var Graphics): (int, int) =
+proc view*(gfx: Graphics): (float, float, float, float) {.inline.} =
+  result[0] = gfx.state.viewX
+  result[1] = gfx.state.viewY
+  result[2] = gfx.state.viewWidth
+  result[3] = gfx.state.viewHeight
+
+proc viewToWorld*(gfx: Graphics, x, y: float): (float, float) {.inline.} =
+  result[0] = x - 0.5 * gfx.state.viewWidth + gfx.state.viewX
+  result[1] = y - 0.5 * gfx.state.viewHeight + gfx.state.viewY
+
+proc windowSize*(gfx: Graphics): (float, float) {.inline.} =
+  var w, h: cint
+  proc SDL_GetWindowSize(window: ptr SDLWindow, w, h: var cint)
+    {.importc, header: sdlH.}
+  SDL_GetWindowSize(gfx.window, w, h)
+  (w.toFloat, h.toFloat)
+
+proc selectWindowSize(gfx: var Graphics): (int, int) {.inline.} =
   var bestW = 800
   # TODO(nikki): Use canvas width in Emscripten (see C++ engine code)
   (bestW, (bestW.toFloat * gfx.state.viewHeight / gfx.state.viewWidth).toInt)
