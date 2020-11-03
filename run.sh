@@ -53,8 +53,29 @@ case "$1" in
         if [[ -z "$VALGRIND" ]]; then
           ./build/release/ng
         else
+          SUPPRESSIONS="
+          {
+            ignore_versioned_system_libs
+            Memcheck:Leak
+            ...
+            obj:*/lib*/lib*.so.*
+          }
+          {
+            ignore_iris_dri
+            Memcheck:Addr4
+            ...
+            obj:*/dri/iris_dri.so
+          }
+          {
+            ignore_iris_dri
+            Memcheck:Addr8
+            ...
+            obj:*/dri/iris_dri.so
+          }
+          "
           valgrind \
-            --suppressions=<(echo -e '{\n ignore_versioned_libs\n Memcheck:Leak\n ...\n obj:*/lib*/lib*.so.*\n }\n') \
+            --suppressions=<(echo "$SUPPRESSIONS") \
+            --gen-suppressions=all \
             --leak-check=full \
             -s \
             ./build/release/ng
