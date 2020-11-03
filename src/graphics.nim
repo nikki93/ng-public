@@ -146,7 +146,7 @@ proc endFrame(gfx: var Graphics) =
     {.importc, header: gpuH.}
   GPU_Flip(gfx.screen)
 
-template frame*(gfx: var Graphics, body: untyped) =
+template frame*(gfx: var Graphics, body: typed) =
   beginFrame(gfx)
   body
   endFrame(gfx)

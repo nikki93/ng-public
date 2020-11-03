@@ -171,7 +171,7 @@ proc endFrame(ev: var Events) =
 
 var theFrameProc: proc() # Needed for the Emscripten case below
 
-template loop*(ev: var Events, body: untyped) =
+template loop*(ev: var Events, body: typed) =
   # Run this on each iteration
   proc frameProc() =
     beginFrame(ev)
