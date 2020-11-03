@@ -29,7 +29,7 @@ type
     x: float32
     y: float32
 
-  SDLEvent {.importc: "SDL_Event", header: sdlH.} = object
+  SDLEvent {.union, importc: "SDL_Event", header: sdlH.} = object
     `type`: SDLEventType
     button: SDLMouseButtonEvent
     tfinger: SDLTouchFingerEvent
