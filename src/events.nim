@@ -83,7 +83,7 @@ proc `=destroy`(ev: var Events) =
 # Frame
 
 proc addTouch(ev: var Events, id: int64, screenX, screenY: float) {.inline.} =
-  ev.touches.keepItIf(it.id == id)
+  ev.touches.keepItIf(it.id != id)
   ev.touches.add(Touch(
     id: id,
     screenX: screenX, screenY: screenY,
