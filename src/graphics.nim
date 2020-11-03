@@ -29,7 +29,7 @@ proc setState(gfx: var Graphics, state: State) =
 
 proc selectWindowSize(gfx: var Graphics): (int, int) =
   var bestW = 800
-  # TODO(nikki): Use canvas width in Emscripten (see C++ code)
+  # TODO(nikki): Use canvas width in Emscripten (see C++ engine code)
   (bestW, (bestW.toFloat * gfx.state.viewHeight / gfx.state.viewWidth).toInt)
 
 
