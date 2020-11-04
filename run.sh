@@ -62,6 +62,18 @@ case "$1" in
           }
           {
             ignore_iris_dri
+            Memcheck:Addr1
+            ...
+            obj:*/dri/iris_dri.so
+          }
+          {
+            ignore_iris_dri
+            Memcheck:Addr2
+            ...
+            obj:*/dri/iris_dri.so
+          }
+          {
+            ignore_iris_dri
             Memcheck:Addr4
             ...
             obj:*/dri/iris_dri.so
