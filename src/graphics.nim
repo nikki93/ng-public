@@ -66,7 +66,8 @@ proc init(gfx: var Graphics) =
     {.importc, header: sdlH.}
   discard SDL_InitSubSystem(SDL_INIT_VIDEO)
 
-  # Emscripten particulars
+  # In Emscripten, tell SDL to only take keyboard focus when the canvas is
+  # focused. Without this it steals keyboard focus from the whole page.
   when defined(emscripten):
     proc SDL_SetHint(nane: cstring, value: cstring): bool
       {.importc, header: sdlH.}
@@ -110,6 +111,8 @@ proc init(gfx: var Graphics) =
   echo "initialized graphics"
 
 proc `=destroy`(gfx: var Graphics) =
+  # TODO(nikki): Deinitialize resources here, /before/ the rest
+
   # Destroy renderer
   if gfx.screen != nil:
     proc GPU_Quit()
