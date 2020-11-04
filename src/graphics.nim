@@ -55,7 +55,8 @@ proc selectWindowSize(gfx: var Graphics): (int, int) =
   (bestW, (bestW.toFloat * gfx.state.viewHeight / gfx.state.viewWidth).toInt)
 
 proc updateRenderScale(gfx: var Graphics) =
-  gfx.renderScale = cast[int](gfx.screen.w).toBiggestFloat / gfx.state.viewWidth
+  let screenW = cast[int](gfx.screen.w).toBiggestFloat
+  gfx.renderScale = screenW / gfx.state.viewWidth
 
 
 # State
