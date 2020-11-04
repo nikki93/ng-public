@@ -35,14 +35,14 @@ type
     tfinger: SDLTouchFingerEvent
 
   Touch = object
-    id: int64
-    screenX, screenY: float
+    id*: int64
+    screenX*, screenY*: float
     prevScreenX, prevScreenY: float
-    screenDX, screenDY: float
-    x, y: float
-    dx, dy: float
-    pressed: bool
-    released: bool
+    screenDX*, screenDY*: float
+    x*, y*: float
+    dx*, dy*: float
+    pressed*: bool
+    released*: bool
 
   Events = object
     quitting: bool

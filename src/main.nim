@@ -9,11 +9,9 @@ ev.loop:
   tim.frame
 
   if ev.touches.len > 0:
-    var msg = "touches: "
+    echo "num touches: ", ev.touches.len
     for touch in ev.touches:
-      msg.add($touch)
-      msg.add(", ")
-    echo msg
+      echo "touch ", touch.id, ": ", $touch
 
   gfx.frame:
     let r = 0xff * (0.2 * (sin(2 * tim.t) + 1) + 0.1)
