@@ -27,7 +27,7 @@ type
 proc main() =
   randomize()
 
-  for i in 1..300:
+  for i in 1..3000:
     let ent = ker.create()
 
     var depth = ker.add(Depth, ent)
