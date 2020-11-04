@@ -20,3 +20,7 @@ ev.loop:
       gfx.clear(rU8, 0x80, 0x20)
     else:
       gfx.clear(rU8, 0x20, 0x80)
+
+    gfx.drawLine(100, 100, 400, 300)
+    gfx.drawRectangle(200, 200, 80, 80)
+    gfx.drawRectangleFill(400, 200, 80, 80)

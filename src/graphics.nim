@@ -5,6 +5,12 @@ const gpuH = "\"precomp.h\""
 type
   SDLWindow {.importc: "SDL_Window", header: sdlH.} = object
 
+  SDLColor {.importc: "SDL_Color", header: sdlH.} = object
+    r, g, b, a: uint8
+
+  GPURect {.importc: "GPU_Rect", header: gpuH.} = object
+    x, y, w, h: float32
+
   GPUTarget {.importc: "GPU_Target", header: gpuH.} = object
 
   State = object
@@ -15,7 +21,8 @@ type
   Graphics = object
     window: ptr SDLWindow
     screen: ptr GPUTarget
-    dpiScale: float
+
+    renderScale: float
     state: State
 
 
@@ -28,10 +35,8 @@ proc setState(gfx: var Graphics, state: State) =
 # Coordinates
 
 proc view*(gfx: Graphics): (float, float, float, float) {.inline.} =
-  result[0] = gfx.state.viewX
-  result[1] = gfx.state.viewY
-  result[2] = gfx.state.viewWidth
-  result[3] = gfx.state.viewHeight
+  (result[0], result[1]) = (gfx.state.viewX, gfx.state.viewY)
+  (result[2], result[3]) = (gfx.state.viewWidth, gfx.state.viewHeight)
 
 proc viewToWorld*(gfx: Graphics, x, y: float): (float, float) {.inline.} =
   result[0] = x - 0.5 * gfx.state.viewWidth + gfx.state.viewX
@@ -56,6 +61,7 @@ const SDL_INIT_VIDEO = 0x00000020
 
 proc init(gfx: var Graphics) =
   # Initial state
+  gfx.renderScale = 1
   gfx.state = State(
     r: 0xff, g: 0xff, b: 0xff, a: 0xff,
     viewX: 400, viewY: 225,
@@ -137,6 +143,42 @@ proc clear*(gfx: var Graphics, r, g, b: uint8) =
   proc GPU_ClearRGB(target: ptr GPUTarget, r, g, b: uint8)
     {.importc, header: gpuH.}
   GPU_ClearRGB(gfx.screen, r, g, b)
+
+proc worldToRender(gfx: Graphics, x, y: float): (float, float) {.inline.} =
+  ## Render-transformed coordinates to pass to renderer
+  result[0] = gfx.renderScale *
+    (x + 0.5 * gfx.state.viewWidth - gfx.state.viewX)
+  result[1] = gfx.renderScale *
+    (y + 0.5 * gfx.state.viewHeight - gfx.state.viewY)
+
+proc gpuRect(gfx: var Graphics, x, y, w, h: float): GPURect {.inline.} =
+  ## Render-transformed `GPU_Rect` to pass to renderer
+  (result.x, result.y) = gfx.worldToRender(x, y)
+  (result.w, result.h) = (gfx.renderScale * w, gfx.renderScale * h)
+
+proc sdlColor(gfx: var Graphics): SDLColor {.inline.} =
+  ## Current `SDLColor` to pass to renderer
+  SDLColor(r: gfx.state.r, g: gfx.state.g, b: gfx.state.b, a: gfx.state.a)
+
+proc drawLine*(gfx: var Graphics, x1, y1, x2, y2: float) =
+  proc GPU_Line(target: ptr GPUTarget,
+    x1, y1, x2, y2: float32, color: SDLColor)
+    {.importc, header: gpuH.}
+  let (rx1, ry1) = gfx.worldToRender(x1, y1)
+  let (rx2, ry2) = gfx.worldToRender(x2, y2)
+  GPU_Line(gfx.screen, rx1, ry1, rx2, ry2, gfx.sdlColor)
+
+proc drawRectangle*(gfx: var Graphics, x, y, w, h: float) =
+  proc GPU_Rectangle2(target: ptr GPUTarget,
+    rect: GPURect, color: SDLColor)
+    {.importc, header: gpuH.}
+  GPU_Rectangle2(gfx.screen, gfx.gpuRect(x, y, w, h), gfx.sdlColor)
+
+proc drawRectangleFill*(gfx: var Graphics, x, y, w, h: float) =
+  proc GPU_RectangleFilled2(target: ptr GPUTarget,
+    rect: GPURect, color: SDLColor)
+    {.importc, header: gpuH.}
+  GPU_RectangleFilled2(gfx.screen, gfx.gpuRect(x, y, w, h), gfx.sdlColor)
 
 
 # Frame
