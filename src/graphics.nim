@@ -82,7 +82,7 @@ proc init(gfx: var Graphics) =
   # Initial state
   gfx.renderScale = 1
   gfx.state = State(
-    r: 0xff, g: 0xff, b: 0xff, a: 0xff,
+    r: 0xf8, g: 0xf8, b: 0xf2, a: 0xff,
     viewX: 400, viewY: 225,
     viewWidth: 800, viewHeight: 450)
 
@@ -217,7 +217,7 @@ proc beginFrame(gfx: var Graphics) =
 
   gfx.updateRenderScale()
 
-  gfx.clear(0xff, 0xff, 0xff)
+  gfx.clear(0x28, 0x2a, 0x36)
 
 proc endFrame(gfx: var Graphics) =
   proc GPU_Flip(target: ptr GPUTarget)
