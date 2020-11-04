@@ -64,6 +64,11 @@ proc init(ev: var Events) =
   ev.refreshCount = 1
   ev.refreshRate = 60 # TODO(nikki): Read refresh rate from graphics
 
+  # Tell SDL not to consider touches as mouse events since we check both
+  proc SDL_SetHint(nane: cstring, value: cstring): bool
+    {.importc, header: sdlH.}
+  discard SDL_SetHint("SDL_TOUCH_MOUSE_EVENTS", "0")
+
   # Init SDL events
   proc SDL_InitSubSystem(flags: uint32): int
     {.importc, header: sdlH.}
