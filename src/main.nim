@@ -1,38 +1,77 @@
-import std/math
+import std/[math, random]
 
 import boot
 
-import timing, graphics, events
+import timing, graphics, events, kernel
 
 
-ev.loop:
-  tim.frame
+type
+  Depth = object
+    depth: float
 
-  if ev.touches.len > 0:
-    echo "num touches: ", ev.touches.len
-    for touch in ev.touches:
-      echo "touch ", touch.id, ": ", $touch
+  Position = object
+    x, y: float
 
-  gfx.frame:
-    let r = 0xff * (0.2 * (sin(2 * tim.t) + 1) + 0.1)
-    let rU8 = cast[uint8](r.toInt)
+  Oscillate = object
+    xRate, yRate: float
+    xPhase, yPhase: float
+    xAmp, yAmp: float
+
+  Size = object
+    width, height: float
+
+  Color = object
+    r, g, b: uint8
+
+
+proc main() =
+  randomize()
+
+  for i in 1..3000:
+    let ent = ker.create()
+
+    var depth = ker.add(Depth, ent)
+    depth.depth = i.toFloat
+
+    var pos = ker.add(Position, ent)
+    pos.x = rand(800.0)
+    pos.y = rand(450.0)
+
+    var size = ker.add(Size, ent)
+    size.width = rand(10.0..200.0)
+    size.height = rand(10.0..200.0)
+
+    var col = ker.add(Color, ent)
+    col.r = cast[uint8](rand(0x20..0xa0))
+    col.g = cast[uint8](rand(0x20..0xa0))
+    col.b = cast[uint8](rand(0x20..0xa0))
+
+    if i mod 2 == 0:
+      var osc = ker.add(Oscillate, ent)
+      osc.xRate = rand(0.2..5.0)
+      osc.xPhase = rand(0.0..(2 * PI))
+      osc.xAmp = rand(20.0..300.0)
+
+  ev.loop:
+    tim.frame()
+
+    for _, osc, pos in ker.each(Oscillate, Position):
+      pos.x += osc.xAmp * sin(osc.xRate * tim.t + osc.xPhase) * tim.dt
+      pos.y += osc.yAmp * sin(osc.yRate * tim.t + osc.yPhase) * tim.dt
+
     if ev.touches.len > 0:
-      gfx.clear(rU8, 0x20, 0x20)
-    else:
-      gfx.clear(rU8, 0x80, 0x20)
+      for ent, size, pos in ker.each(Size, Position):
+        for touch in ev.touches:
+          if abs(touch.x - pos.x) < 0.5 * size.width and
+            abs(touch.y - pos.y) < 0.5 * size.height:
+            ker.destroy(ent)
 
-    gfx.drawLine(100, 100, 400, 300)
-    gfx.scope:
-      gfx.setView(0, 0, 16, 9)
-      gfx.setColor(0xff, 0, 0)
-      gfx.drawRectangle(0, 0, 5, 5)
-    gfx.drawRectangleFill(400, 225, 80, 80)
-    gfx.drawRectangle(0, 0, 80, 80)
-
-    gfx.scope:
-      gfx.setColor(0, 0x7f, 0)
-      for touch in ev.touches:
-        gfx.drawRectangleFill(touch.x, touch.y, 20, 20)
+    gfx.frame:
+      ker.isort(Depth, proc (a: auto, b: auto): auto {.cdecl.} =
+        a.depth < b.depth)
+      for _, _, pos, size, col in ker.each(Depth, Position, Size, Color):
         gfx.scope:
-          gfx.setColor(0, 0, 0)
-          gfx.drawRectangle(touch.x, touch.y, 20, 20)
+          gfx.setColor(col.r, col.g, col.b)
+          gfx.drawRectangle(pos.x, pos.y, size.width, size.height)
+
+main()
