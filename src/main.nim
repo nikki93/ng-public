@@ -22,5 +22,9 @@ ev.loop:
       gfx.clear(rU8, 0x20, 0x80)
 
     gfx.drawLine(100, 100, 400, 300)
-    gfx.drawRectangle(200, 200, 80, 80)
-    gfx.drawRectangleFill(400, 200, 80, 80)
+    gfx.scope:
+      gfx.setView(0, 0, 16, 9)
+      gfx.setColor(0xff, 0, 0)
+      gfx.drawRectangle(0, 0, 5, 5)
+    gfx.drawRectangleFill(400, 225, 80, 80)
+    gfx.drawRectangle(0, 0, 80, 80)

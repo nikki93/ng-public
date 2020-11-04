@@ -12,6 +12,7 @@ type
     x, y, w, h: float32
 
   GPUTarget {.importc: "GPU_Target", header: gpuH.} = object
+    w: uint16
 
   State = object
     r, g, b, a: uint8
@@ -26,13 +27,14 @@ type
     state: State
 
 
-# State
-
-proc setState(gfx: var Graphics, state: State) =
-  discard
-
 
 # Coordinates
+
+proc SDL_GetWindowSize(window: ptr SDLWindow, w, h: var cint)
+  {.importc, header: sdlH.}
+
+proc GPU_SetWindowResolution(w, h: uint16)
+  {.importc, header: gpuH.}
 
 proc view*(gfx: Graphics): (float, float, float, float) {.inline.} =
   (result[0], result[1]) = (gfx.state.viewX, gfx.state.viewY)
@@ -44,15 +46,31 @@ proc viewToWorld*(gfx: Graphics, x, y: float): (float, float) {.inline.} =
 
 proc windowSize*(gfx: Graphics): (float, float) {.inline.} =
   var w, h: cint
-  proc SDL_GetWindowSize(window: ptr SDLWindow, w, h: var cint)
-    {.importc, header: sdlH.}
   SDL_GetWindowSize(gfx.window, w, h)
   (w.toFloat, h.toFloat)
 
-proc selectWindowSize(gfx: var Graphics): (int, int) {.inline.} =
+proc selectWindowSize(gfx: var Graphics): (int, int) =
   var bestW = 800
   # TODO(nikki): Use canvas width in Emscripten (see C++ engine code)
   (bestW, (bestW.toFloat * gfx.state.viewHeight / gfx.state.viewWidth).toInt)
+
+proc updateRenderScale(gfx: var Graphics) =
+  gfx.renderScale = cast[int](gfx.screen.w).toBiggestFloat / gfx.state.viewWidth
+
+
+# State
+
+proc setColor*(gfx: var Graphics, r, g, b: uint8, a: uint8 = 0xff) =
+  (gfx.state.r, gfx.state.g, gfx.state.b, gfx.state.a) = (r, g, b, a)
+
+proc setView*(gfx: var Graphics, x, y, w, h: float) =
+  (gfx.state.viewX, gfx.state.viewY) = (x, y)
+  (gfx.state.viewWidth, gfx.state.viewHeight) = (w, h)
+  gfx.updateRenderScale()
+
+proc setState*(gfx: var Graphics, state: State) =
+  gfx.setColor(state.r, state.g, state.b, state.a)
+  gfx.setView(state.viewX, state.viewY, state.viewWidth, state.viewHeight)
 
 
 # Init / deinit
@@ -99,16 +117,12 @@ proc init(gfx: var Graphics) =
     {.importc, header: gpuH.}
   GPU_SetInitWindow(SDL_GetWindowID(gfx.window))
   var w, h: cint
-  proc SDL_GetWindowSize(window: ptr SDLWindow, w, h: var cint)
-    {.importc, header: sdLH.}
   SDL_GetWindowSize(gfx.window, w, h)
   proc GPU_Init(w, h: uint16, flags: uint32): ptr GPUTarget
     {.importc, header: gpuH.}
   const GPU_DEFAULT_INIT_FLAGS = 0
   gfx.screen = GPU_Init(cast[uint16](w), cast[uint16](h),
     GPU_DEFAULT_INIT_FLAGS)
-  proc GPU_SetWindowResolution(w, h: uint16)
-    {.importc, header: gpuH.}
   GPU_SetWindowResolution(cast[uint16](w), cast[uint16](h))
 
   # Apply initial state
@@ -153,7 +167,7 @@ proc worldToRender(gfx: Graphics, x, y: float): (float, float) {.inline.} =
 
 proc gpuRect(gfx: var Graphics, x, y, w, h: float): GPURect {.inline.} =
   ## Render-transformed `GPU_Rect` to pass to renderer
-  (result.x, result.y) = gfx.worldToRender(x, y)
+  (result.x, result.y) = gfx.worldToRender(x - 0.5 * w, y - 0.5 * h)
   (result.w, result.h) = (gfx.renderScale * w, gfx.renderScale * h)
 
 proc sdlColor(gfx: var Graphics): SDLColor {.inline.} =
@@ -180,10 +194,28 @@ proc drawRectangleFill*(gfx: var Graphics, x, y, w, h: float) =
     {.importc, header: gpuH.}
   GPU_RectangleFilled2(gfx.screen, gfx.gpuRect(x, y, w, h), gfx.sdlColor)
 
+template scope*(gfx: var Graphics, body: typed) =
+  let oldState = gfx.state
+  body
+  setState(gfx, oldState)
+
 
 # Frame
 
 proc beginFrame(gfx: var Graphics) =
+  # Update window and renderer size if needed
+  let (bestW, bestH) = gfx.selectWindowSize()
+  var w, h: cint
+  SDL_GetWindowSize(gfx.window, w, h)
+  if w != bestW or h != bestH:
+    proc SDL_SetWindowSize(window: ptr SDLWindow, w, h: int)
+      {.importc, header: sdlH.}
+    SDL_SetWindowSize(gfx.window, bestW, bestH)
+    GPU_SetWindowResolution(cast[uint16](bestW), cast[uint16](bestH))
+    echo "updated window size to (", bestW, ", ", bestH, ")"
+
+  gfx.updateRenderScale()
+
   gfx.clear(0xff, 0xff, 0xff)
 
 proc endFrame(gfx: var Graphics) =
@@ -193,7 +225,7 @@ proc endFrame(gfx: var Graphics) =
 
 template frame*(gfx: var Graphics, body: typed) =
   beginFrame(gfx)
-  body
+  scope(gfx, body)
   endFrame(gfx)
 
 
