@@ -28,3 +28,11 @@ ev.loop:
       gfx.drawRectangle(0, 0, 5, 5)
     gfx.drawRectangleFill(400, 225, 80, 80)
     gfx.drawRectangle(0, 0, 80, 80)
+
+    gfx.scope:
+      gfx.setColor(0, 0x7f, 0)
+      for touch in ev.touches:
+        gfx.drawRectangleFill(touch.x, touch.y, 20, 20)
+        gfx.scope:
+          gfx.setColor(0, 0, 0)
+          gfx.drawRectangle(touch.x, touch.y, 20, 20)
