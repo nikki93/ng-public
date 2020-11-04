@@ -89,9 +89,12 @@ proc `=destroy`(ev: var Events) =
 
 proc addTouch(ev: var Events, id: int64, screenX, screenY: float) {.inline.} =
   ev.touches.keepItIf(it.id != id)
+  let (x, y) = gfx.viewToWorld(screenX, screenY)
   ev.touches.add(Touch(
     id: id,
     screenX: screenX, screenY: screenY,
+    prevScreenX: screenX, prevScreenY: screenY,
+    x: x, y: y,
     pressed: true,
   ))
 
