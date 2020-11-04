@@ -67,7 +67,7 @@ proc main() =
             ker.destroy(ent)
 
     gfx.frame:
-      ker.isort(Depth, proc (a: auto, b: auto): auto {.cdecl.} =
+      ker.isort(Depth, proc (a, b: auto): auto {.cdecl.} =
         a.depth < b.depth)
       for _, _, pos, size, col in ker.each(Depth, Position, Size, Color):
         gfx.scope:
