@@ -27,7 +27,7 @@ type
 proc main() =
   randomize()
 
-  for i in 1..3000:
+  for i in 1..300:
     let ent = ker.create()
 
     var depth = ker.add(Depth, ent)
@@ -72,6 +72,12 @@ proc main() =
       for _, _, pos, size, col in ker.each(Depth, Position, Size, Color):
         gfx.scope:
           gfx.setColor(col.r, col.g, col.b)
-          gfx.drawRectangle(pos.x, pos.y, size.width, size.height)
+          gfx.drawRectangleFill(pos.x, pos.y, size.width, size.height)
+
+  ker.clear(Depth)
+  ker.clear(Position)
+  ker.clear(Oscillate)
+  ker.clear(Size)
+  ker.clear(Color)
 
 main()
