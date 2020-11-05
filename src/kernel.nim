@@ -167,7 +167,7 @@ iterator each*(ker: var Kernel, T1, T2, T3, T4: typedesc):
 
 # Clear
 
-proc clear*[T](ker: var Kernel, _: typedesc[T]) =
+proc clear*[T](ker: var Kernel, _: typedesc[T]) {.inline.} =
   for ent, _ in ker.each(T):
     ker.remove(T, ent)
 
@@ -178,7 +178,7 @@ proc isort*[T](
   ker: var Kernel,
   _: typedesc[T],
   compare: proc (a: ptr T, b: ptr T): bool {.cdecl.},
-) =
+) {.inline.} =
   {.emit: [ker.reg, ".sort<", T, ">([&](const auto &a, const auto &b) {",
     "return ", compare, "(const_cast<", T, "*>(&a), const_cast<", T, "*>(&b));",
   "}, entt::insertion_sort{});"].}
