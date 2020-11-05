@@ -43,7 +43,7 @@ type
     useCount: int
 
   Image = object
-    tex: ref Texture
+    tex {.cursor.}: ref Texture
 
   State = object
     r, g, b, a: uint8
@@ -130,10 +130,9 @@ proc `=destroy`(tex: var Texture) =
 
 proc `=destroy`(img: var Image) =
   # User code just dropped an image handle. Decrement the use count of the
-  # associated texture and destroy the ref.
+  # associated texture.
   if img.tex != nil:
     dec img.tex.useCount
-    `=destroy`(img.tex)
 
 proc initImage(tex: ref Texture): Image =
   ## Create a new image handle associated with the given texture.
@@ -335,12 +334,12 @@ proc endFrame(gfx: var Graphics) =
   GPU_Flip(gfx.screen)
 
   # Destroy textures no one's holding a handle to
-  var toDestroy: seq[string]
-  for path, tex in gfx.texs:
+  var toDestroy: seq[ref Texture]
+  for tex in gfx.texs.mvalues:
     if tex.useCount == 0:
-      toDestroy.add(tex.path)
-  for path in toDestroy:
-    gfx.texs.del(path)
+      toDestroy.add(move(tex))
+  for tex in toDestroy:
+    gfx.texs.del(tex.path)
 
 
 template frame*(gfx: var Graphics, body: typed) =
