@@ -65,6 +65,7 @@ proc main() =
           if abs(touch.x - pos.x) < 0.5 * size.width and
             abs(touch.y - pos.y) < 0.5 * size.height:
             ker.destroy(ent)
+            break
 
     gfx.frame:
       ker.isort(Depth, proc (a, b: auto): auto {.cdecl.} =
