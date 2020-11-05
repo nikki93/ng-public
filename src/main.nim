@@ -25,8 +25,7 @@ type
 
 
 proc main() =
-  echo "'keepme.txt' says: "
-  echo open("assets/keepme.txt").readAll()
+  let playerImg = gfx.loadImage("assets/player.png")
 
   randomize()
 
@@ -77,6 +76,8 @@ proc main() =
         gfx.scope:
           gfx.setColor(col.r, col.g, col.b)
           gfx.drawRectangleFill(pos.x, pos.y, size.width, size.height)
+
+      gfx.drawImage(playerImg, 100, 100, 0.25)
 
   ker.clear(Depth)
   ker.clear(Position)

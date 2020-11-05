@@ -15,6 +15,9 @@
 ##   between coordinate spaces.
 
 
+import tables
+
+
 const sdlH = "\"precomp.h\""
 
 const gpuH = "\"precomp.h\""
@@ -31,6 +34,17 @@ type
   GPUTarget {.importc: "GPU_Target", header: gpuH.} = object
     w: uint16
 
+  GPUImage {.importc: "GPU_Image", header: gpuH.} = object
+    w, h: uint16
+
+  Texture = object
+    gpuImage: ptr GPUImage
+    path: string
+    useCount: int
+
+  Image = object
+    tex: ref Texture
+
   State = object
     r, g, b, a: uint8
     viewX, viewY: float
@@ -43,6 +57,7 @@ type
     renderScale: float
     state: State
 
+    texs: Table[string, ref Texture]
 
 
 # Coordinates
@@ -97,6 +112,55 @@ proc setView*(gfx: var Graphics, x, y, w, h: float) =
 proc setState(gfx: var Graphics, state: State) =
   gfx.setColor(state.r, state.g, state.b, state.a)
   gfx.setView(state.viewX, state.viewY, state.viewWidth, state.viewHeight)
+
+
+# Image
+
+proc `=copy`(a: var Texture, b: Texture) {.error.}
+
+proc `=copy`(a: var Image, b: Image) {.error.}
+
+proc `=destroy`(tex: var Texture) =
+  # Free the GPU data associated with this texture
+  if tex.gpuImage != nil:
+    proc GPU_FreeImage(image: ptr GPUImage)
+      {.importc, header: gpuH.}
+    GPU_FreeImage(tex.gpuImage)
+  `=destroy`(tex.path)
+
+proc `=destroy`(img: var Image) =
+  # User code just dropped an image handle. Decrement the use count of the
+  # associated texture and destroy the ref.
+  if img.tex != nil:
+    dec img.tex.useCount
+    `=destroy`(img.tex)
+
+proc initImage(tex: ref Texture): Image =
+  ## Create a new image handle associated with the given texture.
+  ## Increments the use count for the texture.
+  inc tex.useCount
+  result.tex = tex
+
+proc loadImage*(gfx: var Graphics, path: string): Image =
+  ## Load an `Image` from the file at the given path. If an image for
+  ## that file is already currently loaded, this just returns another
+  ## handle to that data and is quick.
+
+  # Check existing textures
+  let found = gfx.texs.getOrDefault(path)
+  if found != nil:
+    return initImage(found)
+
+  # Didn't find existing texture. Load a new one and remember it.
+  proc GPU_LoadImage(filename: cstring): ptr GPU_Image
+    {.importc, header: gpuH.}
+  let tex = (ref Texture)(gpuImage: GPU_LoadImage(path), path: path)
+  gfx.texs[path] = tex
+  return initImage(tex)
+
+proc size*(img: Image): (float, float) =
+  result[0] = cast[int](img.tex.gpuImage.w).toBiggestFloat
+  result[1] = cast[int](img.tex.gpuImage.h).toBiggestFloat
 
 
 # Init / deinit
@@ -157,7 +221,8 @@ proc init(gfx: var Graphics) =
   echo "initialized graphics"
 
 proc `=destroy`(gfx: var Graphics) =
-  # TODO(nikki): Deinitialize resources here, /before/ the rest
+  # Destroy all resources /before/ deinitializing renderer and window
+  `=destroy`(gfx.texs)
 
   # Destroy renderer
   if gfx.screen != nil:
@@ -200,6 +265,16 @@ proc gpuRect(gfx: var Graphics, x, y, w, h: float): GPURect {.inline.} =
 proc sdlColor(gfx: var Graphics): SDLColor {.inline.} =
   ## Current `SDLColor` to pass to renderer
   SDLColor(r: gfx.state.r, g: gfx.state.g, b: gfx.state.b, a: gfx.state.a)
+
+proc drawImage*(gfx: var Graphics, img: Image, x, y, scale: float) =
+  let (imgW, imgH) = img.size
+  let w = scale * imgW
+  let h = scale * imgH
+  proc GPU_BlitRect(image: ptr GPUImage, srcRect: ptr GPURect,
+    target: ptr GPUTarget, destRect: var GPURect)
+    {.importc, header: gpuH.}
+  var destRect = gfx.gpuRect(x, y, w, h)
+  GPU_BlitRect(img.tex.gpuImage, nil, gfx.screen, destRect)
 
 proc drawLine*(gfx: var Graphics, x1, y1, x2, y2: float) =
   ## Draw a line from `(x1, y1)` to `(x2, y2)`
@@ -254,9 +329,19 @@ proc beginFrame(gfx: var Graphics) =
   gfx.clear(0x28, 0x2a, 0x36)
 
 proc endFrame(gfx: var Graphics) =
+  # Flush GPU draw calls
   proc GPU_Flip(target: ptr GPUTarget)
     {.importc, header: gpuH.}
   GPU_Flip(gfx.screen)
+
+  # Destroy textures no one's holding a handle to
+  var toDestroy: seq[string]
+  for path, tex in gfx.texs:
+    if tex.useCount == 0:
+      toDestroy.add(tex.path)
+  for path in toDestroy:
+    gfx.texs.del(path)
+
 
 template frame*(gfx: var Graphics, body: typed) =
   ## Wrap a single frame of graphics drawing. All drawing procedures
