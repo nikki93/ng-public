@@ -1,3 +1,5 @@
+## Manages the window event loop and provides access to input events.
+
 import std/[times, sequtils]
 
 
@@ -35,14 +37,17 @@ type
     tfinger: SDLTouchFingerEvent
 
   Touch = object
-    id*: int64
-    screenX*, screenY*: float
+    id*: int64                  ## Unique id distinguishing this touch from
+                                ## other ones in a multi-touch gesture.
+    screenX*, screenY*: float   ## The touch coordinates in view-space.
     prevScreenX, prevScreenY: float
-    screenDX*, screenDY*: float
-    x*, y*: float
-    dx*, dy*: float
-    pressed*: bool
-    released*: bool
+    screenDX*, screenDY*: float ## Change of view-space coordinates in the last
+                                ## frame.
+    x*, y*: float               ## Touch coordinates in world space.
+    dx*, dy*: float             ## Change of world-space coordinates in the last
+                                ## frame.
+    pressed*: bool              ## Whether the touch just began in this frame.
+    released*: bool             ## Whether the touch just ended in this frame.
 
   Events = object
     quitting: bool
@@ -51,7 +56,7 @@ type
     refreshCount: int
     refreshRate: int
 
-    touches*: seq[Touch]
+    touches*: seq[Touch] ## The currently active touches.
 
 
 # Init / deinit
@@ -180,6 +185,9 @@ proc endFrame(ev: var Events) =
 var theFrameProc: proc() # Needed for the Emscripten case below
 
 template loop*(ev: var Events, body: typed) =
+  ## Begin the application's event loop, running the body every frame of the
+  ## event loop. Events are only accessible within this body.
+
   # Run this on each iteration
   proc frameProc() =
     beginFrame(ev)
@@ -207,5 +215,5 @@ template loop*(ev: var Events, body: typed) =
 
 proc `=copy`(a: var Events, b: Events) {.error.}
 
-var ev*: Events
+var ev*: Events ## The global instance of this module to pass to procedures.
 ev.init()

@@ -1,3 +1,5 @@
+## Keeps track of elapsed time.
+
 import std/[times, math]
 
 
@@ -16,9 +18,11 @@ type
 # Time
 
 proc t*(tim: Timing): float {.inline.} =
+  ## Time elapsed in seconds since the start of the application.
   tim.seconds
 
 proc dt*(tim: Timing): float {.inline.} =
+  ## Time elapsed in seconds since the last frame.
   tim.deltaSeconds
 
 
@@ -41,6 +45,9 @@ func inSecondsFloat(dur: Duration): float =
   1.0e-6 * dur.inMicroseconds.toBiggestFloat
 
 proc frame*(tim: var Timing) =
+  ## Notify the timing system about one frame passing. Usually this is done
+  ## once at the beginning of each frame of the event loop (see `events`).
+
   # Time
   let now = getTime()
   tim.seconds = (now - tim.start).inSecondsFloat
@@ -61,5 +68,5 @@ proc frame*(tim: var Timing) =
 
 proc `=copy`(a: var Timing, b: Timing) {.error.}
 
-var tim*: Timing
+var tim*: Timing ## The global instance of this module to pass to procedures.
 tim.init()

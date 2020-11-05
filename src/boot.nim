@@ -1,4 +1,5 @@
-# Initializes all engine modules, in the correct order
+## Initializes all engine modules, in the correct order. Must be imported once,
+## at the beginning of the main module of the game.
 
 {.used.}
 

@@ -1,3 +1,20 @@
+## Interface to real-time rendering for the entire application.
+##
+## Responsibilities
+## ================
+##
+## - Manages the **window** and the associated **renderer**.
+## - Manages **resources** (such as images and effects) for drawing.
+## - Has procedures to **perform the actual drawing**. Coordinates are
+##   generally in **world-space**, and subject to a **view transformation**
+##   when drawn.
+## - Manages the current **drawing state** which includes properties that
+##   affect the next draw call (such as view, color, ...). States can be
+##   **scoped** with `gfx.scope`.
+## - Has **utilities** to get the view and window dimensions and convert
+##   between coordinate spaces.
+
+
 const sdlH = "\"precomp.h\""
 
 const gpuH = "\"precomp.h\""
@@ -37,14 +54,18 @@ proc GPU_SetWindowResolution(w, h: uint16)
   {.importc, header: gpuH.}
 
 proc view*(gfx: Graphics): (float, float, float, float) {.inline.} =
+  ## Get the current rectangular view region in world-space.
   (result[0], result[1]) = (gfx.state.viewX, gfx.state.viewY)
   (result[2], result[3]) = (gfx.state.viewWidth, gfx.state.viewHeight)
 
 proc viewToWorld*(gfx: Graphics, x, y: float): (float, float) {.inline.} =
+  ## Convert the position expressed in view-space to world-space.
   result[0] = x - 0.5 * gfx.state.viewWidth + gfx.state.viewX
   result[1] = y - 0.5 * gfx.state.viewHeight + gfx.state.viewY
 
 proc windowSize*(gfx: Graphics): (float, float) {.inline.} =
+  ## Get the size of the window (in the operating system's units --
+  ## mostly useful for aspect ratio).
   var w, h: cint
   SDL_GetWindowSize(gfx.window, w, h)
   (w.toFloat, h.toFloat)
@@ -62,14 +83,18 @@ proc updateRenderScale(gfx: var Graphics) =
 # State
 
 proc setColor*(gfx: var Graphics, r, g, b: uint8, a: uint8 = 0xff) =
+  ## Set the color used for drawing in the current scope.
   (gfx.state.r, gfx.state.g, gfx.state.b, gfx.state.a) = (r, g, b, a)
 
 proc setView*(gfx: var Graphics, x, y, w, h: float) =
+  ## Set the view rectangle for the current scope. This means drawing 
+  ## will show up on screen as if viewed from this rectangle. The rectangle
+  ## coordinates are in world-space.
   (gfx.state.viewX, gfx.state.viewY) = (x, y)
   (gfx.state.viewWidth, gfx.state.viewHeight) = (w, h)
   gfx.updateRenderScale()
 
-proc setState*(gfx: var Graphics, state: State) =
+proc setState(gfx: var Graphics, state: State) =
   gfx.setColor(state.r, state.g, state.b, state.a)
   gfx.setView(state.viewX, state.viewY, state.viewWidth, state.viewHeight)
 
@@ -155,6 +180,7 @@ proc `=destroy`(gfx: var Graphics) =
 # Draw
 
 proc clear*(gfx: var Graphics, r, g, b: uint8) =
+  ## Clear the screen to the given color.
   proc GPU_ClearRGB(target: ptr GPUTarget, r, g, b: uint8)
     {.importc, header: gpuH.}
   GPU_ClearRGB(gfx.screen, r, g, b)
@@ -176,6 +202,7 @@ proc sdlColor(gfx: var Graphics): SDLColor {.inline.} =
   SDLColor(r: gfx.state.r, g: gfx.state.g, b: gfx.state.b, a: gfx.state.a)
 
 proc drawLine*(gfx: var Graphics, x1, y1, x2, y2: float) =
+  ## Draw a line from `(x1, y1)` to `(x2, y2)`
   proc GPU_Line(target: ptr GPUTarget,
     x1, y1, x2, y2: float32, color: SDLColor)
     {.importc, header: gpuH.}
@@ -184,18 +211,25 @@ proc drawLine*(gfx: var Graphics, x1, y1, x2, y2: float) =
   GPU_Line(gfx.screen, rx1, ry1, rx2, ry2, gfx.sdlColor)
 
 proc drawRectangle*(gfx: var Graphics, x, y, w, h: float) =
+  ## Draw the border of a rectangle with its center at `(x, y)`, and with
+  ## width `w` and height `h`.
   proc GPU_Rectangle2(target: ptr GPUTarget,
     rect: GPURect, color: SDLColor)
     {.importc, header: gpuH.}
   GPU_Rectangle2(gfx.screen, gfx.gpuRect(x, y, w, h), gfx.sdlColor)
 
 proc drawRectangleFill*(gfx: var Graphics, x, y, w, h: float) =
+  ## Draw a filled rectangle with its center at `(x, y)`, and with width
+  ## `w` and height `h`.
   proc GPU_RectangleFilled2(target: ptr GPUTarget,
     rect: GPURect, color: SDLColor)
     {.importc, header: gpuH.}
   GPU_RectangleFilled2(gfx.screen, gfx.gpuRect(x, y, w, h), gfx.sdlColor)
 
 template scope*(gfx: var Graphics, body: typed) =
+  ## Create a new graphics scope and run `body` in it. All graphics state
+  ## changes in `body` remain within that scope, and after the scope call
+  ## the state is restored to the state before the scope call.
   let oldState = gfx.state
   body
   setState(gfx, oldState)
@@ -225,6 +259,10 @@ proc endFrame(gfx: var Graphics) =
   GPU_Flip(gfx.screen)
 
 template frame*(gfx: var Graphics, body: typed) =
+  ## Wrap a single frame of graphics drawing. All drawing procedures
+  ## should be called within the body passed to this. This should
+  ## generally be called once per iteration of the event loop (see the
+  ## `events` module).
   beginFrame(gfx)
   scope(gfx, body)
   endFrame(gfx)
@@ -234,5 +272,9 @@ template frame*(gfx: var Graphics, body: typed) =
 
 proc `=copy`(a: var Graphics, b: Graphics) {.error.}
 
-var gfx*: Graphics
+var gfx*: Graphics ## Maintains the global graphics state, to be passed to
+                   ## graphics procedures. The graphics context is setup
+                   ## during module initialization, and deinitialized
+                   ## automatically on program exit.
+
 gfx.init()
