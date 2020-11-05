@@ -4,7 +4,7 @@
 ## ================
 ##
 ## - Manages the **window** and the associated **renderer**.
-## - Manages **resources** (such as images and effects) for drawing.
+## - Manages **resources** such as images and effects for drawing.
 ## - Has procedures to **perform the actual drawing**. Coordinates are
 ##   generally in **world-space**, and subject to a **view transformation**
 ##   when drawn.
