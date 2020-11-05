@@ -3,7 +3,6 @@ import std/[math, random]
 import boot
 
 import timing, graphics, events, kernel
-import assets
 
 
 type
@@ -26,9 +25,8 @@ type
 
 
 proc main() =
-  echo "'keepme.txt' says:"
-  echo readAsset("keepme.txt")
-  echo "'player.png' size is: ", readAsset("player.png").len
+  echo "'keepme.txt' says: "
+  echo open("assets/keepme.txt").readAll()
 
   randomize()
 
