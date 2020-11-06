@@ -467,6 +467,8 @@ proc sdlColor(gfx: var Graphics): SDLColor {.inline.} =
   SDLColor(r: gfx.state.r, g: gfx.state.g, b: gfx.state.b, a: gfx.state.a)
 
 proc drawImage*(gfx: var Graphics, img: Image, x, y, scale: float) =
+  ## Draw the given image with its center at `(x, y)`, with size scaled by
+  ## the given scale from its actual dimensions.
   let (imgW, imgH) = img.size
   let w = scale * imgW
   let h = scale * imgH
