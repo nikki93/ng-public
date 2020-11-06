@@ -25,7 +25,8 @@ type
 
 
 proc main() =
-  let playerImg = gfx.loadImage("assets/player.png")
+  let testImg = gfx.loadImage("assets/player.png")
+  let testEff = gfx.loadEffect("test.frag")
 
   randomize()
 
@@ -77,7 +78,10 @@ proc main() =
           gfx.setColor(col.r, col.g, col.b)
           gfx.drawRectangleFill(pos.x, pos.y, size.width, size.height)
 
-      gfx.drawImage(playerImg, 100, 100, 0.25)
+      gfx.scope:
+        gfx.useEffect(testEff)
+        testEff.set("u_time", tim.t)
+        gfx.drawImage(testImg, 100, 200, 0.4)
 
   ker.clear(Depth)
   ker.clear(Position)

@@ -15,7 +15,7 @@
 ##   between coordinate spaces.
 
 
-import tables
+import tables, hashes
 
 
 const sdlH = "\"precomp.h\""
@@ -25,17 +25,29 @@ const gpuH = "\"precomp.h\""
 type
   SDLWindow {.importc: "SDL_Window", header: sdlH.} = object
 
+  GPUContext {.importc: "GPU_Context", header: gpuH.} = object
+    default_textured_vertex_shader_id: uint32
+
+  GPUTarget {.importc: "GPU_Target", header: gpuH.} = object
+    w: uint16
+    context: ptr GPUContext
+
   SDLColor {.importc: "SDL_Color", header: sdlH.} = object
     r, g, b, a: uint8
 
   GPURect {.importc: "GPU_Rect", header: gpuH.} = object
     x, y, w, h: float32
 
-  GPUTarget {.importc: "GPU_Target", header: gpuH.} = object
-    w: uint16
-
   GPUImage {.importc: "GPU_Image", header: gpuH.} = object
     w, h: uint16
+
+  GPUShaderBlock {.importc: "GPU_ShaderBlock", header: gpuH.} = object
+    position_loc, texcoord_loc, color_loc, modelViewProjection_loc: int
+
+  GPUShaderEnum {.importc: "GPU_ShaderEnum", header: gpuH.} = enum
+    VertexShader = 0
+    FragmentShader = 1
+
 
   Texture = object
     gpuImage: ptr GPUImage
@@ -45,10 +57,29 @@ type
   Image = object
     tex {.cursor.}: ref Texture
 
+
+  Uniform = object
+    name: string
+    nameHash: Hash
+    gpuId: int
+
+  Program = object
+    gpuProgId: uint32
+    gpuBlock: GPUShaderBlock
+    uniforms: seq[Uniform]
+    path: string
+    useCount: int
+    gfx: ptr Graphics
+
+  Effect = object
+    prog {.cursor.}: ref Program
+
+
   State = object
     r, g, b, a: uint8
     viewX, viewY: float
     viewWidth, viewHeight: float
+    prog {.cursor.}: ref Program
 
   Graphics = object
     window: ptr SDLWindow
@@ -58,6 +89,7 @@ type
     state: State
 
     texs: Table[string, ref Texture]
+    progs: Table[string, ref Program]
 
 
 # Coordinates
@@ -95,25 +127,6 @@ proc updateRenderScale(gfx: var Graphics) =
   gfx.renderScale = screenW / gfx.state.viewWidth
 
 
-# State
-
-proc setColor*(gfx: var Graphics, r, g, b: uint8, a: uint8 = 0xff) =
-  ## Set the color used for drawing in the current scope.
-  (gfx.state.r, gfx.state.g, gfx.state.b, gfx.state.a) = (r, g, b, a)
-
-proc setView*(gfx: var Graphics, x, y, w, h: float) =
-  ## Set the view rectangle for the current scope. This means drawing 
-  ## will show up on screen as if viewed from this rectangle. The rectangle
-  ## coordinates are in world-space.
-  (gfx.state.viewX, gfx.state.viewY) = (x, y)
-  (gfx.state.viewWidth, gfx.state.viewHeight) = (w, h)
-  gfx.updateRenderScale()
-
-proc setState(gfx: var Graphics, state: State) =
-  gfx.setColor(state.r, state.g, state.b, state.a)
-  gfx.setView(state.viewX, state.viewY, state.viewWidth, state.viewHeight)
-
-
 # Image
 
 proc `=copy`(a: var Texture, b: Texture) {.error.}
@@ -129,8 +142,8 @@ proc `=destroy`(tex: var Texture) =
   `=destroy`(tex.path)
 
 proc `=destroy`(img: var Image) =
-  # User code just dropped an image handle. Decrement the use count of the
-  # associated texture.
+  # User code just dropped an image handle. Decrement the use count of
+  # the associated texture.
   if img.tex != nil:
     dec img.tex.useCount
 
@@ -160,6 +173,188 @@ proc loadImage*(gfx: var Graphics, path: string): Image =
 proc size*(img: Image): (float, float) =
   result[0] = cast[int](img.tex.gpuImage.w).toBiggestFloat
   result[1] = cast[int](img.tex.gpuImage.h).toBiggestFloat
+
+
+# Effect
+
+proc `=copy`(a: var Program, b: Program) {.error.}
+
+proc `=copy`(a: var Effect, b: Effect) {.error.}
+
+proc `=destroy`(prog: var Program) =
+  # Free the GPU data associated with this program
+  if prog.gpuProgId != 0:
+    proc GPU_FreeShaderProgram(prog: uint32)
+      {.importc, header: gpuH.}
+    GPU_FreeShaderProgram(prog.gpuProgId)
+  `=destroy`(prog.uniforms)
+  `=destroy`(prog.path)
+
+proc `=destroy`(eff: var Effect) =
+  # User code just dropped an effect handle. Decrement the use count of
+  # the associated program.
+  if eff.prog != nil:
+    dec eff.prog.useCount
+
+proc initEffect(prog: ref Program): Effect =
+  ## Create a new effect handle associated with the given program.
+  ## Increments the use count for the program.
+  inc prog.useCount
+  result.prog = prog
+
+proc loadEffect*(gfx: var Graphics, path: static string): Effect =
+  ## Load an `Effect` based on the shader source file at the given path.
+  ## The path must be statically known. The file should be present
+  ## alongside the source code files of the application and is read at
+  ## compile time.
+
+  const gpuH = "\"precomp.h\"" # Weirdly have to define this again because of
+                               # the `static` parameter
+
+  # Check existing programs
+  let found = gfx.progs.getOrDefault(path)
+  if found != nil:
+    return initEffect(found)
+
+  # Code string with preamble based on platform
+  proc prepareCode(path: static string): string =
+    when defined(emscripten):
+      result.add("""#version 100
+  precision highp float;
+  precision mediump int;
+  #define in varying
+  #define texture texture2D
+  #define fragColor gl_FragColor
+  """)
+    else:
+      result.add("""#version 150
+  out vec4 fragColor;
+  """)
+    result.add(staticRead(path))
+  const code = prepareCode(path)
+
+  # Compile fragment shader and link with default textured vertex shader
+  var errors: string
+  proc GPU_CompileShader(shaderType: GPUShaderEnum, source: cstring): uint32
+    {.importc, header: gpuH.}
+  proc GPU_GetShaderMessage(): cstring
+    {.importc: "(char *)GPU_GetShaderMessage", header: gpuH.}
+  let fragId = GPU_CompileShader(FragmentShader, code)
+  if fragId == 0:
+    errors.add("error compiling '" & path & "':\n")
+    errors.add(GPU_GetShaderMessage())
+  let vertId = gfx.screen.context.default_textured_vertex_shader_id
+  proc GPU_LinkShaders(shader1, shader2: uint32): uint32
+    {.importc, header: gpuH.}
+  let gpuProgId = GPU_LinkShaders(vertId, fragId)
+  if gpuProgId == 0:
+    errors.add("error linking '" & path & "':\n")
+    errors.add(GPU_GetShaderMessage())
+
+  # Preemptively free the fragment shader. The underlying system will
+  # actually hold onto it as long as the GPU program exists.
+  proc GPU_FreeShader(shader: uint32)
+    {.importc, header: gpuH.}
+  GPU_FreeShader(fragId)
+
+  # Load the 'shader block' (contains vertex attribute ids)
+  proc GPU_LoadShaderBlock(prog: uint32,
+    posName, texcoordName, colorName, mvpName: cstring): GPUShaderBlock
+    {.importc, header: gpuH.}
+  let gpuBlock = GPU_LoadShaderBlock(gpuProgId,
+    "gpu_Vertex", "gpu_TexCoord", "gpu_Color",
+    "gpu_ModelViewProjectionMatrix")
+
+  # Create our program object, remember it, and return the effect
+  let prog = (ref Program)(
+    gpuProgId: gpuProgId, gpuBlock: gpuBlock, path: path, gfx: gfx.addr)
+  gfx.progs[path] = prog
+  result = initEffect(prog)
+
+  # Notify about errors
+  if errors.len > 0:
+    echo errors
+
+proc useProgram(gfx: var Graphics, prog: ref Program) =
+  ## Set the program used when drawing in the current scope. If `nil` the
+  ## default program is used.
+  gfx.state.prog = prog
+  proc GPU_ActivateShaderProgram(prog: uint32, blck: ptr GPUShaderBlock)
+    {.importc, header: gpuH.}
+  if prog == nil:
+    GPU_ActivateShaderProgram(0, nil)
+  else:
+    GPU_ActivateShaderProgram(prog.gpuProgId, prog.gpuBlock.addr)
+
+proc useEffect*(gfx: var Graphics, effect: Effect) =
+  ## Set the effect used when drawing in the current scope.
+  gfx.useProgram(effect.prog)
+
+proc set*(eff: Effect, name: static string, value: float) =
+  ## Set a parameter of an effect. The name of the parameter must be
+  ## statically known, and should correspond to a uniform in the effect's
+  ## shader.
+
+  const gpuH = "\"precomp.h\"" # Weirdly have to define this again because of
+                               # the `static` parameter
+
+  let prog {.cursor.} = eff.prog
+  const nameHash = hash(name)
+  var uniformId = -1
+
+  # Check if we've already looked up its id
+  for uniform in prog.uniforms:
+    if uniform.nameHash == nameHash:
+      uniformId = uniform.gpuId
+      break
+
+  # Look up its id if we need to
+  if uniformId == -1:
+    proc GPU_GetUniformLocation(prog: uint32, name: cstring): int
+      {.importc, header: gpuH.}
+    uniformId = GPU_GetUniformLocation(prog.gpuProgId, name)
+    if uniformId != -1:
+      for uniform in prog.uniforms:
+        if uniform.nameHash == nameHash:
+          echo "warning: hashes for uniforms '", uniform.name,
+            "' and '", name, "' clash!"
+      prog.uniforms.add(Uniform(
+        name: name, nameHash: nameHash, gpuId: uniformId))
+
+  # If we have an id, let's set the value. We may have to switch to the
+  # program and back if it's not currently bound.
+  if uniformId != -1:
+    var changed = false
+    let oldProg {.cursor.} = prog.gfx.state.prog
+    if oldProg == nil or oldProg.gpuProgId != prog.gpuProgId:
+      prog.gfx[].useProgram(prog)
+      changed = true
+    proc GPU_SetUniformf(location: int, value: float32)
+      {.importc, header: gpuH.}
+    GPU_SetUniformf(uniformId, value)
+    if changed:
+      prog.gfx[].useProgram(oldProg)
+
+
+
+# State
+
+proc setColor*(gfx: var Graphics, r, g, b: uint8, a: uint8 = 0xff) =
+  ## Set the color used for drawing in the current scope.
+  (gfx.state.r, gfx.state.g, gfx.state.b, gfx.state.a) = (r, g, b, a)
+
+proc setView*(gfx: var Graphics, x, y, w, h: float) =
+  ## Set the view rectangle for the current scope. This means drawing
+  ## will show up on screen as if viewed from this rectangle. The rectangle
+  ## coordinates are in world-space.
+  (gfx.state.viewX, gfx.state.viewY) = (x, y)
+  (gfx.state.viewWidth, gfx.state.viewHeight) = (w, h)
+  gfx.updateRenderScale()
+
+proc setState(gfx: var Graphics, state: State) =
+  gfx.setColor(state.r, state.g, state.b, state.a)
+  gfx.setView(state.viewX, state.viewY, state.viewWidth, state.viewHeight)
+  gfx.useProgram(state.prog)
 
 
 # Init / deinit
@@ -221,6 +416,7 @@ proc init(gfx: var Graphics) =
 
 proc `=destroy`(gfx: var Graphics) =
   # Destroy all resources /before/ deinitializing renderer and window
+  `=destroy`(gfx.progs)
   `=destroy`(gfx.texs)
 
   # Destroy renderer
@@ -333,13 +529,22 @@ proc endFrame(gfx: var Graphics) =
     {.importc, header: gpuH.}
   GPU_Flip(gfx.screen)
 
-  # Destroy textures no one's holding a handle to
-  var toDestroy: seq[ref Texture]
-  for tex in gfx.texs.mvalues:
-    if tex.useCount == 0:
-      toDestroy.add(move(tex))
-  for tex in toDestroy:
-    gfx.texs.del(tex.path)
+  # Destroy textures and programs no one's holding a handle to
+  # TODO(nikki): Factor both into a single template used twice?
+  block:
+    var toDestroy: seq[ref Texture]
+    for tex in gfx.texs.mvalues:
+      if tex.useCount == 0:
+        toDestroy.add(move(tex))
+    for tex in toDestroy:
+      gfx.texs.del(tex.path)
+  block:
+    var toDestroy: seq[ref Program]
+    for prog in gfx.progs.mvalues:
+      if prog.useCount == 0:
+        toDestroy.add(move(prog))
+    for prog in toDestroy:
+      gfx.progs.del(prog.path)
 
 
 template frame*(gfx: var Graphics, body: typed) =
