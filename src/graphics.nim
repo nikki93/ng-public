@@ -15,7 +15,9 @@
 ##   between coordinate spaces.
 
 
-import tables, hashes
+import std/[tables, hashes]
+
+import utils
 
 
 const sdlH = "\"precomp.h\""
@@ -140,13 +142,14 @@ proc `=destroy`(tex: var Texture) =
     proc GPU_FreeImage(image: ptr GPUImage)
       {.importc, header: gpuH.}
     GPU_FreeImage(tex.gpuImage)
-  `=destroy`(tex.path)
+  destroyFields(tex)
 
 proc `=destroy`(img: var Image) =
   # User code just dropped an image handle. Decrement the handle count
   # of the associated texture.
   if img.tex != nil:
     dec img.tex.handleCount
+  destroyFields(img)
 
 proc initImage(tex: ref Texture): Image =
   ## Create a new image handle associated with the given texture.
@@ -188,14 +191,14 @@ proc `=destroy`(prog: var Program) =
     proc GPU_FreeShaderProgram(prog: uint32)
       {.importc, header: gpuH.}
     GPU_FreeShaderProgram(prog.gpuProgId)
-  `=destroy`(prog.uniforms)
-  `=destroy`(prog.path)
+  destroyFields(prog)
 
 proc `=destroy`(eff: var Effect) =
   # User code just dropped an effect handle. Decrement the handle count
   # of the associated program.
   if eff.prog != nil:
     dec eff.prog.handleCount
+  destroyFields(eff)
 
 proc initEffect(prog: ref Program): Effect =
   ## Create a new effect handle associated with the given program.
@@ -423,8 +426,8 @@ proc init(gfx: var Graphics) =
 
 proc `=destroy`(gfx: var Graphics) =
   # Destroy all resources /before/ deinitializing renderer and window
-  `=destroy`(gfx.progs)
-  `=destroy`(gfx.texs)
+  gfx.progs.clear()
+  gfx.texs.clear()
 
   # Destroy renderer
   if gfx.screen != nil:
@@ -441,6 +444,7 @@ proc `=destroy`(gfx: var Graphics) =
     SDL_DestroyWindow(gfx.window)
     SDL_QuitSubSystem(SDL_INIT_VIDEO)
 
+  destroyFields(gfx)
   echo "deinitialized graphics"
 
 

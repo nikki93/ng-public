@@ -3,7 +3,7 @@
 import std/[times, sequtils]
 
 
-import graphics
+import graphics, utils
 
 
 const sdlH = "\"precomp.h\""
@@ -87,6 +87,7 @@ proc `=destroy`(ev: var Events) =
     {.importc, header: sdlH.}
   SDL_QuitSubSystem(SDL_INIT_EVENTS)
 
+  destroyFields(ev)
   echo "deinitialized events"
 
 

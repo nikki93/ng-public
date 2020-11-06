@@ -2,6 +2,8 @@
 
 import std/[times, math]
 
+import utils
+
 
 type
   Timing = object
@@ -36,6 +38,7 @@ proc init(tim: var Timing) =
   echo "initialized timing"
 
 proc `=destroy`(tim: var Timing) =
+  destroyFields(tim)
   echo "deinitialized timing"
 
 
