@@ -202,36 +202,11 @@ proc initEffect(prog: ref Program): Effect =
   inc prog.useCount
   result.prog = prog
 
-proc loadEffect*(gfx: var Graphics, path: static string): Effect =
-  ## Load an `Effect` based on the shader source file at the given path.
-  ## The path must be statically known. The file should be present
-  ## alongside the source code files of the application and is read at
-  ## compile time.
-
-  const gpuH = "\"precomp.h\"" # Weirdly have to define this again because of
-                               # the `static` parameter
-
+proc loadEffect(gfx: var Graphics, path: string, code: string): Effect =
   # Check existing programs
   let found = gfx.progs.getOrDefault(path)
   if found != nil:
     return initEffect(found)
-
-  # Code string with preamble based on platform
-  proc prepareCode(path: static string): string =
-    when defined(emscripten):
-      result.add("""#version 100
-  precision highp float;
-  precision mediump int;
-  #define in varying
-  #define texture texture2D
-  #define fragColor gl_FragColor
-  """)
-    else:
-      result.add("""#version 150
-  out vec4 fragColor;
-  """)
-    result.add(staticRead(path))
-  const code = prepareCode(path)
 
   # Compile fragment shader and link with default textured vertex shader
   var errors: string
@@ -275,6 +250,31 @@ proc loadEffect*(gfx: var Graphics, path: static string): Effect =
   if errors.len > 0:
     echo errors
 
+proc loadEffect*(gfx: var Graphics, path: static string): Effect =
+  ## Load an `Effect` based on the shader source file at the given path.
+  ## The path must be statically known. The file should be present
+  ## alongside the source code files of the application and is read at
+  ## compile time.
+
+  # Constant code string with preamble based on platform
+  proc prepareCode(path: static string): string =
+    when defined(emscripten):
+      result.add("""#version 100
+  precision highp float;
+  precision mediump int;
+  #define in varying
+  #define texture texture2D
+  #define fragColor gl_FragColor
+  """)
+    else:
+      result.add("""#version 150
+  out vec4 fragColor;
+  """)
+    result.add(staticRead(path))
+  const code = prepareCode(path)
+  gfx.loadEffect(path, code) # Call to version without `static` param
+
+
 proc useProgram(gfx: var Graphics, prog: ref Program) =
   ## Set the program used when drawing in the current scope. If `nil` the
   ## default program is used.
@@ -290,16 +290,8 @@ proc useEffect*(gfx: var Graphics, effect: Effect) =
   ## Set the effect used when drawing in the current scope.
   gfx.useProgram(effect.prog)
 
-proc set*(eff: Effect, name: static string, value: float) =
-  ## Set a parameter of an effect. The name of the parameter must be
-  ## statically known, and should correspond to a uniform in the effect's
-  ## shader.
-
-  const gpuH = "\"precomp.h\"" # Weirdly have to define this again because of
-                               # the `static` parameter
-
+proc set(eff: Effect, nameHash: Hash, name: string, value: float) =
   let prog {.cursor.} = eff.prog
-  const nameHash = hash(name)
   var uniformId = -1
 
   # Check if we've already looked up its id
@@ -335,6 +327,12 @@ proc set*(eff: Effect, name: static string, value: float) =
     if changed:
       prog.gfx[].useProgram(oldProg)
 
+proc set*(eff: Effect, name: static string, value: float) {.inline.} =
+  ## Set a parameter of an effect. The name of the parameter must be
+  ## statically known, and should correspond to a uniform in the effect's
+  ## shader.
+  const nameHash = hash(name)
+  eff.set(nameHash, name, value) # Call to version without `static` param
 
 
 # State
