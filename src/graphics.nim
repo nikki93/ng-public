@@ -203,6 +203,9 @@ proc initEffect(prog: ref Program): Effect =
   result.prog = prog
 
 proc loadEffect(gfx: var Graphics, path: string, code: string): Effect =
+  # Version of `loadEffect*` below with the `static` param erased so that
+  # the compiler doesn't generate all this code for each string.
+
   # Check existing programs
   let found = gfx.progs.getOrDefault(path)
   if found != nil:
@@ -276,7 +279,7 @@ proc loadEffect*(gfx: var Graphics, path: static string): Effect =
 
 
 proc useProgram(gfx: var Graphics, prog: ref Program) =
-  ## Set the program used when drawing in the current scope. If `nil` the
+  ## Use this program when drawing in the current scope. If `nil` the
   ## default program is used.
   gfx.state.prog = prog
   proc GPU_ActivateShaderProgram(prog: uint32, blck: ptr GPUShaderBlock)
@@ -287,10 +290,13 @@ proc useProgram(gfx: var Graphics, prog: ref Program) =
     GPU_ActivateShaderProgram(prog.gpuProgId, prog.gpuBlock.addr)
 
 proc useEffect*(gfx: var Graphics, effect: Effect) =
-  ## Set the effect used when drawing in the current scope.
+  ## Use this effect when drawing in the current scope.
   gfx.useProgram(effect.prog)
 
 proc set(eff: Effect, nameHash: Hash, name: string, value: float) =
+  # Version of `set*` below with the `static` param erased so that
+  # the compiler doesn't generate all this code for each string.
+
   let prog {.cursor.} = eff.prog
   var uniformId = -1
 
