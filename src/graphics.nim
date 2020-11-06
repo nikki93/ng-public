@@ -56,7 +56,7 @@ type
     useCount: int
 
   Image = object
-    tex {.cursor.}: ref Texture
+    tex: ptr Texture
 
 
   Uniform = object
@@ -73,14 +73,14 @@ type
     gfx: ptr Graphics
 
   Effect = object
-    prog {.cursor.}: ref Program
+    prog: ptr Program
 
 
   State = object
     r, g, b, a: uint8
     viewX, viewY: float
     viewWidth, viewHeight: float
-    prog {.cursor.}: ref Program
+    prog: ptr Program
 
   Graphics = object
     window: ptr SDLWindow
@@ -152,7 +152,7 @@ proc initImage(tex: ref Texture): Image =
   ## Create a new image handle associated with the given texture.
   ## Increments the use count for the texture.
   inc tex.useCount
-  result.tex = tex
+  result.tex = tex[].addr
 
 proc loadImage*(gfx: var Graphics, path: string): Image =
   ## Load an `Image` from the file at the given path. If an image for
@@ -201,7 +201,7 @@ proc initEffect(prog: ref Program): Effect =
   ## Create a new effect handle associated with the given program.
   ## Increments the use count for the program.
   inc prog.useCount
-  result.prog = prog
+  result.prog = prog[].addr
 
 proc loadEffect(gfx: var Graphics, path: string, code: string): Effect =
   # Version of `loadEffect*` below with the `static` param erased so that
@@ -279,7 +279,7 @@ proc loadEffect*(gfx: var Graphics, path: static string): Effect =
   gfx.loadEffect(path, code) # Call to version without `static` param
 
 
-proc useProgram(gfx: var Graphics, prog: ref Program) =
+proc useProgram(gfx: var Graphics, prog: ptr Program) =
   ## Use this program when drawing in the current scope. If `nil` the
   ## default program is used.
   gfx.state.prog = prog
@@ -298,7 +298,7 @@ proc set(eff: Effect, nameHash: Hash, name: string, value: float) =
   # Version of `set*` below with the `static` param erased so that
   # the compiler doesn't generate all this code for each string.
 
-  let prog {.cursor.} = eff.prog
+  let prog = eff.prog
   var uniformId = -1
 
   # Check if we've already looked up its id
@@ -324,7 +324,7 @@ proc set(eff: Effect, nameHash: Hash, name: string, value: float) =
   # program and back if it's not currently bound.
   if uniformId != -1:
     var changed = false
-    let oldProg {.cursor.} = prog.gfx.state.prog
+    let oldProg = prog.gfx.state.prog
     if oldProg == nil or oldProg.gpuProgId != prog.gpuProgId:
       prog.gfx[].useProgram(prog)
       changed = true
