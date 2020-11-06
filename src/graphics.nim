@@ -53,7 +53,7 @@ type
   Texture = object
     gpuImage: ptr GPUImage
     path: string
-    useCount: int
+    handleCount: int
 
   Image = object
     tex: ptr Texture
@@ -69,7 +69,7 @@ type
     gpuBlock: GPUShaderBlock
     uniforms: seq[Uniform]
     path: string
-    useCount: int
+    handleCount: int
     gfx: ptr Graphics
 
   Effect = object
@@ -143,15 +143,15 @@ proc `=destroy`(tex: var Texture) =
   `=destroy`(tex.path)
 
 proc `=destroy`(img: var Image) =
-  # User code just dropped an image handle. Decrement the use count of
-  # the associated texture.
+  # User code just dropped an image handle. Decrement the handle count
+  # of the associated texture.
   if img.tex != nil:
-    dec img.tex.useCount
+    dec img.tex.handleCount
 
 proc initImage(tex: ref Texture): Image =
   ## Create a new image handle associated with the given texture.
-  ## Increments the use count for the texture.
-  inc tex.useCount
+  ## Increments the handle count for the texture.
+  inc tex.handleCount
   result.tex = tex[].addr
 
 proc loadImage*(gfx: var Graphics, path: string): Image =
@@ -192,15 +192,15 @@ proc `=destroy`(prog: var Program) =
   `=destroy`(prog.path)
 
 proc `=destroy`(eff: var Effect) =
-  # User code just dropped an effect handle. Decrement the use count of
-  # the associated program.
+  # User code just dropped an effect handle. Decrement the handle count
+  # of the associated program.
   if eff.prog != nil:
-    dec eff.prog.useCount
+    dec eff.prog.handleCount
 
 proc initEffect(prog: ref Program): Effect =
   ## Create a new effect handle associated with the given program.
-  ## Increments the use count for the program.
-  inc prog.useCount
+  ## Increments the handle count for the program.
+  inc prog.handleCount
   result.prog = prog[].addr
 
 proc loadEffect(gfx: var Graphics, path: string, code: string): Effect =
@@ -541,14 +541,14 @@ proc endFrame(gfx: var Graphics) =
   block:
     var toDestroy: seq[ref Texture]
     for tex in gfx.texs.mvalues:
-      if tex.useCount == 0:
+      if tex.handleCount == 0:
         toDestroy.add(move(tex))
     for tex in toDestroy:
       gfx.texs.del(tex.path)
   block:
     var toDestroy: seq[ref Program]
     for prog in gfx.progs.mvalues:
-      if prog.useCount == 0:
+      if prog.handleCount == 0:
         toDestroy.add(move(prog))
     for prog in toDestroy:
       gfx.progs.del(prog.path)
