@@ -123,7 +123,7 @@ proc selectWindowSize(gfx: var Graphics): (int, int) =
   # TODO(nikki): Use canvas width in Emscripten (see C++ engine code)
   (bestW, (bestW.toFloat * gfx.state.viewHeight / gfx.state.viewWidth).toInt)
 
-proc updateRenderScale(gfx: var Graphics) =
+proc updateRenderScale(gfx: var Graphics) {.inline.} =
   let screenW = cast[int](gfx.screen.w).toBiggestFloat
   gfx.renderScale = screenW / gfx.state.viewWidth
 
@@ -279,7 +279,7 @@ proc loadEffect*(gfx: var Graphics, path: static string): Effect =
   gfx.loadEffect(path, code) # Call to version without `static` param
 
 
-proc useProgram(gfx: var Graphics, prog: ptr Program) {.inline.} =
+proc useProgram(gfx: var Graphics, prog: ptr Program) =
   ## Use this program when drawing in the current scope. If `nil` the
   ## default program is used.
   if gfx.state.prog == prog:
