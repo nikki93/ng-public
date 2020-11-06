@@ -25,6 +25,7 @@ const gpuH = "\"precomp.h\""
 type
   SDLWindow {.importc: "SDL_Window", header: sdlH.} = object
 
+
   GPUContext {.importc: "GPU_Context", header: gpuH.} = object
     default_textured_vertex_shader_id: uint32
 
