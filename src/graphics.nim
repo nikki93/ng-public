@@ -279,9 +279,11 @@ proc loadEffect*(gfx: var Graphics, path: static string): Effect =
   gfx.loadEffect(path, code) # Call to version without `static` param
 
 
-proc useProgram(gfx: var Graphics, prog: ptr Program) =
+proc useProgram(gfx: var Graphics, prog: ptr Program) {.inline.} =
   ## Use this program when drawing in the current scope. If `nil` the
   ## default program is used.
+  if gfx.state.prog == prog:
+    return
   gfx.state.prog = prog
   proc GPU_ActivateShaderProgram(prog: uint32, blck: ptr GPUShaderBlock)
     {.importc, header: gpuH.}
@@ -344,11 +346,11 @@ proc set*(eff: Effect, name: static string, value: float) {.inline.} =
 
 # State
 
-proc setColor*(gfx: var Graphics, r, g, b: uint8, a: uint8 = 0xff) =
+proc setColor*(gfx: var Graphics, r, g, b: uint8, a: uint8 = 0xff) {.inline.} =
   ## Set the color used for drawing in the current scope.
   (gfx.state.r, gfx.state.g, gfx.state.b, gfx.state.a) = (r, g, b, a)
 
-proc setView*(gfx: var Graphics, x, y, w, h: float) =
+proc setView*(gfx: var Graphics, x, y, w, h: float) {.inline.} =
   ## Set the view rectangle for the current scope. This means drawing
   ## will show up on screen as if viewed from this rectangle. The rectangle
   ## coordinates are in world-space.
@@ -356,7 +358,7 @@ proc setView*(gfx: var Graphics, x, y, w, h: float) =
   (gfx.state.viewWidth, gfx.state.viewHeight) = (w, h)
   gfx.updateRenderScale()
 
-proc setState(gfx: var Graphics, state: State) =
+proc setState(gfx: var Graphics, state: State) {.inline.} =
   gfx.setColor(state.r, state.g, state.b, state.a)
   gfx.setView(state.viewX, state.viewY, state.viewWidth, state.viewHeight)
   gfx.useProgram(state.prog)
