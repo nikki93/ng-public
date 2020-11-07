@@ -37,6 +37,7 @@ case "$1" in
   # Desktop
   release)
     $TIME $NIM cpp \
+      --verbosity:0 \
       --compileOnly \
       --cc:$NIM_CC \
       --nimcache:build/nim-gen-release \
@@ -106,6 +107,7 @@ case "$1" in
   # Web
   web-release)
     $TIME $NIM cpp \
+      --verbosity:0 \
       --compileOnly \
       --nimcache:build/nim-gen-web-release \
       -d:danger \
