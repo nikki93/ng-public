@@ -59,6 +59,17 @@ type
     touches*: seq[Touch] ## The currently active touches.
 
 
+# Focus
+
+proc windowFocused*(ev: Events): bool {.inline.} =
+  when defined(emscripten):
+    proc JS_isWindowFocused(): bool
+      {.importc.}
+    JS_isWindowFocused()
+  else:
+    true
+
+
 # Init / deinit
 
 const SDL_INIT_EVENTS = 0x00004000
