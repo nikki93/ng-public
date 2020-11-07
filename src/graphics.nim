@@ -122,7 +122,10 @@ proc windowSize*(gfx: Graphics): (float, float) {.inline.} =
 
 proc selectWindowSize(gfx: var Graphics): (int, int) =
   var bestW = 800
-  # TODO(nikki): Use canvas width in Emscripten (see C++ engine code)
+  when defined(emscripten):
+    proc JS_getCanvasWidth(): int
+      {.importc.}
+    bestW = JS_getCanvasWidth()
   (bestW, (bestW.toFloat * gfx.state.viewHeight / gfx.state.viewWidth).toInt)
 
 proc updateRenderScale(gfx: var Graphics) {.inline.} =
