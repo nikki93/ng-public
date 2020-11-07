@@ -62,6 +62,7 @@ type
 # Focus
 
 proc windowFocused*(ev: Events): bool {.inline.} =
+  ## Whether the window currently has keyboard focus
   when defined(emscripten):
     proc JS_isWindowFocused(): bool
       {.importc.}
