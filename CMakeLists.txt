@@ -82,7 +82,7 @@ endif()
 
 # Web flags
 if(WEB)
-  target_link_options(ng PRIVATE "SHELL:--bind")
+  target_link_options(ng PRIVATE "SHELL:--js-library ${PROJECT_SOURCE_DIR}/src/library.js")
   target_link_options(ng PRIVATE "SHELL:-s WASM=1")
   target_link_options(ng PRIVATE "SHELL:-s MAX_WEBGL_VERSION=2")
   target_link_options(ng PRIVATE "SHELL:-s TOTAL_MEMORY=256MB")
@@ -94,6 +94,8 @@ if(WEB)
     target_compile_options(ng PRIVATE "SHELL:--profiling")
     target_link_options(ng PRIVATE "SHELL:--profiling")
   endif()
+  file(GLOB MY_ASSETS CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/assets/*)
+  set_target_properties(ng PROPERTIES LINK_DEPENDS "${PROJECT_SOURCE_DIR}/src/library.js;${MY_ASSETS}")
 endif()
 
 # iOS extras

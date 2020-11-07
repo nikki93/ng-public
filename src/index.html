@@ -9,12 +9,14 @@
 
     <!-- Styles -->
     <script type="text/javascript">
-      // Try to force skipping cache
-      const l = document.createElement('link');
-      l.rel = 'stylesheet';
-      l.type = 'text/css';
-      l.href = 'index.css?ts=' + new Date().getTime();
-      document.getElementsByTagName('head')[0].appendChild(l);
+      (() => {
+        // Skip cache
+        const l = document.createElement('link');
+        l.rel = 'stylesheet';
+        l.type = 'text/css';
+        l.href = 'index.css?ts=' + new Date().getTime();
+        document.getElementsByTagName('head')[0].appendChild(l);
+      })();
     </script>
   </head>
 
@@ -64,7 +66,7 @@
       };
 
       (() => {
-        // Try to force skipping cache
+        // Skip cache
         const s = document.createElement('script');
         s.async = true;
         s.type = 'text/javascript';
