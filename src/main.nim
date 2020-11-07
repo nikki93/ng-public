@@ -19,4 +19,8 @@ proc main() =
         testEff.set("u_time", tim.t)
         gfx.drawImage(testImg, 100, 200, 0.4)
 
+      gfx.scope:
+        gfx.setColor(0xff, 0, 0xff)
+        gfx.drawRectangle(300, 200, 80, 80)
+
 main()
