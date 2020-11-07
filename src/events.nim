@@ -41,11 +41,11 @@ type
                                 ## other ones in a multi-touch gesture.
     screenX*, screenY*: float   ## The touch coordinates in view-space.
     prevScreenX, prevScreenY: float
-    screenDX*, screenDY*: float ## Change of view-space coordinates in the last
-                                ## frame.
+    screenDX*, screenDY*: float ## Change of view-space coordinates in the
+                                ## last frame.
     x*, y*: float               ## Touch coordinates in world space.
-    dx*, dy*: float             ## Change of world-space coordinates in the last
-                                ## frame.
+    dx*, dy*: float             ## Change of world-space coordinates in the
+                                ## last frame.
     pressed*: bool              ## Whether the touch just began in this frame.
     released*: bool             ## Whether the touch just ended in this frame.
 
