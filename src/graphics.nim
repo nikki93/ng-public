@@ -170,7 +170,8 @@ proc loadImage*(gfx: var Graphics, path: string): Image =
   # Didn't find existing texture. Load a new one and remember it.
   proc GPU_LoadImage(filename: cstring): ptr GPU_Image
     {.importc, header: gpuH.}
-  let tex = (ref Texture)(gpuImage: GPU_LoadImage(path), path: path)
+  let tex = (ref Texture)(gpuImage: GPU_LoadImage(path))
+  tex.path = path # Separate statement prevents extra copy perf warning
   gfx.texs[path] = tex
   return initImage(tex)
 
@@ -249,7 +250,8 @@ proc loadEffect(gfx: var Graphics, path: string, code: string): Effect =
 
   # Create our program object, remember it, and return the effect
   let prog = (ref Program)(
-    gpuProgId: gpuProgId, gpuBlock: gpuBlock, path: path, gfx: gfx.addr)
+    gpuProgId: gpuProgId, gpuBlock: gpuBlock, gfx: gfx.addr)
+  prog.path = path # Separate statement prevents extra copy perf warning
   gfx.progs[path] = prog
   result = initEffect(prog)
 
