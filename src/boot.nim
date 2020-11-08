@@ -8,4 +8,5 @@
 import timing
 import graphics
 import events
+import uis
 import kernel
