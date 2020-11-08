@@ -201,27 +201,28 @@ template loop*(ev: var Events, body: typed) =
   ## Begin the application's event loop, running the body every frame of the
   ## event loop. Events are only accessible within this body.
 
-  # Run this on each iteration
-  proc frameProc() =
-    beginFrame(ev)
-    body
-    endFrame(ev)
+  block:
+    # Run this on each iteration
+    proc frameProc() =
+      beginFrame(ev)
+      body
+      endFrame(ev)
 
-  when defined(emscripten):
-    # Emscripten maanges the main loop and needs us to just pass it a
-    # frame callback
-    theFrameProc = frameProc
-    proc cFrame() {.cdecl.} =
-      theFrameProc()
-    proc emscripten_set_main_loop(
-      x: proc() {.cdecl.},
-      fps: int, simulateInfiniteLoop: bool)
-      {.importc.}
-    emscripten_set_main_loop(cFrame, 0, true)
-  else:
-    # Regular loop
-    while not ev.quitting:
-      frameProc()
+    when defined(emscripten):
+      # Emscripten maanges the main loop and needs us to just pass it a
+      # frame callback
+      theFrameProc = frameProc
+      proc cFrame() {.cdecl.} =
+        theFrameProc()
+      proc emscripten_set_main_loop(
+        x: proc() {.cdecl.},
+        fps: int, simulateInfiniteLoop: bool)
+        {.importc.}
+      emscripten_set_main_loop(cFrame, 0, true)
+    else:
+      # Regular loop
+      while not ev.quitting:
+        frameProc()
 
 
 # Singleton
