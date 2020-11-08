@@ -100,6 +100,234 @@ div.side-panel {
   flex-direction: column;
 }
 
+/* Status */
+div.status {
+  flex: 1;
+  padding: 4px 14px 4px 14px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+div.status > *:not(:last-child) {
+  margin-right: 8px;
+}
+div.status > div.flex-gap {
+  flex: 1;
+}
+div.toolbar > div.small-gap {
+  width: 12px;
+}
+
+/* Toolbar */
+div.toolbar {
+  flex: 1;
+  padding: 6px 16px 6px 16px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+div.toolbar > *:not(:last-child) {
+  margin-right: 8px;
+}
+div.toolbar > div.flex-gap {
+  flex: 1;
+}
+div.toolbar > div.small-gap {
+  width: 12px;
+}
+
+/* Inspector */
+div.inspector {
+  flex: 1;
+  padding: 6px 16px 6px 16px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+div.inspector::-webkit-scrollbar {
+  display: none;
+}
+
+/* Inspector sections */
+div.inspector > details {
+  padding: 8px;
+}
+div.inspector > details > summary {
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  padding: 6px;
+  margin-left: -4px;
+  margin-right: -4px;
+  border-radius: 8px;
+  transition: 0.1s;
+}
+div.inspector > details > summary:focus {
+  outline: 0;
+}
+@media (hover: hover) {
+  div.inspector > details > summary:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+}
+div.inspector > details[open] > summary {
+  margin-bottom: 4px;
+}
+div.inspector > details[open] {
+  margin-bottom: 4px;
+}
+
+/* Inspector header extra buttons */
+div.inspector > details > summary > button {
+  margin-top: -6px;
+  margin-right: -6px;
+  float: right;
+  font-weight: normal;
+}
+
+/* Inspector info text */
+div.inspector > details > div.info {
+  display: flex;
+  flex-direction: row;
+  padding: 6px;
+  align-items: center;
+}
+
+/* Inspector add bar */
+div.inspector > div.add-bar {
+  padding: 24px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+div.inspector > div.add-bar > button {
+  margin: 4px;
+}
+
+/* Sprite inspector */
+div.inspector > details.sprite > img.preview {
+  margin: 6px;
+  max-height: 120px;
+  max-width: 25%;
+}
+div.inspector > details.sprite > div.info > button.pick {
+  margin-left: 6px;
+}
+div.inspector > details.sprite > div.info > button.pick::before {
+  content: '\f040';
+}
+
+/* Sprite inspector picker */
+div.inspector > details.sprite div.picker-container {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+div.inspector > details.sprite div.picker {
+  background-color: #121212;
+  border-radius: 8px;
+  width: 75%;
+  height: 75%;
+  max-width: 1200px;
+  max-height: 800px;
+  padding: 36px;
+  display: flex;
+  flex-direction: column;
+}
+div.inspector > details.sprite div.picker > div.content {
+  flex: 1;
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+}
+div.inspector > details.sprite div.picker div.cell {
+  margin: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: 0.1s;
+  padding: 6px;
+}
+div.inspector > details.sprite div.picker div.cell * {
+  pointer-events: none;
+}
+@media (hover: hover) {
+  div.inspector > details.sprite div.picker div.cell:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+}
+div.inspector > details.sprite div.picker div.cell div.thumbnail-container {
+  height: 100px;
+  margin: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+div.inspector > details.sprite div.picker div.cell img.thumbnail {
+  max-height: 100%;
+  max-width: 88px;
+}
+div.inspector > details.sprite div.picker div.cell div.filename {
+  margin: 6px;
+  text-align: center;
+}
+
+/* Feet inspector */
+div.inspector > details.feet > div.info > button.shape {
+  margin-left: 6px;
+}
+div.inspector > details.feet > div.info > button.shape::before {
+  content: '\f040';
+}
+
+/* Scene switcher */
+div.scene-switcher {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: -2px;
+}
+div.scene-switcher > button {
+  margin: 0;
+}
+div.scene-switcher > button.prev::before {
+  content: '\f060';
+}
+div.scene-switcher > button.prev {
+  content: '\f060';
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+div.scene-switcher > button.next::before {
+  content: '\f061';
+}
+div.scene-switcher > button.next {
+  content: '\f061';
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+div.scene-switcher > div.name {
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
 /* --- Components ----------------------------------------------------------------- */
 
 /* Image checkerboard background */
@@ -160,4 +388,68 @@ button[disabled] {
 }
 button[label]::after {
   content: attr(label);
+}
+
+/* Reload button */
+button.reload::before {
+  content: '\f021';
+}
+
+/* Add button */
+button.add::before {
+  content: '\f067';
+}
+
+/* Remove button */
+button.remove::before {
+  content: '\f00d';
+}
+
+/* Save button */
+button.save::before {
+  content: '\f0c7';
+}
+
+/* Profiler button */
+button.profiler::before {
+  content: '\f017';
+}
+
+/* Zoom buttons */
+button.zoom-in::before {
+  content: '\f067';
+}
+button.zoom-out::before {
+  content: '\f068';
+}
+
+/* Pan button */
+button.pan::before {
+  content: '\f256';
+}
+
+/* Undo / redo buttons */
+button.undo::before {
+  content: '\f0e2';
+}
+button.redo::before {
+  content: '\f01e';
+}
+
+/* Play / stop button */
+button.play::before {
+  content: '\f04b';
+}
+button.stop::before {
+  content: '\f04d';
+}
+
+/* Move button */
+button.move::before {
+  content: '\f0b2';
+}
+
+/* Delete button */
+button.delete::before {
+  content: '\f2ed';
 }
