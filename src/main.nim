@@ -25,9 +25,7 @@ proc main() =
 
     ui.patch "top":
       ui.elem "div", { "class": "toolbar" }:
-        ui.elem "button", {
-          "class": "play"
-        }:
+        ui.elem "button", { "class": "play" }:
           discard
 
     ui.patch "side":
