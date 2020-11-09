@@ -75,6 +75,17 @@ proc class(ui: var UI, value: string) =
 
 
 macro elem*(ui: var UI, tag: string, args: varargs[untyped]) =
+  ## Display a DOM-based UI element. A `tag` is always required and is the
+  ## tag name to pass to the DOM. `args` can include:
+  ##  - Named attributes with `attr: val` or `attr = val` syntax. The
+  ##    attributes are passed through to the DOM. The special attribute
+  ##    named `key` can be used to distinguish elements for performance
+  ##    and is not sent to the DOM.
+  ##  - A string literal by itself, which is passed as the `class`
+  ##    attribute.
+  ##  - A statement list, which is run "inside" the element. Elements
+  ##    displayed inside become children of the outer element.
+
   const debug = false
 
   when debug:
@@ -134,9 +145,11 @@ macro elem*(ui: var UI, tag: string, args: varargs[untyped]) =
 # Common elements
 
 template box*(ui: var UI, args: varargs[untyped]) =
+  ## `ui.elem` with the `"div"` tag
   elem(ui, "div", args)
 
 template button*(ui: var UI, args: varargs[untyped]) =
+  ## `ui.elem` with the `"button"` tag
   elem(ui, "button", args)
 
 
@@ -159,6 +172,8 @@ else:
   proc JS_uiEventCount(typ: cstring): int = discard
 
 template event*(ui: var UI, eventType: string, body: typed) =
+  ## Run the body for each occurrence of the named event in the last
+  ## UI frame for the enclosing UI element.
   block:
     let count = JS_uiEventCount(eventType)
     for i in 1..count:
@@ -173,15 +188,18 @@ else:
   proc JS_uiValue(): cstring = discard
 
 proc valueStr*(ui: var UI): string =
+  ## Get the value of the current UI element as a string.
   let cStr = JS_uiValue()
   result = $cStr
   proc free(p: pointer) {.importc.}
   free(cStr)
 
 proc valueInt*(ui: var UI): int =
+  ## Get the value of the current UI element as an integer.
   ui.valueStr.parseInt
 
 proc valueFloat*(ui: var UI): float =
+  ## Get the value of the current UI element as a floating point number.
   ui.valueStr.parseFloat
 
 
@@ -195,6 +213,7 @@ else:
   proc JS_uiPatch(id: cstring) = discard
 
 template patch*(ui: var UI, id: cstring, body: typed) =
+  ## Display the UI elements in the body at the DOM node with the given ID.
   block:
     proc patchProc() =
       body
@@ -217,6 +236,8 @@ else:
   proc JS_uiClearEventCounts() = discard
 
 template frame*(ui: var UI, body: typed) =
+  ## Run one frame of UI logic. Generally this is done once per event loop
+  ## (see the 'events' module). All UI display should be done in the body.
   when defined(emscripten):
     body
     JS_uiClearEventCounts()
