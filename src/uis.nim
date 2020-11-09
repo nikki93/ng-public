@@ -217,8 +217,9 @@ else:
   proc JS_uiClearEventCounts() = discard
 
 template frame*(ui: var UI, body: typed) =
-  body
-  JS_uiClearEventCounts()
+  when defined(emscripten):
+    body
+    JS_uiClearEventCounts()
 
 
 # Init / deinit
