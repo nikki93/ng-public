@@ -7,6 +7,7 @@ when defined(emscripten):
 
 import utils
 
+
 when defined(emscripten):
   {.emit: "#include <emscripten.h>".}
 
