@@ -45,6 +45,10 @@ proc main() =
               ui.text "position"
             ui.box("info"):
               ui.text $x & ", " & $y
+            ui.box("info"):
+              ui.elem("input"):
+                ui.event("change"):
+                  echo "value is now: '", ui.valueStr, "'"
 
       ui.patch("bottom"):
         ui.box("status"):

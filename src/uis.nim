@@ -1,6 +1,6 @@
 ## Interface to DOM-based user interface in the browser
 
-import std/macros
+import std/[macros, strutils]
 
 import utils
 
@@ -163,6 +163,26 @@ template event*(ui: var UI, eventType: string, body: typed) =
     let count = JS_uiEventCount(eventType)
     for i in 1..count:
       body
+
+
+# Values
+
+when defined(emscripten):
+  proc JS_uiValue(): cstring {.importc.}
+else:
+  proc JS_uiValue(): cstring = discard
+
+proc valueStr*(ui: var UI): string =
+  let cStr = JS_uiValue()
+  result = $cStr
+  proc free(p: pointer) {.importc.}
+  free(cStr)
+
+proc valueInt*(ui: var UI): int =
+  ui.valueStr.parseInt
+
+proc valueFloat*(ui: var UI): float =
+  ui.valueStr.parseFloat
 
 
 # Patch

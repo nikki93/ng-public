@@ -330,6 +330,33 @@ div.scene-switcher > div.name {
 
 /* --- Components ----------------------------------------------------------------- */
 
+/* Input base */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+input {
+  border: none;
+  font: inherit;
+  color: inherit;
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 6px;
+  margin: 4px;
+  border-radius: 8px;
+  flex: 1;
+  max-width: 128px;
+}
+input[type='number'] {
+  max-width: 56px;
+}
+input:focus {
+  outline: 0;
+}
+
 /* Image checkerboard background */
 img.checker {
   background-position: 0px 0px, 10px 10px;

@@ -80,6 +80,11 @@ mergeInto(LibraryManager.library, {
     window.UI.eventCounts = new WeakMap();
   },
 
+  JS_uiValue: function () {
+    const str = IncrementalDOM.currentElement().value;
+    return allocate(intArrayFromString(str), 'i8', ALLOC_NORMAL);
+  },
+
   JS_uiPatch: function (id) {
     const el = document.getElementById(UTF8ToString(id));
     if (el) {
