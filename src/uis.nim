@@ -216,8 +216,6 @@ when defined(emscripten):
 
 when defined(emscripten):
   proc JS_uiClearEventCounts() {.importc.}
-else:
-  proc JS_uiClearEventCounts() = discard
 
 template frame*(ui: var UI, body: typed) =
   ## Run one frame of UI logic. Generally this is done once per event loop
@@ -230,7 +228,7 @@ template frame*(ui: var UI, body: typed) =
 # Init / deinit
 
 proc init(ui: var UI) =
-  echo "initialzied ui"
+  echo "initialized ui"
 
 proc `=destroy`(ui: var UI) =
   destroyFields(ui)
