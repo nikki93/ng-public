@@ -1,3 +1,5 @@
+import std/math
+
 import boot
 
 import timing, graphics, events, uis
@@ -7,11 +9,18 @@ proc main() =
   let testImg = gfx.loadImage("assets/player.png")
   let testEff = gfx.loadEffect("test.frag")
 
+  var x = 100.0
+  var y = 100.0
+
   ev.loop:
     tim.frame()
 
     if not ev.windowFocused:
       return
+
+    if ev.touches.len == 1:
+      let touch = ev.touches[0]
+      (x, y) = (touch.x, touch.y)
 
     gfx.frame:
       gfx.scope:
@@ -21,7 +30,7 @@ proc main() =
 
       gfx.scope:
         gfx.setColor(0xff, 0, 0xff)
-        gfx.drawRectangle(300, 200, 80, 80)
+        gfx.drawRectangle(x, y, 80, 80)
 
     ui.patch("top"):
       ui.box("toolbar"):
@@ -33,11 +42,11 @@ proc main() =
           ui.elem("summary"):
             ui.text "position"
           ui.box("info"):
-            ui.text "100, 200"
+            ui.text $x & ", " & $y
     
     ui.patch("bottom"):
       ui.box("status"):
         ui.box:
-          ui.text "bottom!"
+          ui.text "fps: " & $tim.fps.round.toInt
 
 main()
