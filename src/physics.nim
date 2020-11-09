@@ -13,7 +13,7 @@ type
 # Init / deinit
 
 proc init(phy: var Physics) =
-  # Init Chimpunk space
+  # Init Chipmunk space
   proc cpSpaceNew(): ptr cpSpace
     {.importc, header: cpH.}
   phy.space = cpSpaceNew()
