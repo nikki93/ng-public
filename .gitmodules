@@ -7,3 +7,6 @@
 [submodule "vendor/sdl-gpu"]
 	path = vendor/sdl-gpu
 	url = https://github.com/grimfang4/sdl-gpu.git
+[submodule "vendor/Chipmunk2D"]
+	path = vendor/Chipmunk2D
+	url = https://github.com/slembcke/Chipmunk2D.git

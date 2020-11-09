@@ -169,14 +169,14 @@ target_link_libraries(ng PRIVATE my_SDL_gpu)
 target_include_directories(ng PRIVATE vendor/entt/src)
 
 # Chipmunk2D
-#set(BUILD_DEMOS OFF CACHE BOOL "" FORCE)
-#set(INSTALL_DEMOS OFF CACHE BOOL "" FORCE)
-#set(BUILD_SHARED OFF CACHE BOOL "" FORCE)
-#set(BUILD_STATIC ON CACHE BOOL "" FORCE)
-#set(INSTALL_STATIC OFF CACHE BOOL "" FORCE)
-#add_subdirectory(vendor/Chipmunk2D EXCLUDE_FROM_ALL)
-#target_include_directories(ng PRIVATE vendor/Chipmunk2D/include)
-#target_link_libraries(ng PRIVATE chipmunk_static)
+set(BUILD_DEMOS OFF CACHE BOOL "" FORCE)
+set(INSTALL_DEMOS OFF CACHE BOOL "" FORCE)
+set(BUILD_SHARED OFF CACHE BOOL "" FORCE)
+set(BUILD_STATIC ON CACHE BOOL "" FORCE)
+set(INSTALL_STATIC OFF CACHE BOOL "" FORCE)
+add_subdirectory(vendor/Chipmunk2D EXCLUDE_FROM_ALL)
+target_include_directories(ng PRIVATE vendor/Chipmunk2D/include)
+target_link_libraries(ng PRIVATE chipmunk_static)
 
 # rapidjson
 #target_include_directories(ng PRIVATE vendor/rapidjson/include)
