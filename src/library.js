@@ -43,11 +43,16 @@ mergeInto(LibraryManager.library, {
   JS_uiAttrFloat: function (name, value) {
     IncrementalDOM.attr(UTF8ToString(name), value);
   },
+  JS_uiAttrBool: function (name, value) {
+    if (value) {
+      IncrementalDOM.attr(UTF8ToString(name), '');
+    }
+  },
   JS_uiAttrStr: function (name, value) {
     IncrementalDOM.attr(UTF8ToString(name), UTF8ToString(value));
   },
-  JS_uiAttrClass: function (clazz) {
-    IncrementalDOM.attr('class', UTF8ToString(clazz));
+  JS_uiAttrClass: function (value) {
+    IncrementalDOM.attr('class', UTF8ToString(value));
   },
 
   JS_uiText: function (value) {
