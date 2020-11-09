@@ -9,8 +9,7 @@ proc main() =
   let testImg = gfx.loadImage("assets/player.png")
   let testEff = gfx.loadEffect("test.frag")
 
-  var x = 100.0
-  var y = 100.0
+  var (x, y) = (100.0, 100.0)
 
   ev.loop:
     tim.frame()
