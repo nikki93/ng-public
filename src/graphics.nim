@@ -154,11 +154,11 @@ proc `=destroy`(img: var Image) =
     dec img.tex.handleCount
   destroyFields(img)
 
-proc initImage(tex: ref Texture): Image =
+proc initImage(tex: ptr Texture): Image =
   ## Create a new image handle associated with the given texture.
   ## Increments the handle count for the texture.
   inc tex.handleCount
-  result.tex = tex[].addr
+  result.tex = tex
 
 proc loadImage*(gfx: var Graphics, path: string): Image =
   ## Load an `Image` from the file at the given path. If an image for
@@ -168,15 +168,15 @@ proc loadImage*(gfx: var Graphics, path: string): Image =
   # Check existing textures
   let found = gfx.texs.getOrDefault(path)
   if found != nil:
-    return initImage(found)
+    return initImage(found[].addr)
 
   # Didn't find existing texture. Load a new one and remember it.
   proc GPU_LoadImage(filename: cstring): ptr GPU_Image
     {.importc, header: gpuH.}
   let tex = (ref Texture)(gpuImage: GPU_LoadImage(path))
   tex.path = path # Separate statement prevents extra copy perf warning
+  result = initImage(tex[].addr) # Do this first to prevent copying `tex`
   gfx.texs[path] = tex
-  return initImage(tex)
 
 proc size*(img: Image): (float, float) =
   result[0] = cast[int](img.tex.gpuImage.w).toBiggestFloat
@@ -204,11 +204,11 @@ proc `=destroy`(eff: var Effect) =
     dec eff.prog.handleCount
   destroyFields(eff)
 
-proc initEffect(prog: ref Program): Effect =
+proc initEffect(prog: ptr Program): Effect =
   ## Create a new effect handle associated with the given program.
   ## Increments the handle count for the program.
   inc prog.handleCount
-  result.prog = prog[].addr
+  result.prog = prog
 
 proc loadEffect(gfx: var Graphics, path: string, code: string): Effect =
   # Version of `loadEffect*` below with the `static` param erased so that
@@ -217,7 +217,7 @@ proc loadEffect(gfx: var Graphics, path: string, code: string): Effect =
   # Check existing programs
   let found = gfx.progs.getOrDefault(path)
   if found != nil:
-    return initEffect(found)
+    return initEffect(found[].addr)
 
   # Compile fragment shader and link with default textured vertex shader
   var errors: string
@@ -255,8 +255,8 @@ proc loadEffect(gfx: var Graphics, path: string, code: string): Effect =
   let prog = (ref Program)(
     gpuProgId: gpuProgId, gpuBlock: gpuBlock, gfx: gfx.addr)
   prog.path = path # Separate statement prevents extra copy perf warning
+  result = initEffect(prog[].addr) # Do this first to prevent copying `prog`
   gfx.progs[path] = prog
-  result = initEffect(prog)
 
   # Notify about errors
   if errors.len > 0:
