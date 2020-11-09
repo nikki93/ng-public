@@ -162,6 +162,7 @@ else:
   proc JS_uiText(value: cstring) = discard
 
 proc text*(ui: var UI, value: string) {.inline.} =
+  ## Add the given text as a child of the enclosing UI element.
   JS_uiText(value)
 
 
