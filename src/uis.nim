@@ -130,6 +130,20 @@ proc text*(ui: var UI, value: string) {.inline.} =
   JS_uiText(value)
 
 
+# Events
+
+when defined(emscripten):
+  proc JS_uiEventCount(typ: cstring): int {.importc.}
+else:
+  proc JS_uiEventCount(typ: cstring): int = discard
+
+template event*(ui: var UI, eventType: string, body: typed) =
+  block:
+    let count = JS_uiEventCount(eventType)
+    for i in 1..count:
+      body
+
+
 # Patch
 
 var thePatchProc: proc()
@@ -152,6 +166,18 @@ when defined(emscripten):
     {.exportc, codegenDecl: "EMSCRIPTEN_KEEPALIVE $# $#$#".} =
     if thePatchProc != nil:
       thePatchProc()
+
+
+# Frame
+
+when defined(emscripten):
+  proc JS_uiClearEventCounts() {.importc.}
+else:
+  proc JS_uiClearEventCounts() = discard
+
+template frame*(ui: var UI, body: typed) =
+  body
+  JS_uiClearEventCounts()
 
 
 # Init / deinit

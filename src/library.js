@@ -59,6 +59,27 @@ mergeInto(LibraryManager.library, {
     IncrementalDOM.text(UTF8ToString(value));
   },
 
+  JS_uiEventCount: function (type) {
+    const typeStr = UTF8ToString(type);
+    const target = IncrementalDOM.currentElement();
+    if (!target.__UIHandlerRegistered) {
+      target.addEventListener(typeStr, window.UI.eventHandler);
+      target.__UIHandlerRegistered = true;
+    }
+    const counts = window.UI.eventCounts.get(target);
+    if (counts === undefined) {
+      return 0;
+    }
+    const count = counts[typeStr];
+    if (count === undefined) {
+      return 0;
+    }
+    return count;
+  },
+  JS_uiClearEventCounts: function () {
+    window.UI.eventCounts = new WeakMap();
+  },
+
   JS_uiPatch: function (id) {
     const el = document.getElementById(UTF8ToString(id));
     if (el) {
