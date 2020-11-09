@@ -46,6 +46,12 @@ else:
 proc elemOpenStart(ui: var UI, tag: string) =
   JS_uiElemOpenStart(tag)
 
+proc elemOpenStart(ui: var UI, tag: string, key: int) =
+  JS_uiElemOpenStartKeyInt(tag, key)
+
+proc elemOpenStart(ui: var UI, tag: string, key: string) =
+  JS_uiElemOpenStartKeyStr(tag, key)
+
 proc elemOpenEnd(ui: var UI) =
   JS_uiElemOpenEnd()
 
@@ -77,31 +83,46 @@ macro elem*(ui: var UI, tag: string, args: varargs[untyped]) =
 
   result = newStmtList()
 
-  result.add quote do:
-    elemOpenStart(`ui`, `tag`)
+  # Check for key
+  var key: NimNode
+  for node in args:
+    if node.kind in {nnkExprColonExpr, nnkExprEqExpr} and $node[0] == "key":
+      key = node[1]
 
+  # Start open
+  if key != nil:
+    result.add quote do:
+      elemOpenStart(`ui`, `tag`, `key`)
+  else:
+    result.add quote do:
+      elemOpenStart(`ui`, `tag`)
+
+  # Attributes
   for node in args:
     case node.kind:
     of nnkStrLit:
       result.add quote do:
         class(`ui`, `node`)
     of nnkExprColonExpr, nnkExprEqExpr:
-      let name = newLit($node[0])
-      let value = node[1]
-      result.add quote do:
-        attr(`ui`, `name`, `value`)
-      discard
+      if $node[0] != "key":
+        let name = newLit($node[0])
+        let value = node[1]
+        result.add quote do:
+          attr(`ui`, `name`, `value`)
     of nnkStmtList:
       discard
     else:
       error("`ui.elem` parameters must be attributes or a body", node)
 
+  # End open
   result.add quote do:
     elemOpenEnd(`ui`)
 
+  # Inside
   if args.len > 0 and args.last.kind == nnkStmtList:
     result.add(args.last)
 
+  # Close
   result.add quote do:
     elemClose(`ui`, `tag`)
 
