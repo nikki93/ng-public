@@ -82,7 +82,7 @@ mergeInto(LibraryManager.library, {
 
   JS_uiValue: function () {
     const str = IncrementalDOM.currentElement().value;
-    return allocate(intArrayFromString(str), 'i8', ALLOC_NORMAL);
+    return allocate(intArrayFromString(str), ALLOC_NORMAL);
   },
 
   JS_uiPatch: function (id) {
