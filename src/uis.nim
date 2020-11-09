@@ -52,7 +52,6 @@ when defined(emscripten):
     JS_uiAttrBool(name, value)
   proc attr(ui: var UI, name: string, value: string) =
     JS_uiAttrStr(name, value)
-
   proc class(ui: var UI, value: string) =
     JS_uiAttrClass(value)
 
