@@ -1,4 +1,5 @@
-## Interface to DOM-based user interface in the browser
+## Interface to DOM-based user interface in the browser. All operations
+## no-op cleanly on non-browser platforms.
 
 import std/[macros, strutils]
 
