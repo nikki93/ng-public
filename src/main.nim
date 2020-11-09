@@ -35,7 +35,7 @@ proc main() =
     ui.patch("top"):
       ui.box("toolbar"):
         ui.button("play")
-    
+
     ui.patch("side"):
       ui.box("inspector"):
         ui.elem("details", open = true):
@@ -43,7 +43,7 @@ proc main() =
             ui.text "position"
           ui.box("info"):
             ui.text $x & ", " & $y
-    
+
     ui.patch("bottom"):
       ui.box("status"):
         ui.box:
