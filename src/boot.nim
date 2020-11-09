@@ -9,4 +9,5 @@ import timing
 import graphics
 import events
 import uis
+import physics
 import kernel
