@@ -66,7 +66,9 @@ macro elem*(ui: var UI, tag: string, args: varargs[untyped]) =
   ##  - A string literal by itself, which is passed as the `class`
   ##    attribute.
   ##  - A statement list, which is run "inside" the element. Elements
-  ##    displayed inside become children of the outer element.
+  ##    displayed inside become children of the outer element. `ui.event` and
+  ##    `ui.valueStr` (and the other value procs) need to run inside an
+  ##    element too, and apply to the enclosing element.
 
   when not defined(emscripten):
     result = newStmtList()
