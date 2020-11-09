@@ -1,6 +1,6 @@
 ## Keeps track of elapsed time.
 
-import std/[times, math]
+import std/times
 
 import utils
 
@@ -14,7 +14,7 @@ type
 
     lastFPSUpdate: Time
     framesSinceFPSUpdate: int
-    fps: float
+    fps*: float
 
 
 # Time
@@ -64,7 +64,6 @@ proc frame*(tim: var Timing) =
     tim.lastFPSUpdate = now
     tim.fps = tim.framesSinceFPSUpdate.toFloat / secSinceFPSUpdate
     tim.framesSinceFPSUpdate = 0
-    echo "fps: ", tim.fps.round.toInt
 
 
 # Singleton
