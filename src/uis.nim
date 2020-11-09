@@ -94,7 +94,7 @@ macro elem*(ui: var UI, tag: string, args: varargs[untyped]) =
     of nnkStmtList:
       discard
     else:
-      doAssert(false, "`ui.elem` parameters must be attributes or a body")
+      error("`ui.elem` parameters must be attributes or a body", node)
 
   result.add quote do:
     elemOpenEnd(`ui`)
