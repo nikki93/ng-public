@@ -25,6 +25,8 @@ proc main() =
 
   ev.loop:
     tim.frame()
+    if tim.dt >= 3 * 1 / 60.0: # Frame drop
+      return
 
     if not ev.windowFocused:
       return
