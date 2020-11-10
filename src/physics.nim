@@ -15,7 +15,7 @@ type
   cpShape {.importc: "cpShape", header: cpH.} = object
     space: ptr cpSpace
 
-  cpVect* {.importc: "cpVect", header: cpH.} = object
+  cpVect {.importc: "cpVect", header: cpH.} = object
     x, y: float
 
   Vec2* = tuple
@@ -39,11 +39,11 @@ type
 
 # `cpVect` <-> `Vec2`
 
-converter toVec2*(value: cpVect): Vec2 {.inline.} =
+converter toVec2(value: cpVect): Vec2 {.inline.} =
   result.x = value.x
   result.y = value.y
 
-converter toCpVect*(value: Vec2): cpVect {.inline.} =
+converter toCpVect(value: Vec2): cpVect {.inline.} =
   result.x = value.x
   result.y = value.y
 
