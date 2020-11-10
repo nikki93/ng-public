@@ -15,12 +15,12 @@ proc main() =
 
   const (floorW, floorH) = (screenW, 20.0)
   let floorBody = phy.createStatic()
-  floorBody.position = (0.5 * screenW, 450.0 - 0.5 * floorH)
+  floorBody.setPosition((0.5 * screenW, 450.0 - 0.5 * floorH))
   let floorShape = phy.createBox(floorBody, floorW, floorH)
 
   const (boxW, boxH) = (80.0, 80.0)
   let boxBody = phy.createDynamic(1.0, Inf)
-  boxBody.position = (0.5 * screenW, 0.5 * boxH + 20.0)
+  boxBody.setPosition((0.5 * screenW, 0.5 * boxH + 20.0))
   let boxShape = phy.createBox(boxBody, 80.0, 80.0)
 
   type
@@ -44,7 +44,7 @@ proc main() =
         let constr = phy.createPivot(target, boxBody)
         walk = (ref Walk)(target: target, constr: constr)
       if walk != nil:
-        walk.target.position = (touch.x, touch.y)
+        walk.target.setPosition((touch.x, touch.y))
       if touch.released:
         walk = nil
 
@@ -58,7 +58,7 @@ proc main() =
 
       gfx.scope:
         gfx.setColor(0xff, 0, 0xff)
-        let (x, y) = boxBody.position
+        let (x, y) = boxBody.getPosition()
         gfx.drawRectangleFill(x, y, boxW, boxH)
 
     ui.frame:

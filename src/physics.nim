@@ -97,12 +97,12 @@ proc `=destroy`(body: var Body) =
 proc initBody(cp: ptr cpBody): Body =
   Body(cp: cp)
 
-proc position*(body: Body): Vec2 {.inline.} =
+proc getPosition*(body: Body): Vec2 {.inline.} =
   proc cpBodyGetPosition(body: ptr cpBody): cpVect
     {.importc, header: cpH.}
   cpBodyGetPosition(body.cp)
 
-proc `position=`*(body: Body, value: Vec2) {.inline.} =
+proc setPosition*(body: Body, value: Vec2) {.inline.} =
   proc cpBodySetPosition(body: ptr cpBody, value: cpVect)
     {.importc, header: cpH.}
   cpBodySetPosition(body.cp, value)
