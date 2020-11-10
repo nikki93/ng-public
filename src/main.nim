@@ -6,22 +6,14 @@ import timing, graphics, events, uis, physics
 
 
 proc main() =
-  let testImg = gfx.loadImage("assets/player.png")
-  let testEff = gfx.loadEffect("test.frag")
+  let playerBody = phy.createDynamic(1.0, Inf)
+  playerBody.setPosition((100.0, 100.0))
+  const radius = 8.0
+  let (playerW, playerH) = (45.0 - 2 * radius, 20.0 - 2 * radius)
+  let playerShape = phy.createBox(playerBody, playerW, playerH, radius)
 
-  const (screenW, screenH) = (800.0, 450.0)
-
-  phy.gravity = (0.0, 9.8 * 32)
-
-  const (floorW, floorH) = (screenW, 20.0)
-  let floorBody = phy.createStatic()
-  floorBody.setPosition((0.5 * screenW, 450.0 - 0.5 * floorH))
-  let floorShape = phy.createBox(floorBody, floorW, floorH)
-
-  const (boxW, boxH) = (80.0, 80.0)
-  let boxBody = phy.createDynamic(1.0, Inf)
-  boxBody.setPosition((0.5 * screenW, 0.5 * boxH + 20.0))
-  let boxShape = phy.createBox(boxBody, 80.0, 80.0)
+  let playerImg = gfx.loadImage("assets/player.png")
+  let playerEff = gfx.loadEffect("test.frag")
 
   type
     Walk = object
@@ -41,7 +33,7 @@ proc main() =
       let touch = ev.touches[0]
       if touch.pressed:
         let target = phy.createStatic()
-        let constr = phy.createPivot(target, boxBody)
+        let constr = phy.createPivot(target, playerBody)
         walk = (ref Walk)(target: target, constr: constr)
       if walk != nil:
         walk.target.setPosition((touch.x, touch.y))
@@ -52,19 +44,11 @@ proc main() =
 
     gfx.frame:
       gfx.scope:
-        gfx.useEffect(testEff)
-        testEff.set("u_time", tim.t)
-        gfx.drawImage(testImg, 100, 200, 0.4)
-
-      gfx.scope:
-        gfx.setColor(0x8f, 0, 0xaf)
-        let (x, y) = boxBody.getPosition()
-        gfx.drawRectangleFill(x, y, boxW, boxH)
-
-      gfx.scope:
-        gfx.setColor(0, 0x8f, 0x8f)
-        let (x, y) = floorBody.getPosition()
-        gfx.drawRectangleFill(x, y, floorW, floorH)
+        gfx.useEffect(playerEff)
+        playerEff.set("u_time", tim.t)
+        let (x, y) = playerBody.getPosition()
+        const playerOffsetY = 65.0
+        gfx.drawImage(playerImg, x, y - playerOffsetY, 0.25)
 
     ui.frame:
       ui.patch("top"):
