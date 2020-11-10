@@ -20,6 +20,7 @@ type
 
   Physics = object
     space: ptr cpSpace
+    stepAccum: float
 
   Vec2* = tuple
     x, y: float
@@ -238,9 +239,13 @@ proc `gravity=`*(phy: var Physics, value: Vec2) =
 # Frame
 
 proc frame*(phy: var Physics) =
-  proc cpSpaceStep(space: ptr cpSpace, dt: float)
-    {.importc, header: cpH.}
-  cpSpaceStep(phy.space, tim.dt)
+  phy.stepAccum += tim.dt
+  const stepPeriod = 1 / 60.0
+  while phy.stepAccum > stepPeriod:
+    proc cpSpaceStep(space: ptr cpSpace, dt: float)
+      {.importc, header: cpH.}
+    cpSpaceStep(phy.space, stepPeriod)
+    phy.stepAccum -= stepPeriod
 
 
 # Init / deinit
