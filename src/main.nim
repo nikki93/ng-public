@@ -9,19 +9,25 @@ proc main() =
   let testImg = gfx.loadImage("assets/player.png")
   let testEff = gfx.loadEffect("test.frag")
 
-  let (screenW, screenH) = (800.0, 450.0)
+  const (screenW, screenH) = (800.0, 450.0)
 
   phy.gravity = (0.0, 9.8 * 32)
 
-  let (floorW, floorH) = (screenW, 20.0)
+  const (floorW, floorH) = (screenW, 20.0)
   let floorBody = phy.createStatic()
   floorBody.position = (0.5 * screenW, 450.0 - 0.5 * floorH)
   let floorShape = phy.createBox(floorBody, floorW, floorH)
 
-  let (boxW, boxH) = (80.0, 80.0)
+  const (boxW, boxH) = (80.0, 80.0)
   let boxBody = phy.createDynamic(1.0, Inf)
   boxBody.position = (0.5 * screenW, 0.5 * boxH + 20.0)
   let boxShape = phy.createBox(boxBody, 80.0, 80.0)
+
+  type
+    Walk = object
+      target: Body
+      constr: Constraint
+  var walk: ref Walk
 
   ev.loop:
     tim.frame()
@@ -30,6 +36,17 @@ proc main() =
 
     if not ev.windowFocused:
       return
+
+    if ev.touches.len == 1:
+      let touch = ev.touches[0]
+      if touch.pressed:
+        let target = phy.createStatic()
+        let constr = phy.createPivot(target, boxBody)
+        walk = (ref Walk)(target: target, constr: constr)
+      if walk != nil:
+        walk.target.position = (touch.x, touch.y)
+      if touch.released:
+        walk = nil
 
     phy.frame()
 
