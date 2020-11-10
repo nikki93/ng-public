@@ -50,8 +50,8 @@ proc main() =
 
     gfx.frame:
       gfx.scope:
-        gfx.useEffect(playerEff)
-        playerEff.set("u_time", tim.t)
+        #gfx.useEffect(playerEff)
+        #playerEff.set("u_time", tim.t)
         let (x, y) = playerBody.getPosition()
         const playerOffsetY = 65.0
         gfx.drawImage(playerImg, x, y - playerOffsetY, 0.25)
