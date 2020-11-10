@@ -34,6 +34,8 @@ proc main() =
       if touch.pressed:
         let target = phy.createStatic()
         let constr = phy.createPivot(target, playerBody)
+        constr.setMaxForce(2000)
+        constr.setMaxBias(180)
         walk = (ref Walk)(target: target, constr: constr)
       if walk != nil:
         walk.target.setPosition((touch.x, touch.y))

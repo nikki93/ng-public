@@ -129,6 +129,26 @@ proc `=destroy`(constr: var Constraint) =
 proc initConstraint(cp: ptr cpConstraint): Constraint =
   Constraint(cp: cp)
 
+proc getMaxForce*(constr: Constraint): float {.inline.} =
+  proc cpConstraintGetMaxForce(constr: ptr cpConstraint): float
+    {.importc, header: cpH.}
+  cpConstraintGetMaxForce(constr.cp)
+
+proc setMaxForce*(constr: Constraint, maxForce: float) {.inline.} =
+  proc cpConstraintSetMaxForce(constr: ptr cpConstraint, maxForce: float)
+    {.importc, header: cpH.}
+  cpConstraintSetMaxForce(constr.cp, maxForce)
+
+proc getMaxBias*(constr: Constraint): float {.inline.} =
+  proc cpConstraintGetMaxBias(constr: ptr cpConstraint): float
+    {.importc, header: cpH.}
+  cpConstraintGetMaxBias(constr.cp)
+
+proc setMaxBias*(constr: Constraint, maxBias: float) {.inline.} =
+  proc cpConstraintSetMaxBias(constr: ptr cpConstraint, maxBias: float)
+    {.importc, header: cpH.}
+  cpConstraintSetMaxBias(constr.cp, maxBias)
+
 
 # Shape wrapper
 
