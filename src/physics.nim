@@ -1,3 +1,11 @@
+## Physics engine that uses Chipmunk Game Dynamics under the hood. Details
+## on physics properties and behavior can be found in the Chipmunk manual
+## (http://chipmunk-physics.net/release/ChipmunkLatest-Docs/). The
+## documentation here just covers aspects specific to this module.
+## 
+## Types `Body`, `Constraint` and `Shape` which wrap Chipmunk objects
+## automatically remove the objects and destroy them in their destructor.
+
 import timing, utils
 
 
@@ -263,12 +271,14 @@ proc `gravity=`*(phy: var Physics, value: Vec2) =
 
 # Frame
 
-const useFixedTimeStep = false
-
-proc frame*(phy: var Physics) =
+proc frame*(phy: var Physics, fixedTimeStep: bool = false) =
+  ## Step the physics simulation. Reads the delta time from the timing module.
+  ## A "fixed timestep" can optionally be enabled, which uses the method
+  ## explained in
+  ## https://gafferongames.com/post/fix_your_timestep/#free-the-physics .
   proc cpSpaceStep(space: ptr cpSpace, dt: float)
     {.importc, header: cpH.}
-  when useFixedTimeStep:
+  if fixedTimeStep:
     phy.stepAccum += tim.dt
     const stepPeriod = 1 / 120.0
     while phy.stepAccum > stepPeriod:
