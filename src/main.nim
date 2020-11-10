@@ -27,6 +27,8 @@ proc main() =
 
   var playing = true
 
+  var textInputValue = "type something :)"
+
   ev.loop:
     tim.frame()
     if tim.dt >= 3 * 1 / 60.0: # Frame drop
@@ -39,6 +41,7 @@ proc main() =
       if ev.touches.len == 1:
         let touch = ev.touches[0]
         if touch.pressed:
+          textInputValue = "you touched!"
           let target = phy.createStatic()
           let constr = phy.createPivot(target, playerBody)
           constr.maxForce = 2000
@@ -74,9 +77,11 @@ proc main() =
             ui.elem("summary"):
               ui.text "position"
             ui.box("info"):
-              ui.elem("input"):
+              ui.elem("input", value = textInputValue):
                 ui.event("change"):
-                  echo "value is now: '", ui.valueStr, "'"
+                  textInputValue = ui.valueStr
+            ui.box("info"):
+              ui.text "value is: " & textInputValue
 
       ui.patch("bottom"):
         ui.box("status"):
