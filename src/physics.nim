@@ -24,10 +24,10 @@ type
 
 # Vec2 <-> (float, float) tuple
 
-converter toVec2*(value: (float, float)): Vec2 =
+converter toVec2*(value: (float, float)): Vec2 {.inline.} =
   Vec2(x: value[0], y: value[1])
 
-converter toTuple*(value: Vec2): (float, float) =
+converter toTuple*(value: Vec2): (float, float) {.inline.} =
   (value.x, value.y)
 
 
