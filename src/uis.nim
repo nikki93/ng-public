@@ -126,6 +126,9 @@ macro elem*(ui: var UI, tag: string, args: varargs[untyped]) =
     result.add quote do:
       elemClose(`ui`, `tag`)
 
+    # Enclose in `block:`
+    result = newBlockStmt(result)
+
     when debug:
       echo "tree: ", result.treeRepr, "\n"
       echo "code: ", result.repr, "\n"

@@ -518,9 +518,10 @@ template scope*(gfx: var Graphics, body: typed) =
   ## Create a new graphics scope and run `body` in it. All graphics state
   ## changes in `body` remain within that scope, and after the scope call
   ## the state is restored to the state before the scope call.
-  let oldState = gfx.state
-  body
-  setState(gfx, oldState)
+  block:
+    let oldState = gfx.state
+    body
+    setState(gfx, oldState)
 
 
 # Frame
