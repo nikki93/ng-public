@@ -7,14 +7,14 @@ import timing, graphics, events, uis, physics
 
 proc main() =
   let playerBody = phy.createDynamic(1.0, Inf)
-  playerBody.setPosition((100.0, 100.0))
+  playerBody.position = (100.0, 100.0)
   const radius = 8.0
   let (playerW, playerH) = (45.0 - 2 * radius, 20.0 - 2 * radius)
   let playerShape = phy.createBox(playerBody, playerW, playerH, radius)
 
   let frictionConstr = phy.createPivot(phy.getBackground(), playerBody)
-  frictionConstr.setMaxForce(800)
-  frictionConstr.setMaxBias(0)
+  frictionConstr.maxForce = 800
+  frictionConstr.maxBias = 0
 
   let playerImg = gfx.loadImage("assets/player.png")
   let playerEff = gfx.loadEffect("test.frag")
@@ -38,11 +38,11 @@ proc main() =
       if touch.pressed:
         let target = phy.createStatic()
         let constr = phy.createPivot(target, playerBody)
-        constr.setMaxForce(2000)
-        constr.setMaxBias(180)
+        constr.maxForce = 2000
+        constr.maxBias = 180
         walk = (ref Walk)(target: target, constr: constr)
       if walk != nil:
-        walk.target.setPosition((touch.x, touch.y))
+        walk.target.position = (touch.x, touch.y)
       if touch.released:
         walk = nil
 
@@ -54,7 +54,7 @@ proc main() =
       gfx.scope:
         #gfx.useEffect(playerEff)
         #playerEff.set("u_time", tim.t)
-        let (x, y) = playerBody.getPosition()
+        let (x, y) = playerBody.position
         const playerOffsetY = 65.0
         gfx.drawImage(playerImg, x, y - playerOffsetY, 0.25)
 

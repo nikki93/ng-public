@@ -113,12 +113,12 @@ proc `=destroy`(body: var Body) =
 proc initBody(cp: ptr cpBody): Body =
   Body(cp: cp)
 
-proc getPosition*(body: Body): Vec2 {.inline.} =
+proc position*(body: Body): Vec2 {.inline.} =
   proc cpBodyGetPosition(body: ptr cpBody): cpVect
     {.importc, header: cpH.}
   cpBodyGetPosition(body.cp)
 
-proc setPosition*(body: Body, value: Vec2) {.inline.} =
+proc `position=`*(body: Body, value: Vec2) {.inline.} =
   proc cpBodySetPosition(body: ptr cpBody, value: cpVect)
     {.importc, header: cpH.}
   cpBodySetPosition(body.cp, value)
@@ -140,22 +140,22 @@ proc `=destroy`(constr: var Constraint) =
 proc initConstraint(cp: ptr cpConstraint): Constraint =
   Constraint(cp: cp)
 
-proc getMaxForce*(constr: Constraint): float {.inline.} =
+proc maxForce*(constr: Constraint): float {.inline.} =
   proc cpConstraintGetMaxForce(constr: ptr cpConstraint): float
     {.importc, header: cpH.}
   cpConstraintGetMaxForce(constr.cp)
 
-proc setMaxForce*(constr: Constraint, maxForce: float) {.inline.} =
+proc `maxForce=`*(constr: Constraint, maxForce: float) {.inline.} =
   proc cpConstraintSetMaxForce(constr: ptr cpConstraint, maxForce: float)
     {.importc, header: cpH.}
   cpConstraintSetMaxForce(constr.cp, maxForce)
 
-proc getMaxBias*(constr: Constraint): float {.inline.} =
+proc maxBias*(constr: Constraint): float {.inline.} =
   proc cpConstraintGetMaxBias(constr: ptr cpConstraint): float
     {.importc, header: cpH.}
   cpConstraintGetMaxBias(constr.cp)
 
-proc setMaxBias*(constr: Constraint, maxBias: float) {.inline.} =
+proc `maxBias=`*(constr: Constraint, maxBias: float) {.inline.} =
   proc cpConstraintSetMaxBias(constr: ptr cpConstraint, maxBias: float)
     {.importc, header: cpH.}
   cpConstraintSetMaxBias(constr.cp, maxBias)
