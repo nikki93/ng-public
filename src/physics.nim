@@ -1,6 +1,6 @@
 ## Physics engine that uses Chipmunk Game Dynamics under the hood. Details
 ## on physics properties and behavior can be found in the Chipmunk manual
-## (http://chipmunk-physics.net/release/ChipmunkLatest-Docs/). The
+## (http://chipmunk-physics.net/release/ChipmunkLatest-Docs/ ). The
 ## documentation here just covers aspects specific to this module.
 ## 
 ## Types `Body`, `Constraint` and `Shape` which wrap Chipmunk objects
