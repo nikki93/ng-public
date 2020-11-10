@@ -49,6 +49,8 @@ proc main() =
     phy.frame()
 
     gfx.frame:
+      gfx.clear(0xcc, 0xe4, 0xf5)
+
       gfx.scope:
         #gfx.useEffect(playerEff)
         #playerEff.set("u_time", tim.t)
