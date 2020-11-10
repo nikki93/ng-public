@@ -25,6 +25,8 @@ proc main() =
       constr: Constraint
   var walk: ref Walk
 
+  var playing = true
+
   ev.loop:
     tim.frame()
     if tim.dt >= 3 * 1 / 60.0: # Frame drop
@@ -33,20 +35,21 @@ proc main() =
     if not ev.windowFocused:
       return
 
-    if ev.touches.len == 1:
-      let touch = ev.touches[0]
-      if touch.pressed:
-        let target = phy.createStatic()
-        let constr = phy.createPivot(target, playerBody)
-        constr.maxForce = 2000
-        constr.maxBias = 180
-        walk = (ref Walk)(target: target, constr: constr)
-      if walk != nil:
-        walk.target.position = (touch.x, touch.y)
-      if touch.released:
-        walk = nil
+    if playing:
+      if ev.touches.len == 1:
+        let touch = ev.touches[0]
+        if touch.pressed:
+          let target = phy.createStatic()
+          let constr = phy.createPivot(target, playerBody)
+          constr.maxForce = 2000
+          constr.maxBias = 180
+          walk = (ref Walk)(target: target, constr: constr)
+        if walk != nil:
+          walk.target.position = (touch.x, touch.y)
+        if touch.released:
+          walk = nil
 
-    phy.frame()
+      phy.frame()
 
     gfx.frame:
       gfx.clear(0xcc, 0xe4, 0xf5)
@@ -61,9 +64,9 @@ proc main() =
     ui.frame:
       ui.patch("top"):
         ui.box("toolbar"):
-          ui.button("play"):
+          ui.button(class = if playing: "stop" else: "play"):
             ui.event("click"):
-              echo "clicked!"
+              playing = not playing
 
       ui.patch("side"):
         ui.box("inspector"):
