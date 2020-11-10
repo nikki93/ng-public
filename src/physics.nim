@@ -238,14 +238,19 @@ proc `gravity=`*(phy: var Physics, value: Vec2) =
 
 # Frame
 
+const useFixedTimeStep = true
+
 proc frame*(phy: var Physics) =
-  phy.stepAccum += tim.dt
-  const stepPeriod = 1 / 60.0
-  while phy.stepAccum > stepPeriod:
-    proc cpSpaceStep(space: ptr cpSpace, dt: float)
-      {.importc, header: cpH.}
-    cpSpaceStep(phy.space, stepPeriod)
-    phy.stepAccum -= stepPeriod
+  proc cpSpaceStep(space: ptr cpSpace, dt: float)
+    {.importc, header: cpH.}
+  when useFixedTimeStep:
+    phy.stepAccum += tim.dt
+    const stepPeriod = 1 / 120.0
+    while phy.stepAccum > stepPeriod:
+      cpSpaceStep(phy.space, stepPeriod)
+      phy.stepAccum -= stepPeriod
+  else:
+    cpSpaceStep(phy.space, tim.dt)
 
 
 # Init / deinit
