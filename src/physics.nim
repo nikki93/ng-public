@@ -263,7 +263,7 @@ proc `gravity=`*(phy: var Physics, value: Vec2) =
 
 # Frame
 
-const useFixedTimeStep = true
+const useFixedTimeStep = false
 
 proc frame*(phy: var Physics) =
   proc cpSpaceStep(space: ptr cpSpace, dt: float)
