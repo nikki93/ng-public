@@ -2,14 +2,26 @@ import std/math
 
 import boot
 
-import timing, graphics, events, uis
+import timing, graphics, events, uis, physics
 
 
 proc main() =
   let testImg = gfx.loadImage("assets/player.png")
   let testEff = gfx.loadEffect("test.frag")
 
-  var (x, y) = (100.0, 100.0)
+  let (screenW, screenH) = (800.0, 450.0)
+
+  phy.gravity = (0.0, 9.8 * 32)
+
+  let (floorW, floorH) = (screenW, 20.0)
+  let floorBody = phy.createStatic()
+  floorBody.position = (0.5 * screenW, 450.0 - 0.5 * floorH)
+  let floorShape = phy.createBox(floorBody, floorW, floorH)
+
+  let (boxW, boxH) = (80.0, 80.0)
+  let boxBody = phy.createDynamic(1.0, Inf)
+  boxBody.position = (0.5 * screenW, 0.5 * boxH + 20.0)
+  let boxShape = phy.createBox(boxBody, 80.0, 80.0)
 
   ev.loop:
     tim.frame()
@@ -17,9 +29,7 @@ proc main() =
     if not ev.windowFocused:
       return
 
-    if ev.touches.len == 1:
-      let touch = ev.touches[0]
-      (x, y) = (touch.x, touch.y)
+    phy.frame()
 
     gfx.frame:
       gfx.scope:
@@ -29,7 +39,8 @@ proc main() =
 
       gfx.scope:
         gfx.setColor(0xff, 0, 0xff)
-        gfx.drawRectangle(x, y, 80, 80)
+        let (x, y) = boxBody.position.toTuple
+        gfx.drawRectangleFill(x, y, boxW, boxH)
 
     ui.frame:
       ui.patch("top"):
@@ -43,8 +54,6 @@ proc main() =
           ui.elem("details", open = true):
             ui.elem("summary"):
               ui.text "position"
-            ui.box("info"):
-              ui.text $x & ", " & $y
             ui.box("info"):
               ui.elem("input"):
                 ui.event("change"):
