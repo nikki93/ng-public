@@ -41,7 +41,7 @@ proc main() =
 
       gfx.scope:
         gfx.setColor(0xff, 0, 0xff)
-        let (x, y) = boxBody.position.toTuple
+        let (x, y) = boxBody.position
         gfx.drawRectangleFill(x, y, boxW, boxH)
 
     ui.frame:

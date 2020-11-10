@@ -15,20 +15,25 @@ type
   cpShape {.importc: "cpShape", header: cpH.} = object
     space: ptr cpSpace
 
+  cpVect* {.importc: "cpVect", header: cpH.} = object
+    x, y: float
+
   Physics = object
     space: ptr cpSpace
 
-  Vec2* {.importc: "cpVect", header: cpH.} = object
+  Vec2* = tuple
     x, y: float
 
 
-# Vec2 <-> (float, float) tuple
+# `cpVect` <-> `Vec2`
 
-converter toVec2*(value: (float, float)): Vec2 {.inline.} =
-  Vec2(x: value[0], y: value[1])
+converter toVec2*(value: cpVect): Vec2 {.inline.} =
+  result.x = value.x
+  result.y = value.y
 
-converter toTuple*(value: Vec2): (float, float) {.inline.} =
-  (value.x, value.y)
+converter toCpVect*(value: Vec2): cpVect {.inline.} =
+  result.x = value.x
+  result.y = value.y
 
 
 # Reused C procs
@@ -63,7 +68,7 @@ proc `=destroy`(body: var Body) =
       body.cp,
       proc(body: ptr cpBody, constr: ptr cpConstraint, data: pointer)
         {.cdecl.} =
-        cpSpaceRemoveConstraint(constr.space, constr),
+      cpSpaceRemoveConstraint(constr.space, constr),
       nil)
     proc cpBodyEachShape(
       body: ptr cpBody,
@@ -75,7 +80,7 @@ proc `=destroy`(body: var Body) =
       body.cp,
       proc(body: ptr cpBody, shape: ptr cpShape, data: pointer)
         {.cdecl.} =
-        cpSpaceRemoveShape(shape.space, shape),
+      cpSpaceRemoveShape(shape.space, shape),
       nil)
 
     # Remove body from space and free it
@@ -90,12 +95,12 @@ proc initBody(cp: ptr cpBody): Body =
   Body(cp: cp)
 
 proc position*(body: Body): Vec2 {.inline.} =
-  proc cpBodyGetPosition(body: ptr cpBody): Vec2
+  proc cpBodyGetPosition(body: ptr cpBody): cpVect
     {.importc, header: cpH.}
   cpBodyGetPosition(body.cp)
 
 proc `position=`*(body: Body, value: Vec2) {.inline.} =
-  proc cpBodySetPosition(body: ptr cpBody, value: Vec2)
+  proc cpBodySetPosition(body: ptr cpBody, value: cpVect)
     {.importc, header: cpH.}
   cpBodySetPosition(body.cp, value)
 
@@ -173,7 +178,7 @@ proc createPivot*(
   anchorA: Vec2 = (0.0, 0.0), anchorB: Vec2 = (0.0, 0.0),
 ): Constraint =
   proc cpPivotJointNew2(
-    a, b: ptr cpBody, anchorA, anchorB: Vec2): ptr cpConstraint
+    a, b: ptr cpBody, anchorA, anchorB: cpVect): ptr cpConstraint
     {.importc, header: cpH.}
   phy.wrap(cpPivotJointNew2(a.cp, b.cp, anchorA, anchorB))
 
@@ -182,7 +187,7 @@ proc createCircle*(
   radius: float, offset: Vec2 = (0.0, 0.0)
 ): Shape =
   proc cpCircleShapeNew(
-    body: ptr cpBody, radius: float, offset: Vec2): ptr cpShape
+    body: ptr cpBody, radius: float, offset: cpVect): ptr cpShape
     {.importc, header: cpH.}
   phy.wrap(cpCircleShapeNew(body.cp, radius, offset))
 
@@ -199,17 +204,19 @@ proc createPoly*(
   phy: var Physics, body: Body,
   verts: openArray[Vec2], radius: float = 0,
 ): Shape =
-  type
-    cpTransform {.importc: "cpTransform", header: cpH.} = tuple
-      a, b, c, d, tx, ty: float
+  var cpVerts = newSeqOfCap[cpVect](verts.len)
+  for vert in verts:
+    cpVerts.add(vert)
+  type cpTransform {.importc: "cpTransform", header: cpH.} = tuple
+    a, b, c, d, tx, ty: float
   proc cpPolyShapeNew(
     body: ptr cpBody,
-    count: int, verts: ptr Vec2,
+    count: int, verts: ptr cpVect,
     transform: cpTransform, radius: float): ptr cpShape
     {.importc, header: cpH.}
   phy.wrap(cpPolyShapeNew(
     body.cp,
-    verts.len, verts[0].unsafeAddr,
+    cpVerts.len, cpVerts[0].addr,
     (1.0, 0.0, 0.0, 1.0, 0.0, 0.0),
     radius,
   ))
@@ -218,7 +225,7 @@ proc createPoly*(
 # Gravity
 
 proc `gravity=`*(phy: var Physics, value: Vec2) =
-  proc cpSpaceSetGravity(space: ptr cpSpace, gravity: Vec2)
+  proc cpSpaceSetGravity(space: ptr cpSpace, gravity: cpVect)
     {.importc, header: cpH.}
   cpSpaceSetGravity(phy.space, value)
 
