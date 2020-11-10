@@ -51,6 +51,11 @@ type
     VertexShader = 0
     FragmentShader = 1
 
+  GPUSnapEnum {.importc: "GPU_SnapEnum", header: gpuH.} = enum
+    None = 0
+
+  GPUFilterEnum {.importc: "GPU_FilterEnum", header: gpuH.} = enum
+    LinearMipmap = 2
 
   Texture = object
     gpuImage: ptr GPUImage
@@ -173,10 +178,19 @@ proc loadImage*(gfx: var Graphics, path: string): Image =
   # Didn't find existing texture. Load a new one and remember it.
   proc GPU_LoadImage(filename: cstring): ptr GPU_Image
     {.importc, header: gpuH.}
-  let tex = (ref Texture)(gpuImage: GPU_LoadImage(path))
+  let gpuImage = GPU_LoadImage(path)
+  let tex = (ref Texture)(gpuImage: gpuImage)
   tex.path = path # Separate statement prevents extra copy perf warning
   result = initImage(tex[].addr) # Do this first to prevent copying `tex`
   gfx.texs[path] = tex
+
+  # Smoother image filtering by default
+  proc GPU_SetSnapMode(image: ptr GPUImage, snap: GPUSnapEnum)
+    {.importc, header: gpuH.}
+  GPU_SetSnapMode(gpuImage, GPUSnapEnum.None)
+  proc GPU_SetImageFilter(image: ptr GPUImage, filter: GPUFilterEnum)
+    {.importc, header: gpuH.}
+  GPU_SetImageFilter(gpuImage, GPUFilterEnum.LinearMipmap)
 
 proc size*(img: Image): (float, float) =
   result[0] = cast[int](img.tex.gpuImage.w).toBiggestFloat
