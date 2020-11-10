@@ -202,7 +202,6 @@ var theFrameProc: proc() # Needed for the Emscripten case below
 template loop*(ev: var Events, body: typed) =
   ## Begin the application's event loop, running the body every frame of the
   ## event loop. Events are only accessible within this body.
-
   block:
     # Run this on each iteration
     proc frameProc() =
