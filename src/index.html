@@ -78,7 +78,7 @@
       })();
     </script>
 
-    <!-- UI state -->
+    <!-- UI initialization -->
     <script>
       window.UI = {};
 
@@ -99,6 +99,8 @@
             counts[e.type] = count + 1;
           }
         };
+
+        IncrementalDOM.attributes.value = IncrementalDOM.applyProp;
       })();
     </script>
   </body>
