@@ -57,9 +57,14 @@ proc main() =
         gfx.drawImage(testImg, 100, 200, 0.4)
 
       gfx.scope:
-        gfx.setColor(0xff, 0, 0xff)
+        gfx.setColor(0x8f, 0, 0xaf)
         let (x, y) = boxBody.getPosition()
         gfx.drawRectangleFill(x, y, boxW, boxH)
+
+      gfx.scope:
+        gfx.setColor(0, 0x8f, 0x8f)
+        let (x, y) = floorBody.getPosition()
+        gfx.drawRectangleFill(x, y, floorW, floorH)
 
     ui.frame:
       ui.patch("top"):
