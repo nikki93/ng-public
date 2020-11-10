@@ -172,6 +172,8 @@ proc beginFrame(ev: var Events) =
     touch.x = newX
     touch.y = newY
 
+const ownSync = false
+
 proc endFrame(ev: var Events) =
   # Remove released touches
   ev.touches.keepItIf(not it.released)
@@ -182,7 +184,7 @@ proc endFrame(ev: var Events) =
 
   # Maintain refresh rate by waiting till next beat. In Emscripten the
   # browser manages the frame rate and we don't have to do this.
-  when not defined(emscripten):
+  when ownSync and not defined(emscripten):
     let refreshOffset = (1000 * ev.refreshCount div ev.refreshRate).milliseconds
     let sleepUntil = ev.refreshBase + refreshOffset
     let now = getTime()

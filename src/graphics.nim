@@ -417,11 +417,20 @@ proc init(gfx: var Graphics) =
   GPU_SetInitWindow(SDL_GetWindowID(gfx.window))
   var w, h: cint
   SDL_GetWindowSize(gfx.window, w, h)
+  const
+    gpuDefault {.used.} = 0
+    gpuEnableVsync {.used.} = 0x1
+    gpuDisableVsync {.used.} = 0x2
+    gpuDisableDoubleBuffer {.used.} = 0x4
+  var gpuFlags: uint32 = gpuDefault
+  when defined(emscripten):
+    gpuFlags = gpuDisableVsync or gpuDisableDoubleBuffer
+  proc GPU_SetPreInitFlags(flags: uint32)
+    {.importc, header: gpuH.}
+  GPU_SetPreInitFlags(gpuFlags)
   proc GPU_Init(w, h: uint16, flags: uint32): ptr GPUTarget
     {.importc, header: gpuH.}
-  const GPU_DEFAULT_INIT_FLAGS = 0
-  gfx.screen = GPU_Init(cast[uint16](w), cast[uint16](h),
-    GPU_DEFAULT_INIT_FLAGS)
+  gfx.screen = GPU_Init(cast[uint16](w), cast[uint16](h), 0)
   GPU_SetWindowResolution(cast[uint16](w), cast[uint16](h))
 
   # Apply initial state
