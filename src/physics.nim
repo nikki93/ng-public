@@ -18,12 +18,23 @@ type
   cpVect* {.importc: "cpVect", header: cpH.} = object
     x, y: float
 
-  Physics = object
-    space: ptr cpSpace
-    stepAccum: float
-
   Vec2* = tuple
     x, y: float
+
+  Body* = object
+    cp: ptr cpBody
+
+  Constraint* = object
+    cp: ptr cpConstraint
+
+  Shape* = object
+    cp: ptr cpShape
+
+  Physics = object
+    space: ptr cpSpace
+    background: Body
+
+    stepAccum: float
 
 
 # `cpVect` <-> `Vec2`
@@ -47,10 +58,6 @@ proc cpSpaceRemoveShape(space: ptr cpSpace, shape: ptr cpShape)
 
 
 # Body wrapper
-
-type
-  Body* = object
-    cp: ptr cpBody
 
 proc `=copy`(a: var Body, b: Body) {.error.}
 
@@ -111,10 +118,6 @@ proc setPosition*(body: Body, value: Vec2) {.inline.} =
 
 # Constraint wrapper
 
-type
-  Constraint* = object
-    cp: ptr cpConstraint
-
 proc `=copy`(a: var Constraint, b: Constraint) {.error.}
 
 proc `=destroy`(constr: var Constraint) =
@@ -151,10 +154,6 @@ proc setMaxBias*(constr: Constraint, maxBias: float) {.inline.} =
 
 
 # Shape wrapper
-
-type
-  Shape* = object
-    cp: ptr cpShape
 
 proc `=copy`(a: var Shape, b: Shape) {.error.}
 
@@ -248,6 +247,12 @@ proc createPoly*(
   ))
 
 
+# Background
+
+proc getBackground*(phy: var Physics): lent Body =
+  phy.background
+
+
 # Gravity
 
 proc `gravity=`*(phy: var Physics, value: Vec2) =
@@ -281,9 +286,16 @@ proc init(phy: var Physics) =
     {.importc, header: cpH.}
   phy.space = cpSpaceNew()
 
+  # Init background body
+  phy.background = phy.createStatic()
+
   echo "initialized physics"
 
 proc `=destroy`(phy: var Physics) =
+  # Destroy background body
+  `=destroy`(phy.background)
+  wasMoved(phy.background)
+
   # Destroy Chipmunk space
   if phy.space != nil:
     proc cpSpaceFree(space: ptr cpSpace)

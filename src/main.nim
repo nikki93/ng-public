@@ -12,6 +12,10 @@ proc main() =
   let (playerW, playerH) = (45.0 - 2 * radius, 20.0 - 2 * radius)
   let playerShape = phy.createBox(playerBody, playerW, playerH, radius)
 
+  let frictionConstr = phy.createPivot(phy.getBackground(), playerBody)
+  frictionConstr.setMaxForce(800)
+  frictionConstr.setMaxBias(0)
+
   let playerImg = gfx.loadImage("assets/player.png")
   let playerEff = gfx.loadEffect("test.frag")
 
