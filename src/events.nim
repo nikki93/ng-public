@@ -222,7 +222,9 @@ template loop*(ev: var Events, body: typed) =
     # Run this on each iteration
     proc frameProc() =
       beginFrame(ev)
-      body
+      proc inner() =
+        body
+      inner()
       endFrame(ev)
 
     when defined(emscripten):
