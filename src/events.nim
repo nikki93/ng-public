@@ -51,6 +51,7 @@ type
 
   Events = object
     quitting: bool
+    prevUnfocused: bool
 
     refreshBase: Time
     refreshCount: int
@@ -196,6 +197,21 @@ proc endFrame(ev: var Events) =
     else:
       ev.refreshBase = now
       ev.refreshCount = 1
+
+  # In Emscripten, sleep more when window isn't focused to reduce CPU usage.
+  when defined(emscripten):
+    const
+      EM_TIMING_SETTIMEOUT = 0
+      EM_TIMING_RAF = 1
+    proc emscripten_set_main_loop_timing(mode, value: int): int
+      {.importc, discardable.}
+    let unfocused = not ev.windowFocused()
+    if unfocused != ev.prevUnfocused:
+      if unfocused:
+        emscripten_set_main_loop_timing(EM_TIMING_SETTIMEOUT, 100)
+      else:
+        emscripten_set_main_loop_timing(EM_TIMING_RAF, 0)
+      ev.prevUnfocused = unfocused
 
 var theFrameProc: proc() # Needed for the Emscripten case below
 
