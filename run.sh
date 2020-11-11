@@ -128,4 +128,8 @@ case "$1" in
   web-serve-release)
     npx http-server -c-1 build/web-release
     ;;
+  web-publish)
+    ./run.sh web-release
+    rsync -avP build/web-release/{index.*,ng.*} dh_bedxci@dreamhotel.xyz:dreamhotel.xyz/ng
+    ;;
 esac
