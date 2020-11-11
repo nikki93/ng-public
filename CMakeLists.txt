@@ -176,6 +176,8 @@ set(BUILD_STATIC ON CACHE BOOL "" FORCE)
 set(INSTALL_STATIC OFF CACHE BOOL "" FORCE)
 add_subdirectory(vendor/Chipmunk2D EXCLUDE_FROM_ALL)
 target_include_directories(ng PRIVATE vendor/Chipmunk2D/include)
+target_compile_definitions(ng PRIVATE -DCP_DATA_POINTER_TYPE=uint32_t)
+target_compile_definitions(chipmunk_static PRIVATE -DCP_DATA_POINTER_TYPE=uint32_t)
 target_link_libraries(ng PRIVATE chipmunk_static)
 
 # rapidjson

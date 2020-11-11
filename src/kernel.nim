@@ -26,11 +26,14 @@ let null* {.importcpp: "kernel_null".}: Entity
 
 proc `==`*(a: Entity, b: Entity): bool {.importcpp: "# == #".}
 
-proc toIntegral(ent: Entity): uint32
-  {.importcpp: "entt::to_integral".}
+proc toIntegral*(ent: Entity): uint32
+  {.importcpp: "entt::to_integral(#)".}
+
+proc toEntity*(value: uint32): Entity
+  {.importcpp: "entt::entity(#)".}
 
 proc `$`*(ent: Entity): string {.inline.} =
-  $ent.toIntegral
+  "Entity(" & $ent.toIntegral & ")"
 
 
 # Create / destroy

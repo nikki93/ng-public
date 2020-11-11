@@ -4,9 +4,10 @@
 ## documentation here just covers aspects specific to this module.
 ## 
 ## Types `Body`, `Constraint` and `Shape` which wrap Chipmunk objects
-## automatically remove the objects and destroy them in their destructor.
+## automatically remove the objects and destroy them in their destructor. They
+## can also store an association to an `Entity` for game logic purposes.
 
-import timing, utils
+import timing, kernel, utils
 
 
 const cpH = "\"precomp.h\""
@@ -16,12 +17,15 @@ type
 
   cpBody {.importc: "cpBody", header: cpH.} = object
     space: ptr cpSpace
+    userData: uint32
 
   cpConstraint {.importc: "cpConstraint", header: cpH.} = object
     space: ptr cpSpace
+    userData: uint32
 
   cpShape {.importc: "cpShape", header: cpH.} = object
     space: ptr cpSpace
+    userData: uint32
 
   cpVect {.importc: "cpVect", header: cpH.} = object
     x, y: float
@@ -111,7 +115,14 @@ proc `=destroy`(body: var Body) =
     cpBodyFree(body.cp)
 
 proc initBody(cp: ptr cpBody): Body =
+  cp.userData = null.toIntegral
   Body(cp: cp)
+
+proc entity*(body: Body): Entity {.inline.} =
+  body.cp.userData.toEntity
+
+proc `entity=`*(body: Body, ent: Entity) {.inline.} =
+  body.cp.userData = ent.toIntegral
 
 proc position*(body: Body): Vec2 {.inline.} =
   proc cpBodyGetPosition(body: ptr cpBody): cpVect
@@ -138,7 +149,14 @@ proc `=destroy`(constr: var Constraint) =
     cpConstraintFree(constr.cp)
 
 proc initConstraint(cp: ptr cpConstraint): Constraint =
+  cp.userData = null.toIntegral
   Constraint(cp: cp)
+
+proc entity*(constr: Constraint): Entity {.inline.} =
+  constr.cp.userData.toEntity
+
+proc `entity=`*(constr: Constraint, ent: Entity) {.inline.} =
+  constr.cp.userData = ent.toIntegral
 
 proc maxForce*(constr: Constraint): float {.inline.} =
   proc cpConstraintGetMaxForce(constr: ptr cpConstraint): float
@@ -175,7 +193,14 @@ proc `=destroy`(shape: var Shape) =
     cpShapeFree(shape.cp)
 
 proc initShape(cp: ptr cpShape): Shape =
+  cp.userData = null.toIntegral
   Shape(cp: cp)
+
+proc entity*(shape: Shape): Entity {.inline.} =
+  shape.cp.userData.toEntity
+
+proc `entity=`*(shape: Shape, ent: Entity) {.inline.} =
+  shape.cp.userData = ent.toIntegral
 
 
 # Constructors
