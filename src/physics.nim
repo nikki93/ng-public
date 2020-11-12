@@ -27,8 +27,11 @@ type
     space: ptr cpSpace
     userData: uint32
 
+  cpShapeFilter {.importc: "cpShapeFilter", header: cpH.} = object
+
   cpVect {.importc: "cpVect", header: cpH.} = object
     x, y: float
+
 
   Vec2* = tuple
     x, y: float
@@ -292,6 +295,49 @@ proc `gravity=`*(phy: var Physics, value: Vec2) =
   proc cpSpaceSetGravity(space: ptr cpSpace, gravity: cpVect)
     {.importc, header: cpH.}
   cpSpaceSetGravity(phy.space, value)
+
+
+# Queries
+
+let cpShapeFilterAll
+  {.importc: "CP_SHAPE_FILTER_ALL", nodecl.}: cpShapeFilter
+
+type
+  SegmentQueryResult* = object
+    ent*: Entity
+    point*, normal*: Vec2
+    alpha*: float
+
+proc segmentQuery*(
+  phy: var Physics, start, finish: Vec2, radius: float,
+  handler: proc(res: SegmentQueryResult)) =
+  # Accumulating results and iterating through them seemed the simplest
+  # way to deal with closures. Also avoids issues with eg. destroying
+  # bodies from within query handlers.
+  proc cpSpaceSegmentQuery(
+    space: ptr cpSpace,
+    start, finish: cpVect, radius: float,
+    filter: cpShapeFilter,
+    handler: proc(
+      shape: ptr cpShape,
+      point, normal: cpVect, alpha: float,
+      data: pointer) {.cdecl.},
+    data: pointer)
+    {.importc, header: cpH.}
+  proc cHandler(
+    shape: ptr cpShape,
+    point, normal: cpVect, alpha: float,
+    data: pointer) {.cdecl.} =
+    var results = cast[ptr seq[SegmentQueryResult]](data)
+    results[].add(SegmentQueryResult(
+      ent: shape.userData.toEntity,
+      point: point, normal: normal,
+      alpha: alpha))
+  var results: seq[SegmentQueryResult]
+  cpSpaceSegmentQuery(phy.space, start, finish, radius,
+    cpShapeFilterAll, cHandler, results.addr)
+  for res in results:
+    handler(res)
 
 
 # Frame
