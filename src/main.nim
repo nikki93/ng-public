@@ -11,34 +11,28 @@ type
     shape: Shape
 
 
-proc main() =
-  const (screenW, screenH) = (800.0, 450.0)
+const (screenW, screenH) = (800.0, 450.0)
 
-  phy.gravity = (0.0, 9.8 * 64)
+phy.gravity = (0.0, 9.8 * 64)
 
-  let wallThickness = 40.0
+let wallThickness = 40.0
 
-  let floorBody = phy.createStatic()
-  floorBody.position = (0.5 * screenW, 450.0 - 0.5 * wallThickness)
-  let floorShape = phy.createBox(floorBody, screenW, wallThickness)
+let floorBody = phy.createStatic()
+floorBody.position = (0.5 * screenW, 450.0 - 0.5 * wallThickness)
+let floorShape = phy.createBox(floorBody, screenW, wallThickness)
 
-  const (boxW, boxH) = (40.0, 40.0)
-  for i in 1..200:
-    let ent = ker.create()
-    let box = ker.add(Box, ent)
-    box.body = phy.createDynamic(1, Inf)
-    box.body.position = (rand(screenW), rand(100.0..(screenH - 100.0)))
-    box.shape = phy.createBox(box.body, boxW, boxH)
-    box.shape.entity = ent
+const (boxW, boxH) = (40.0, 40.0)
+for i in 1..200:
+  let ent = ker.create()
+  let box = ker.add(Box, ent)
+  box.body = phy.createDynamic(1, Inf)
+  box.body.position = (rand(screenW), rand(100.0..(screenH - 100.0)))
+  box.shape = phy.createBox(box.body, boxW, boxH)
+  box.shape.entity = ent
 
-  ev.loop:
-    tim.frame()
-    if tim.dt >= 3 * 1 / 60.0: # Frame drop
-      return
-
-    if not ev.windowFocused:
-      return
-
+ev.loop:
+  tim.frame()
+  if tim.dt < 3 * 1 / 60.0 and ev.windowFocused:
     if ev.touches.len == 1:
       let touch = ev.touches[0]
       var count = 0
@@ -72,6 +66,4 @@ proc main() =
           ui.box:
             ui.text "fps: " & $tim.fps.round.toInt
 
-  ker.clear(Box)
-
-main()
+ker.clear(Box)
