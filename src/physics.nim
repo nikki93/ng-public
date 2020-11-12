@@ -304,16 +304,15 @@ let cpShapeFilterAll
 
 type
   SegmentQueryResult* = object
-    ent*: Entity
+    entity*: Entity
     point*, normal*: Vec2
     alpha*: float
 
 proc segmentQuery*(
-  phy: var Physics, start, finish: Vec2, radius: float,
-  handler: proc(res: SegmentQueryResult)) =
-  # Accumulating results and iterating through them seemed the simplest
-  # way to deal with closures. Also avoids issues with eg. destroying
-  # bodies from within query handlers.
+  phy: var Physics,
+  start, finish: Vec2,
+  radius: float = 0,
+): seq[SegmentQueryResult] =
   proc cpSpaceSegmentQuery(
     space: ptr cpSpace,
     start, finish: cpVect, radius: float,
@@ -330,14 +329,12 @@ proc segmentQuery*(
     data: pointer) {.cdecl.} =
     var results = cast[ptr seq[SegmentQueryResult]](data)
     results[].add(SegmentQueryResult(
-      ent: shape.userData.toEntity,
+      entity: shape.userData.toEntity,
       point: point, normal: normal,
       alpha: alpha))
-  var results: seq[SegmentQueryResult]
-  cpSpaceSegmentQuery(phy.space, start, finish, radius,
-    cpShapeFilterAll, cHandler, results.addr)
-  for res in results:
-    handler(res)
+  cpSpaceSegmentQuery(
+    phy.space, start, finish, radius,
+    cpShapeFilterAll, cHandler, result.addr)
 
 
 # Frame

@@ -47,19 +47,16 @@ proc main() =
     if not ev.windowFocused:
       return
 
-    proc removeTouchedBoxes() = # Need to wrap in a proc bc. of `ev.loop` :|
-      if ev.touches.len == 1:
-        let touch = ev.touches[0]
-        var count = 0
-        phy.segmentQuery((touch.x, touch.y), (touch.x, touch.y + 1), 0,
-          proc(res: SegmentQueryResult) =
-            if res.ent != null:
-              inc count
-              ker.remove(Box, res.ent)
-              ker.destroy(res.ent))
-        if count > 0:
-          echo "destroyed ", count, ", boxes"
-    removeTouchedBoxes()
+    if ev.touches.len == 1:
+      let touch = ev.touches[0]
+      var count = 0
+      for res in phy.segmentQuery((touch.x, touch.y), (touch.x, touch.y + 1)):
+        if res.entity != null:
+          inc count
+          ker.remove(Box, res.entity)
+          ker.destroy(res.entity)
+      if count > 0:
+        echo "destroyed ", count, ", boxes"
 
     phy.frame()
 
