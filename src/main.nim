@@ -22,16 +22,8 @@ proc main() =
   floorBody.position = (0.5 * screenW, 450.0 - 0.5 * wallThickness)
   let floorShape = phy.createBox(floorBody, screenW, wallThickness)
 
-  let leftWallBody = phy.createStatic()
-  leftWallBody.position = (0.5 * wallThickness, 0.5 * screenH)
-  let leftWallShape = phy.createBox(leftWallBody, wallThickness, screenH)
-
-  let rightWallBody = phy.createStatic()
-  rightWallBody.position = (screenW - 0.5 * wallThickness, 0.5 * screenH)
-  let rightWallShape = phy.createBox(rightWallBody, wallThickness, screenH)
-
   const (boxW, boxH) = (40.0, 40.0)
-  for i in 1..50:
+  for i in 1..200:
     let ent = ker.create()
     let box = ker.add(Box, ent)
     box.body = phy.createDynamic(1, Inf)
@@ -64,15 +56,15 @@ proc main() =
       for _, box in ker.each(Box):
         let (x, y) = box.body.position
         gfx.drawRectangleFill(x, y, boxW, boxH)
+        gfx.scope:
+          gfx.setColor(0xa0, 0, 0x80)
+          gfx.drawRectangle(x, y, boxW, boxH)
 
       let (floorX, floorY) = floorBody.position
       gfx.drawRectangleFill(floorX, floorY, 800.0, wallThickness)
-
-      let (leftWallX, leftWallY) = leftWallBody.position
-      gfx.drawRectangleFill(leftWallX, leftWallY, wallThickness, screenH)
-
-      let (rightWallX, rightWallY) = rightWallBody.position
-      gfx.drawRectangleFill(rightWallX, rightWallY, wallThickness, screenH)
+      gfx.scope:
+        gfx.setColor(0xa0, 0x80, 0)
+        gfx.drawRectangle(floorX, floorY, 800.0, wallThickness)
 
     ui.frame:
       ui.patch("bottom"):
