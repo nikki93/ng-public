@@ -63,13 +63,25 @@ converter toCpVect(value: Vec2): cpVect {.inline.} =
   result.y = value.y
 
 
-# Reused C procs
+# Chipmunk objects removal
 
-proc cpSpaceRemoveConstraint(space: ptr cpSpace, constr: ptr cpConstraint)
-  {.importc, header: cpH.}
+proc remove(body: ptr cpBody) =
+  proc cpSpaceRemoveBody(space: ptr cpSpace, body: ptr cpBody)
+    {.importc, header: cpH.}
+  if body.space != nil:
+    cpSpaceRemoveBody(body.space, body)
 
-proc cpSpaceRemoveShape(space: ptr cpSpace, shape: ptr cpShape)
-  {.importc, header: cpH.}
+proc remove(constr: ptr cpConstraint) =
+  proc cpSpaceRemoveConstraint(space: ptr cpSpace, constr: ptr cpConstraint)
+    {.importc, header: cpH.}
+  if constr.space != nil:
+    cpSpaceRemoveConstraint(constr.space, constr)
+
+proc remove(shape: ptr cpShape) =
+  proc cpSpaceRemoveShape(space: ptr cpSpace, shape: ptr cpShape)
+    {.importc, header: cpH.}
+  if shape.space != nil:
+    cpSpaceRemoveShape(shape.space, shape)
 
 
 # Body wrapper
@@ -91,8 +103,7 @@ proc `=destroy`(body: var Body) =
       body.cp,
       proc(body: ptr cpBody, constr: ptr cpConstraint, data: pointer)
         {.cdecl.} =
-      if constr.space != nil:
-        cpSpaceRemoveConstraint(constr.space, constr),
+      remove(constr),
       nil)
     proc cpBodyEachShape(
       body: ptr cpBody,
@@ -104,15 +115,11 @@ proc `=destroy`(body: var Body) =
       body.cp,
       proc(body: ptr cpBody, shape: ptr cpShape, data: pointer)
         {.cdecl.} =
-      if shape.space != nil:
-        cpSpaceRemoveShape(shape.space, shape),
+      remove(shape),
       nil)
 
     # Remove body from space and free it
-    proc cpSpaceRemoveBody(space: ptr cpSpace, body: ptr cpBody)
-      {.importc, header: cpH.}
-    if body.cp.space != nil:
-      cpSpaceRemoveBody(body.cp.space, body.cp)
+    remove(body.cp)
     proc cpBodyFree(body: ptr cpBody)
       {.importc, header: cpH.}
     cpBodyFree(body.cp)
@@ -145,8 +152,7 @@ proc `=copy`(a: var Constraint, b: Constraint) {.error.}
 proc `=destroy`(constr: var Constraint) =
   if constr.cp != nil:
     # Remove constraint from space and free it
-    if constr.cp.space != nil:
-      cpSpaceRemoveConstraint(constr.cp.space, constr.cp)
+    remove(constr.cp)
     proc cpConstraintFree(constr: ptr cpConstraint)
       {.importc, header: cpH.}
     cpConstraintFree(constr.cp)
@@ -189,8 +195,7 @@ proc `=copy`(a: var Shape, b: Shape) {.error.}
 proc `=destroy`(shape: var Shape) =
   if shape.cp != nil:
     # Remove shape from space and free it
-    if shape.cp.space != nil:
-      cpSpaceRemoveShape(shape.cp.space, shape.cp)
+    remove(shape.cp)
     proc cpShapeFree(shape: ptr cpShape)
       {.importc, header: cpH.}
     cpShapeFree(shape.cp)
