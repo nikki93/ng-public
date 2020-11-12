@@ -50,7 +50,7 @@ proc main() =
       if count > 0:
         echo "destroyed ", count, ", boxes"
 
-    phy.frame()
+    phy.frame(fixedTimeStep = true)
 
     gfx.frame:
       for _, box in ker.each(Box):
