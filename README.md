@@ -1,5 +1,7 @@
 # Running
 
+Make sure the submodules are in sync with `git submodule update --init --recursive`.
+
 ## Desktop
 
 This should work on Linux, macOS and Windows. On Windows you'll need WSL for
