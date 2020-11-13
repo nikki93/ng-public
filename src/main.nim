@@ -1,8 +1,6 @@
 import std/[math, random]
 
-import boot
-
-import timing, graphics, events, uis, physics, kernel
+import ng
 
 
 type

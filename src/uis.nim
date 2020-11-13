@@ -247,11 +247,11 @@ template frame*(ui: var UI, body: typed) =
 # Init / deinit
 
 proc init(ui: var UI) =
-  echo "initialized ui"
+  echo "initialized uis"
 
 proc `=destroy`(ui: var UI) =
   destroyFields(ui)
-  echo "deinitialized ui"
+  echo "deinitialized uis"
 
 
 # Singleton
