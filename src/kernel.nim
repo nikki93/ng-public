@@ -1,3 +1,6 @@
+import macros, tables, sets
+
+
 const enttH = "\"precomp.h\""
 
 type
@@ -8,6 +11,21 @@ type
   Kernel = object
     reg: Registry
 
+    typeMetas: Table[string, TypeMeta]
+
+  TypeMeta* = object
+    add*: proc(ent: Entity): pointer
+    remove*: proc(ent: Entity)
+    has*: proc(ent: Entity): bool
+    get*: proc(ent: Entity): pointer
+
+
+# Meta compile-time vars
+
+var typeIdents {.compileTime.}: seq[NimNode]
+
+var typeNames {.compileTime.}: HashSet[string]
+
 
 # Init / deinit
 
@@ -15,7 +33,7 @@ proc init(ker: var Kernel) =
   echo "initialized kernel"
 
 proc `=destroy`(ker: var Kernel) =
-  # TODO(nikki): Explicitly clear tracked types
+  # TODO(nikki): Explicitly destroy all entities
   echo "deinitialized kernel"
 
 
@@ -46,12 +64,17 @@ proc create*(ker: var Kernel): Entity {.inline.} =
 proc destroy*(ker: var Kernel, ent: Entity) {.inline.} =
   proc destroy(reg: var Registry, ent: Entity)
     {.importcpp.}
+  for typeMeta in ker.typeMetas.mvalues:
+    typeMeta.remove(ent)
   ker.reg.destroy(ent)
 
 
 # Add / remove
 
 proc add*(ker: var Kernel, T: typedesc, ent: Entity): ptr T {.inline.} =
+  static:
+    if not typeNames.contains($T):
+      error("type '" & $T & "' must be registered with ng.")
   proc emplace[T](reg: var Registry, ent: Entity): ptr T
     {.importcpp: "&#.emplace<'*0>(#)".}
   result = ker.reg.emplace[:T](ent)
@@ -193,6 +216,39 @@ proc `=copy`(a: var Kernel, b: Kernel) {.error.}
 
 var ker*: Kernel
 ker.init()
+
+
+# Meta
+
+macro ng*(body: untyped) =
+  let ident = body[0][0]
+  ident.expectKind nnkIdent
+  typeIdents.add(ident)
+  typeNames.incl($ident)
+  body
+
+proc registerTypeMeta[T](name: string) =
+  ker.typeMetas[name] = TypeMeta(
+    add: proc(ent: Entity): pointer =
+      ker.add(T, ent),
+    remove: proc(ent: Entity) =
+      ker.remove(T, ent),
+    has: proc(ent: Entity): bool =
+      ker.has(T, ent),
+    get: proc(ent: Entity): pointer =
+      ker.get(T, ent),
+  )
+
+macro initMeta*() =
+  ## Initializes the ng meta system. This macro must be invoked after all
+  ## registered types and their hooks have been defined, and before meta
+  ## information is read.
+  result = newStmtList()
+  for typeIdent in typeIdents:
+    let name = $typeIdent
+    result.add quote do:
+      registerTypeMeta[`typeIdent`](`name`)
+  result = newBlockStmt(result)
 
 
 # Tests

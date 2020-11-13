@@ -4,12 +4,14 @@ import ng
 
 
 type
-  Box = object
+  Box {.ng.} = object
     body: Body
     shape: Shape
 
 
 proc main() =
+  initMeta()
+
   const (screenW, screenH) = (800.0, 450.0)
 
   phy.gravity = (0.0, 9.8 * 64)
@@ -43,7 +45,6 @@ proc main() =
       for res in phy.segmentQuery((touch.x, touch.y), (touch.x, touch.y + 1)):
         if res.entity != null:
           inc count
-          ker.remove(Box, res.entity)
           ker.destroy(res.entity)
       if count > 0:
         echo "destroyed ", count, ", boxes"
