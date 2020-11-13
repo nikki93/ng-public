@@ -20,6 +20,10 @@ Then just run:
 ./run.sh release
 ```
 
+The first time you ever build, it takes a while because SDL-gpu builds GLEW.
+Subsequent builds should be much quicker though (unless you clear the 'build/'
+directory).
+
 You can also do this to run with Valgrind if you have it installed (to check for leaks):
 
 ```
