@@ -42,9 +42,13 @@ case "$1" in
       --cc:$NIM_CC \
       --nimcache:build/nim-gen-release \
       -d:danger \
+      ${MACROS:+-f} \
       ${TESTS:+-d:runTests} \
       ${VALGRIND:+-d:useMalloc} \
       src/main.nim
+    if [[ -n "$MACROS" ]]; then
+      exit 0;
+    fi
     case $PLATFORM in
       lin|macOS)
         $TIME $CMAKE \
@@ -114,8 +118,12 @@ case "$1" in
       -d:emscripten \
       --cpu:wasm32 \
       --os:Linux \
+      ${MACROS:+-f} \
       ${TESTS:+-d:runTests} \
       src/main.nim
+    if [[ -n "$MACROS" ]]; then
+      exit 0;
+    fi
     $TIME $CMAKE \
       -DWEB=ON \
       -DNIM_GEN_SRCS=$(nim_gen_srcs build/nim-gen-web-release) \
