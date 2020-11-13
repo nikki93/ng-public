@@ -64,7 +64,7 @@ proc create*(ker: var Kernel): Entity {.inline.} =
 proc destroy*(ker: var Kernel, ent: Entity) {.inline.} =
   proc destroy(reg: var Registry, ent: Entity)
     {.importcpp.}
-  for typeMeta in ker.typeMetas.mvalues:
+  for typeMeta in ker.typeMetas.mvalues: # `mvalues` to prevent copy
     typeMeta.remove(ent)
   ker.reg.destroy(ent)
 
