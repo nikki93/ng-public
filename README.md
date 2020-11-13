@@ -1,6 +1,10 @@
 # Running
 
-Make sure the submodules are in sync with `git submodule update --init --recursive`.
+Make sure the submodules are in sync with: 
+
+```
+git submodule update --init --recursive`
+```
 
 ## Desktop
 
