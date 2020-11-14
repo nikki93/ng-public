@@ -41,13 +41,9 @@ proc main() =
 
     if ev.touches.len == 1:
       let touch = ev.touches[0]
-      var count = 0
       for res in phy.segmentQuery((touch.x, touch.y), (touch.x, touch.y + 1)):
         if res.entity != null:
-          inc count
           ker.destroy(res.entity)
-      if count > 0:
-        echo "destroyed ", count, ", boxes"
 
     phy.frame(fixedTimeStep = true)
 
