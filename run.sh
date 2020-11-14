@@ -8,6 +8,7 @@ TIME="time"
 TIME_TOTAL="time"
 NIM="nim"
 NIM_CC="clang"
+MAIN=${MAIN:-src/main.nim}
 
 if [[ -f /proc/version ]]; then
   if grep -q Linux /proc/version; then
@@ -24,7 +25,8 @@ if [[ -f /proc/version ]]; then
 fi
 
 nim_gen_srcs() { # Parse Nim's JSON output to get list of C/C++ sources
-  cat $1/main.json | sed -e 's/[",]//g' -e 's/\.o[bj]*$//g' -n -e '/\.cp*$/p' | tr '\n' ';'
+  MAIN_NAME=${MAIN##*/}
+  cat $1/${MAIN_NAME%.nim}.json | sed -e 's/[",]//g' -e 's/\.o[bj]*$//g' -n -e '/\.cp*$/p' | tr '\n' ';'
 }
 
 case "$1" in
@@ -43,9 +45,8 @@ case "$1" in
       --nimcache:build/nim-gen-release \
       -d:danger \
       ${MACROS:+-f} \
-      ${TESTS:+-d:runTests} \
       ${VALGRIND:+-d:useMalloc} \
-      src/main.nim
+      $MAIN
     if [[ -n "$MACROS" ]]; then
       exit 0;
     fi
@@ -119,8 +120,7 @@ case "$1" in
       --cpu:wasm32 \
       --os:Linux \
       ${MACROS:+-f} \
-      ${TESTS:+-d:runTests} \
-      src/main.nim
+      $MAIN
     if [[ -n "$MACROS" ]]; then
       exit 0;
     fi

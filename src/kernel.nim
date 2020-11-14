@@ -271,17 +271,45 @@ macro initMeta*() =
 
 # Tests
 
-when defined(runTests):
+when isMainModule:
   import times
 
-  proc basic() =
-    type Position = object
+  type
+    Position {.ng.} = object
       x: float
       y: float
 
-    type Sprite = object
+    Sprite {.ng.} = object
       img: string
 
+    C1 {.ng.} = object
+      x: float
+    C2 {.ng.} = object
+      x: float
+      y: float
+    C3 {.ng.} = object
+      x: float
+      y: float
+      z: float
+
+    ResourceObj = object
+      name: string
+    Resource = ref ResourceObj
+
+    Stuff1 {.ng.} = object
+      name: string
+      nums: seq[int]
+      ress: seq[Resource]
+
+    Stuff2 {.ng.} = object
+      name: string
+      nums: seq[int]
+      ress: seq[Resource]
+
+    Stuff {.ng.} = object
+      i: int
+
+  proc basic() =
     # create
     let ent = ker.create()
     doAssert ent != null
@@ -347,17 +375,6 @@ when defined(runTests):
 
     const N = 0xfffff - 20 # Close to maximum
 
-    type
-      C1 = object
-        x: float
-      C2 = object
-        x: float
-        y: float
-      C3 = object
-        x: float
-        y: float
-        z: float
-
     var expected = 0
 
     block:
@@ -387,21 +404,6 @@ when defined(runTests):
 
 
   proc leaks() =
-    type
-      ResourceObj = object
-        name: string
-      Resource = ref ResourceObj
-
-      Stuff1 = object
-        name: string
-        nums: seq[int]
-        ress: seq[Resource]
-
-      Stuff2 = object
-        name: string
-        nums: seq[int]
-        ress: seq[Resource]
-
     var es: seq[Entity]
 
     block:
@@ -428,7 +430,7 @@ when defined(runTests):
           for j in 0..<(i mod 10):
             s2.ress.add(ress[(2 * i + 3 * j * i) mod ress.len])
 
-    const fullTest = false # TODO(nikki): Shouldn't leak when `true`
+    const fullTest = true # TODO(nikki): Shouldn't leak when `true`
     if fullTest: # Tests destroy, remove, clear, shutdown
       for i in 0..<(es.len div 2):
         ker.destroy(es[i])
@@ -446,10 +448,6 @@ when defined(runTests):
 
 
   proc sort() =
-    type
-      Stuff = object
-        i: int
-
     for i in 0..<10:
       let e = ker.create();
       let s = ker.add(Stuff, e)
@@ -466,7 +464,12 @@ when defined(runTests):
     echo "sort test passed!"
 
 
+  ker.init()
+  initMeta()
+
   basic()
   bench()
   leaks()
   sort()
+
+  ker.deinit()
