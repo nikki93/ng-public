@@ -63,7 +63,7 @@ if(LIB)
   list(REMOVE_ITEM MY_SOURCES "${CMAKE_SOURCE_DIR}/src/main.c")
 endif()
 target_sources(ng PRIVATE ${MY_SOURCES})
-target_include_directories(ng PRIVATE src)
+target_include_directories(ng PRIVATE src/engine)
 
 # Standard
 target_compile_features(ng PRIVATE cxx_std_17)
@@ -77,12 +77,12 @@ endif()
 
 # Precompiled header
 if(NOT CMAKE_EXPORT_COMPILE_COMMANDS)
-  target_precompile_headers(ng PRIVATE src/precomp.h)
+  target_precompile_headers(ng PRIVATE src/engine/precomp.h)
 endif()
 
 # Web flags
 if(WEB)
-  target_link_options(ng PRIVATE "SHELL:--js-library ${PROJECT_SOURCE_DIR}/src/library.js")
+  target_link_options(ng PRIVATE "SHELL:--js-library ${PROJECT_SOURCE_DIR}/src/web/library.js")
   target_link_options(ng PRIVATE "SHELL:-s WASM=1")
   target_link_options(ng PRIVATE "SHELL:-s MAX_WEBGL_VERSION=2")
   target_link_options(ng PRIVATE "SHELL:-s TOTAL_MEMORY=256MB")
@@ -95,7 +95,7 @@ if(WEB)
     target_link_options(ng PRIVATE "SHELL:--profiling")
   endif()
   file(GLOB MY_ASSETS CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/assets/*)
-  set_target_properties(ng PROPERTIES LINK_DEPENDS "${PROJECT_SOURCE_DIR}/src/library.js;${MY_ASSETS}")
+  set_target_properties(ng PROPERTIES LINK_DEPENDS "${PROJECT_SOURCE_DIR}/src/web/library.js;${MY_ASSETS}")
 endif()
 
 # iOS extras
@@ -198,8 +198,8 @@ endif()
 
 # Static web files
 if(WEB)
-  configure_file(src/index.html index.html COPYONLY)
-  configure_file(src/index.css index.css COPYONLY)
+  configure_file(src/web/index.html index.html COPYONLY)
+  configure_file(src/web/index.css index.css COPYONLY)
 endif()
 
 # iOS launch screen

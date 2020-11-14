@@ -62,7 +62,7 @@ type
     path: string
     handleCount: int
 
-  Image = object
+  Image* = object
     tex: ptr Texture
 
 
@@ -79,7 +79,7 @@ type
     handleCount: int
     gfx: ptr Graphics
 
-  Effect = object
+  Effect* = object
     prog: ptr Program
 
 
