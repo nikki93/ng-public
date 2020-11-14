@@ -71,6 +71,6 @@ proc main() =
           ui.box:
             ui.text "fps: " & $tim.fps.round.toInt
 
-  ker.clear(Box)
+  ker.clear()
 
 main()

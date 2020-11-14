@@ -27,16 +27,6 @@ var typeIdents {.compileTime.}: seq[NimNode]
 var typeNames {.compileTime.}: HashSet[string]
 
 
-# Init / deinit
-
-proc init(ker: var Kernel) =
-  echo "initialized kernel"
-
-proc `=destroy`(ker: var Kernel) =
-  # TODO(nikki): Explicitly destroy all entities
-  echo "deinitialized kernel"
-
-
 # Ids
 
 let null* {.importcpp: "kernel_null".}: Entity
@@ -107,6 +97,21 @@ proc get*(ker: var Kernel, T: typedesc, ent: Entity): ptr T {.inline.} =
 # Queries
 
 const useLambdaEach = false
+
+iterator each*(ker: var Kernel): Entity =
+  proc data(reg: var Registry): ptr Entity
+    {.importcpp: "(entt::entity *) #.data()".}
+  proc size(reg: var Registry): int
+    {.importcpp: "size".}
+  proc valid(reg: var Registry, ent: Entity): bool
+    {.importcpp: "valid".}
+  let dat = ker.reg.data()
+  let sz = ker.reg.size()
+  for i in 0..<sz:
+    var ent: Entity
+    {.emit: [ent, " = ", dat, "[", i, "];"].}
+    if ker.reg.valid(ent):
+      yield ent
 
 iterator each*(ker: var Kernel, T1: typedesc): (Entity, ptr T1) =
   when useLambdaEach:
@@ -193,6 +198,10 @@ iterator each*(ker: var Kernel, T1, T2, T3, T4: typedesc):
 
 # Clear
 
+proc clear*(ker: var Kernel) {.inline.} =
+  for ent in ker.each():
+    ker.destroy(ent)
+
 proc clear*[T](ker: var Kernel, _: typedesc[T]) {.inline.} =
   for ent, _ in ker.each(T):
     ker.remove(T, ent)
@@ -208,6 +217,16 @@ proc isort*[T](
   {.emit: [ker.reg, ".sort<", T, ">([&](const auto &a, const auto &b) {",
     "return ", compare, "(const_cast<", T, "*>(&a), const_cast<", T, "*>(&b));",
   "}, entt::insertion_sort{});"].}
+
+
+# Init / deinit
+
+proc init(ker: var Kernel) =
+  echo "initialized kernel"
+
+proc `=destroy`(ker: var Kernel) =
+  ker.clear()
+  echo "deinitialized kernel"
 
 
 # Singleton
