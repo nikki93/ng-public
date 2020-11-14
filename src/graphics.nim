@@ -390,7 +390,7 @@ proc setState(gfx: var Graphics, state: State) {.inline.} =
 
 const SDL_INIT_VIDEO = 0x00000020
 
-proc init(gfx: var Graphics) =
+proc init*(gfx: var Graphics) =
   # Initial state
   gfx.renderScale = 1
   gfx.state = State(
@@ -452,7 +452,7 @@ proc init(gfx: var Graphics) =
 
   echo "initialized graphics"
 
-proc `=destroy`(gfx: var Graphics) =
+proc deinit*(gfx: var Graphics) =
   # Destroy all resources /before/ deinitializing renderer and window
   gfx.progs.clear()
   gfx.texs.clear()
@@ -472,7 +472,6 @@ proc `=destroy`(gfx: var Graphics) =
     SDL_DestroyWindow(gfx.window)
     SDL_QuitSubSystem(SDL_INIT_VIDEO)
 
-  destroyFields(gfx)
   echo "deinitialized graphics"
 
 
@@ -607,5 +606,3 @@ var gfx*: Graphics ## Maintains the global graphics state, to be passed to
                    ## graphics procedures. The graphics context is setup
                    ## during module initialization, and deinitialized
                    ## automatically on program exit.
-
-gfx.init()

@@ -3,7 +3,7 @@
 import std/[times, sequtils]
 
 
-import graphics, utils
+import graphics
 
 
 const sdlH = "\"precomp.h\""
@@ -76,7 +76,7 @@ proc windowFocused*(ev: Events): bool {.inline.} =
 
 const SDL_INIT_EVENTS = 0x00004000
 
-proc init(ev: var Events) =
+proc init*(ev: var Events) =
   # Refresh rate
   ev.refreshBase = getTime()
   ev.refreshCount = 1
@@ -94,13 +94,12 @@ proc init(ev: var Events) =
 
   echo "initialized events"
 
-proc `=destroy`(ev: var Events) =
+proc deinit*(ev: var Events) =
   # Deinit SDL events
   proc SDL_QuitSubSystem(flags: uint32)
     {.importc, header: sdlH.}
   SDL_QuitSubSystem(SDL_INIT_EVENTS)
 
-  destroyFields(ev)
   echo "deinitialized events"
 
 
@@ -249,4 +248,3 @@ template loop*(ev: var Events, body: typed) =
 proc `=copy`(a: var Events, b: Events) {.error.}
 
 var ev*: Events ## The global instance of this module to pass to procedures.
-ev.init()

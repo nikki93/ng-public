@@ -221,10 +221,10 @@ proc isort*[T](
 
 # Init / deinit
 
-proc init(ker: var Kernel) =
+proc init*(ker: var Kernel) =
   echo "initialized kernel"
 
-proc `=destroy`(ker: var Kernel) =
+proc deinit*(ker: var Kernel) =
   ker.clear()
   echo "deinitialized kernel"
 
@@ -234,7 +234,6 @@ proc `=destroy`(ker: var Kernel) =
 proc `=copy`(a: var Kernel, b: Kernel) {.error.}
 
 var ker*: Kernel
-ker.init()
 
 
 # Meta

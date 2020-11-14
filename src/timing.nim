@@ -2,8 +2,6 @@
 
 import std/times
 
-import utils
-
 
 type
   Timing = object
@@ -30,15 +28,14 @@ proc dt*(tim: Timing): float {.inline.} =
 
 # Init / deinit
 
-proc init(tim: var Timing) =
+proc init*(tim: var Timing) =
   tim.start = getTime()
   tim.lastFrame = tim.start
   tim.lastFPSUpdate = tim.start
 
   echo "initialized timing"
 
-proc `=destroy`(tim: var Timing) =
-  destroyFields(tim)
+proc deinit*(tim: var Timing) =
   echo "deinitialized timing"
 
 
@@ -71,4 +68,3 @@ proc frame*(tim: var Timing) =
 proc `=copy`(a: var Timing, b: Timing) {.error.}
 
 var tim*: Timing ## The global instance of this module to pass to procedures.
-tim.init()

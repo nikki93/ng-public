@@ -5,8 +5,6 @@ import std/macros
 when defined(emscripten):
   import std/strutils
 
-import utils
-
 
 when defined(emscripten):
   {.emit: "#include <emscripten.h>".}
@@ -246,11 +244,10 @@ template frame*(ui: var UI, body: typed) =
 
 # Init / deinit
 
-proc init(ui: var UI) =
+proc init*(ui: var UI) =
   echo "initialized uis"
 
-proc `=destroy`(ui: var UI) =
-  destroyFields(ui)
+proc deinit*(ui: var UI) =
   echo "deinitialized uis"
 
 
@@ -260,4 +257,3 @@ proc `=copy`(a: var UI, b: UI) {.error.}
 
 var ui*: UI ## The global instance for this module, on which to call
             ## the UI procedures
-ui.init()

@@ -124,6 +124,8 @@ proc `=destroy`(body: var Body) =
       {.importc, header: cpH.}
     cpBodyFree(body.cp)
 
+  destroyFields(body)
+
 proc initBody(cp: ptr cpBody): Body =
   cp.userData = null.toIntegral
   Body(cp: cp)
@@ -156,6 +158,7 @@ proc `=destroy`(constr: var Constraint) =
     proc cpConstraintFree(constr: ptr cpConstraint)
       {.importc, header: cpH.}
     cpConstraintFree(constr.cp)
+  destroyFields(constr)
 
 proc initConstraint(cp: ptr cpConstraint): Constraint =
   cp.userData = null.toIntegral
@@ -199,6 +202,7 @@ proc `=destroy`(shape: var Shape) =
     proc cpShapeFree(shape: ptr cpShape)
       {.importc, header: cpH.}
     cpShapeFree(shape.cp)
+  destroyFields(shape)
 
 proc initShape(cp: ptr cpShape): Shape =
   cp.userData = null.toIntegral
@@ -363,7 +367,7 @@ proc frame*(phy: var Physics, fixedTimeStep: bool = false) =
 
 # Init / deinit
 
-proc init(phy: var Physics) =
+proc init*(phy: var Physics) =
   # Init Chipmunk space
   proc cpSpaceNew(): ptr cpSpace
     {.importc, header: cpH.}
@@ -374,7 +378,7 @@ proc init(phy: var Physics) =
 
   echo "initialized physics"
 
-proc `=destroy`(phy: var Physics) =
+proc deinit*(phy: var Physics) =
   # Destroy background body
   `=destroy`(phy.background)
   wasMoved(phy.background)
@@ -385,7 +389,6 @@ proc `=destroy`(phy: var Physics) =
       {.importc, header: cpH.}
     cpSpaceFree(phy.space)
 
-  destroyFields(phy)
   echo "deinitialized physics"
 
 
@@ -394,4 +397,3 @@ proc `=destroy`(phy: var Physics) =
 proc `=copy`(a: var Physics, b: Physics) {.error.}
 
 var phy*: Physics
-phy.init()
