@@ -1,4 +1,4 @@
-import std/[math, random]
+import std/math
 
 import ng
 
