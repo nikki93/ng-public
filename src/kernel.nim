@@ -430,7 +430,7 @@ when isMainModule:
           for j in 0..<(i mod 10):
             s2.ress.add(ress[(2 * i + 3 * j * i) mod ress.len])
 
-    const fullTest = true # TODO(nikki): Shouldn't leak when `true`
+    const fullTest = true
     if fullTest: # Tests destroy, remove, clear, shutdown
       for i in 0..<(es.len div 2):
         ker.destroy(es[i])
@@ -440,6 +440,7 @@ when isMainModule:
         if i mod 2 == 0: # Leave some unremoved to test shutdown
           ker.remove(Stuff1, e)
       ker.clear(Stuff2)
+      # Don't explicitly clear `Stuff1`, to test shutdown
     else: # Only tests clear
       ker.clear(Stuff1)
       ker.clear(Stuff2)
