@@ -16,7 +16,6 @@ type
   TypeMeta* = object
     add*: proc(ent: Entity): pointer
     remove*: proc(ent: Entity)
-    has*: proc(ent: Entity): bool
     get*: proc(ent: Entity): pointer
 
 
@@ -59,6 +58,14 @@ proc destroy*(ker: var Kernel, ent: Entity) {.inline.} =
   ker.reg.destroy(ent)
 
 
+# Get
+
+proc get*(ker: var Kernel, T: typedesc, ent: Entity): ptr T {.inline.} =
+  proc tryGet[T](reg: var Registry, ent: Entity): ptr T
+    {.importcpp: "#.try_get<'*0>(#)".}
+  ker.reg.tryGet[:T](ent)
+
+
 # Add / remove
 
 proc add*(ker: var Kernel, T: typedesc, ent: Entity): ptr T {.inline.} =
@@ -71,27 +78,12 @@ proc add*(ker: var Kernel, T: typedesc, ent: Entity): ptr T {.inline.} =
   zeroMem(result, sizeof(T))
 
 proc remove*(ker: var Kernel, T: typedesc, ent: Entity) {.inline.} =
-  proc tryGet[T](reg: var Registry, ent: Entity): ptr T
-    {.importcpp: "#.try_get<'*0>(#)".}
   proc remove[T](reg: var Registry, ent: Entity, _: ptr T)
     {.importcpp: "#.remove<'*3>(#)".}
-  var got = ker.reg.tryGet[:T](ent)
+  var got = ker.get(T, ent)
   if got != nil:
     `=destroy`(got[])
     ker.reg.remove[:T](ent, nil)
-
-
-# Has / get
-
-proc has*(ker: var Kernel, T: typedesc, ent: Entity): bool {.inline.} =
-  proc has[T](reg: var Registry, ent: Entity, _: ptr T): bool
-    {.importcpp: "#.has<'*3>(#)".}
-  ker.reg.has[:T](ent, nil)
-
-proc get*(ker: var Kernel, T: typedesc, ent: Entity): ptr T {.inline.} =
-  proc get[T](reg: var Registry, ent: Entity): ptr T
-    {.importcpp: "&#.get<'*0>(#)".}
-  ker.reg.get[:T](ent)
 
 
 # Queries
@@ -251,8 +243,6 @@ proc registerTypeMeta[T](name: string) =
       ker.add(T, ent),
     remove: proc(ent: Entity) =
       ker.remove(T, ent),
-    has: proc(ent: Entity): bool =
-      ker.has(T, ent),
     get: proc(ent: Entity): pointer =
       ker.get(T, ent),
   )
@@ -346,7 +336,7 @@ when isMainModule:
       proc check(mustSumX, mustSumY: float) =
         var sumX, sumY: float
         for e, pos in ker.each(Position):
-          if not ker.has(Sprite, e):
+          if ker.get(Sprite, e) == nil:
             sumX += pos.x
             sumY += pos.y
         doAssert sumX == mustSumX and sumY == mustSumY
@@ -355,10 +345,10 @@ when isMainModule:
         ker.destroy(e)
       check(0, 0)
 
-    block: # has, remove
-      doAssert ker.has(Sprite, ent)
+    block: # get, remove
+      doAssert ker.get(Sprite, ent) != nil
       ker.remove(Sprite, ent)
-      doAssert not ker.has(Sprite, ent)
+      doAssert ker.get(Sprite, ent) == nil
       var found = 0
       for _, pos, spr in ker.each(Position, Sprite):
         inc found
