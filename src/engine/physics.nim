@@ -146,6 +146,16 @@ proc `position=`*(body: Body, value: Vec2) {.inline.} =
     {.importc, header: cpH.}
   cpBodySetPosition(body.cp, value)
 
+proc velocity*(body: Body): Vec2 {.inline.} =
+  proc cpBodyGetVelocity(body: ptr cpBody): cpVect
+    {.importc, header: cpH.}
+  cpBodyGetVelocity(body.cp)
+
+proc `velocity=`*(body: Body, value: Vec2) {.inline.} =
+  proc cpBodySetVelocity(body: ptr cpBody, value: cpVect)
+    {.importc, header: cpH.}
+  cpBodySetVelocity(body.cp, value)
+
 
 # Constraint wrapper
 

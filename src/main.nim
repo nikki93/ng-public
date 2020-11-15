@@ -67,8 +67,8 @@ onDraw.add proc() =
 # Player
 
 onPhysicsPre.add proc() =
+  # Walk player to touch
   if ev.touches.len > 0:
-    # Touching: add walk if needed and update it
     let touch = ev.touches[0]
     for ent, _, feet in ker.each(Player, Feet):
       var walk = ker.get(Walk, ent)
@@ -80,13 +80,27 @@ onPhysicsPre.add proc() =
         walk.constr.maxBias = 180
       walk.target.position = (touch.x, touch.y)
       walk.touchTime = tim.t
-  else: # Not touching: remove walk
-    for ent, _, _ in ker.each(Player, Walk):
-      ker.remove(Walk, ent)
 
 onPhysicsPost.add proc() =
-  # Remove walk if reached target or obstructed
-  discard
+  # Remove walk if player reached target or is obstructed
+  for ent, _, feet, walk in ker.each(Player, Feet, Walk):
+    if tim.t - walk.touchTime < 1: # Recently touched, keep walking
+      continue
+    let (vx, vy) = feet.body.velocity
+    if vx * vx + vy * vy >= 20 * 20: # Moving fast enough, keep walking
+      continue
+    let (fx, fy) = feet.body.position
+    let (wx, wy) = walk.target.position
+    let (dx, dy) = (wx - fx, wy - fy)
+    let dLen = sqrt(dx * dx + dy * dy)
+    if dLen < 10: # We're there, remove
+      ker.remove(Walk, ent)
+      echo "removed walk: reached target"
+      continue
+    let dot = vx * dx / dLen + vy * dy / dLen
+    if dot <= 7: # Velocity along target direction too low, remove
+      ker.remove(Walk, ent)
+      echo "removed walk: obstructed"
 
 onPhysicsPost.add proc() =
   # Read player physics
