@@ -1,4 +1,4 @@
-import macros, tables, sets
+import macros, sets
 
 
 const enttH = "\"precomp.h\""
@@ -11,12 +11,13 @@ type
   Kernel = object
     reg: Registry
 
-    typeMetas: Table[string, TypeMeta]
+    typeMetas: seq[TypeMeta]
 
-  TypeMeta* = object
-    add*: proc(ent: Entity): pointer
-    remove*: proc(ent: Entity)
-    get*: proc(ent: Entity): pointer
+  TypeMeta = object
+    name: string
+    add: proc(ent: Entity): pointer
+    remove: proc(ent: Entity)
+    get: proc(ent: Entity): pointer
 
 
 # Meta compile-time vars
@@ -53,7 +54,7 @@ proc create*(ker: var Kernel): Entity {.inline.} =
 proc destroy*(ker: var Kernel, ent: Entity) {.inline.} =
   proc destroy(reg: var Registry, ent: Entity)
     {.importcpp.}
-  for typeMeta in ker.typeMetas.mvalues: # `mvalues` to prevent copy
+  for typeMeta in ker.typeMetas:
     typeMeta.remove(ent)
   ker.reg.destroy(ent)
 
@@ -243,14 +244,15 @@ macro ng*(body: untyped) =
   body
 
 proc registerTypeMeta[T](name: string) =
-  ker.typeMetas[name] = TypeMeta(
-    add: proc(ent: Entity): pointer =
-      ker.add(T, ent),
-    remove: proc(ent: Entity) =
-      ker.remove(T, ent),
-    get: proc(ent: Entity): pointer =
-      ker.get(T, ent),
-  )
+  var tm: TypeMeta
+  tm.name = name
+  tm.add = proc(ent: Entity): pointer =
+    ker.add(T, ent)
+  tm.remove = proc(ent: Entity) =
+    ker.remove(T, ent)
+  tm.get = proc(ent: Entity): pointer =
+    ker.get(T, ent)
+  ker.typeMetas.add(tm)
 
 macro initMeta*() =
   ## Initializes the ng meta system. This macro must be invoked after all
