@@ -172,7 +172,7 @@ proc beginFrame(ev: var Events) =
     touch.x = newX
     touch.y = newY
 
-const maintainRefreshRate = false
+const maintainRefreshRate = true
 
 proc endFrame(ev: var Events) =
   # Remove released touches
