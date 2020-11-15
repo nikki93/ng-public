@@ -98,9 +98,15 @@ onPhysicsPost.add proc() =
   # Set player depth behind objects that obscure it
   discard
 
+let footprintsImg = gfx.loadImage("assets/footprints.png")
 onDrawOverlay.add proc() =
-  # Draw player footprints at target when walking
-  discard
+  # Draw footprints at player walk target
+  for _, _, feet, walk in ker.each(Player, Feet, Walk):
+    let (fx, fy) = feet.body.position
+    let (wx, wy) = walk.target.position
+    let (dx, dy) = (fx - wx, fy - wy)
+    if dx * dx + dy * dy > 30 * 30: # Skip drawing if target too close
+      gfx.drawImage(footprintsImg, wx, wy, 0.65)
 
 onPhysicsPost.add proc() =
   # Update player animation based on walk state
