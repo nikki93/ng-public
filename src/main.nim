@@ -41,7 +41,7 @@ type
 
 # Triggers
 
-type Trigger = seq[proc()]
+type Trigger = seq[proc()] # Track a bunch of procs to run at once
 
 proc run(s: Trigger) =
   for fn in s:
@@ -67,8 +67,8 @@ onDraw.add proc() =
 # Player
 
 onPhysicsPre.add proc() =
-  # Walk player to touch
   if ev.touches.len > 0:
+    # Touching: add walk if needed and update it
     let touch = ev.touches[0]
     for ent, _, feet in ker.each(Player, Feet):
       var walk = ker.get(Walk, ent)
@@ -80,6 +80,9 @@ onPhysicsPre.add proc() =
         walk.constr.maxBias = 180
       walk.target.position = (touch.x, touch.y)
       walk.touchTime = tim.t
+  else: # Not touching: remove walk
+    for ent, _, _ in ker.each(Player, Walk):
+      ker.remove(Walk, ent)
 
 onPhysicsPost.add proc() =
   # Remove walk if reached target or obstructed
@@ -109,7 +112,7 @@ onPhysicsPost.add proc() =
 proc main() =
   initMeta()
 
-  block:
+  block: # Create player entity
     let ent = ker.create()
 
     let pos = ker.add(Position, ent)
@@ -135,20 +138,20 @@ proc main() =
 
     discard ker.add(Player, ent)
 
-  ev.loop:
-    tim.frame()
+  ev.loop: # Main event loop
+    tim.frame() # Step time, skip frame if frame drop or not focused
     if tim.dt >= 3 * 1 / 60.0 or not ev.windowFocused:
       return
 
-    onPhysicsPre.run()
+    onPhysicsPre.run() # Step physics, running pre / post triggers
     phy.frame()
     onPhysicsPost.run()
 
-    gfx.frame:
+    gfx.frame: # Draw graphics
       onDraw.run()
       onDrawOverlay.run()
 
-    ui.frame:
+    ui.frame: # Show UI
       ui.patch("bottom"):
         ui.box("status"):
           ui.box:
