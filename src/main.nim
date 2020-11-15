@@ -57,6 +57,7 @@ var onDrawOverlay: Trigger
 # Sprite
 
 onDraw.add proc() =
+  # Draw sprites in depth order
   ker.isort(Sprite, proc (a, b: ptr Sprite): bool {.cdecl.} =
     a.depth < b.depth)
   for _, spr, pos in ker.each(Sprite, Position):
