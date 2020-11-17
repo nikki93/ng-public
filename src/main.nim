@@ -138,41 +138,71 @@ onPhysicsPost.add proc() =
 
 # Loading
 
-import std/json
+import std/[json, strutils]
 
-proc load(path: string) =
+
+proc load(spr: var Sprite, ent: Entity, node: JsonNode) =
+  spr.image = gfx.loadImage("assets/" & node["imageName"].getStr())
+
+proc load(feet: var Feet, ent: Entity, node: JsonNode) =
+  feet.body = phy.createStatic()
+  feet.body.entity = ent
+  let pos = ker.get(Position, ent)
+  if pos != nil:
+    feet.body.position = (pos.x, pos.y)
+
+  var verts: seq[Vec2]
+  let vertsJson = node["verts"]
+  while 2 * verts.len + 1 < vertsJson.len:
+    verts.add((vertsJson[2 * verts.len].getFloat(),
+      vertsJson[2 * verts.len + 1].getFloat()))
+  feet.shape = phy.createPoly(feet.body, verts)
+  feet.shape.entity = ent
+
+
+var skippedFields {.compileTime.}: seq[string]
+
+proc load(T: typedesc, ent: Entity, node: JsonNode) =
+  # Simple field loaders
+  proc loadField(val: var int, node: JsonNode) {.used.} =
+    val = node.getInt()
+  proc loadField(val: var float, node: JsonNode) {.used.} =
+    val = node.getFloat()
+  proc loadField(val: var string, node: JsonNode) {.used.} =
+    val = node.getStr()
+
+  # Read into type from JSON, adding if it doesn't exist
+  var inst = ker.get(T, ent)
+  if inst == nil:
+    inst = ker.add(T, ent)
+  for name, val in fieldPairs(inst[]):
+    when compiles(loadField(val, JsonNode())):
+      # Simple field
+      let valJson = node.getOrDefault(name)
+      if valJson != nil:
+        loadField(val, valJson)
+    else:
+      # Not a simple field, keep track and hint
+      static:
+        skippedFields.add($T & "." & name)
+
+  # Call `load` hook if type has one
+  when compiles(load(inst[], ent, node)):
+    load(inst[], ent, node)
+
+when not defined(nimsuggest):
+  {.hint: "automatic loading skipped for: " & skippedFields.join(", ").}
+
+
+proc loadScene(path: string) =
   let root = parseJson(open(path).readAll())
-  for entJson in root["entities"]:
+  for entJson in root["entities"]: # Each entity
     let ent = ker.create()
-    for typeJson in entJson["types"]:
+    for typeJson in entJson["types"]: # Each type
       let typeName = typeJson["_type"].getStr()
-
-      if typeName == "Position":
-        let pos = ker.add(Position, ent)
-        pos.x = typeJson["x"].getFloat()
-        pos.y = typeJson["y"].getFloat()
-
-      if typeName == "Sprite":
-        let spr = ker.add(Sprite, ent)
-        spr.image = gfx.loadImage("assets/" & typeJson["imageName"].getStr())
-        spr.scale = typeJson["scale"].getFloat()
-        spr.depth = typeJson["depth"].getFloat()
-
-      if typeName == "Feet":
-        let feet = ker.add(Feet, ent)
-        feet.body = phy.createStatic()
-        feet.body.entity = ent
-        let pos = ker.get(Position, ent)
-        if pos != nil:
-          feet.body.position = (pos.x, pos.y)
-
-        var verts: seq[Vec2]
-        let vertsJson = typeJson["verts"]
-        while 2 * verts.len + 1 < vertsJson.len: # JSON verts array is flat
-          verts.add((vertsJson[2 * verts.len].getFloat(),
-            vertsJson[2 * verts.len + 1].getFloat()))
-        feet.shape = phy.createPoly(feet.body, verts)
-        feet.shape.entity = ent
+      forEachRegisteredType(T): # Check which registered type this is
+        if typeName == $T:
+          load(T, ent, typeJson)
 
 
 # main
@@ -181,7 +211,7 @@ proc main() =
   initMeta()
 
   block: # Load scene
-    load("assets/test.scn")
+    loadScene("assets/test.scn")
 
   block: # Create player entity
     let ent = ker.create()
