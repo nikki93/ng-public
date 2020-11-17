@@ -236,7 +236,9 @@ var ker*: Kernel
 var typeInfoFirstUsedAt {.compileTime.}: string
 
 macro ng*(body: untyped) =
-  let ident = body[0][0]
+  var ident = body[0][0]
+  if ident.kind == nnkPostfix:
+    ident = ident[1]
   ident.expectKind nnkIdent
   when not defined(nimsuggest):
     if typeInfoFirstUsedAt != "":
