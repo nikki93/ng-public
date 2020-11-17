@@ -287,8 +287,10 @@ proc createPoly*(
   var cpVerts = newSeqOfCap[cpVect](verts.len)
   for vert in verts:
     cpVerts.add(vert)
-  type cpTransform {.importc: "cpTransform", header: cpH.} = tuple
+  type cpTransform {.importc: "cpTransform", header: cpH.} = object
     a, b, c, d, tx, ty: float
+  let transform = cpTransform(
+    a: 1, b: 0, c: 0, d: 1, tx: 0, ty: 0)
   proc cpPolyShapeNew(
     body: ptr cpBody,
     count: int, verts: ptr cpVect,
@@ -297,7 +299,7 @@ proc createPoly*(
   phy.wrap(cpPolyShapeNew(
     body.cp,
     cpVerts.len, cpVerts[0].addr,
-    (1.0, 0.0, 0.0, 1.0, 0.0, 0.0),
+    transform,
     radius,
   ))
 
