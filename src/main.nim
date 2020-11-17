@@ -167,10 +167,12 @@ proc load(path: string) =
         let pos = ker.get(Position, ent)
         if pos != nil:
           feet.body.position = (pos.x, pos.y)
+
         var verts: seq[Vec2]
         let vertsJson = typeJson["verts"]
-        for i in 0..<vertsJson.len:
-          verts.add((vertsJson[i].getFloat(), vertsJson[i + 1].getFloat()))
+        while 2 * verts.len + 1 < vertsJson.len: # JSON verts array is flat
+          verts.add((vertsJson[2 * verts.len].getFloat(),
+            vertsJson[2 * verts.len + 1].getFloat()))
         feet.shape = phy.createPoly(feet.body, verts)
         feet.shape.entity = ent
 
