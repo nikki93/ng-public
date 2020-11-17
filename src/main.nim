@@ -95,12 +95,10 @@ onPhysicsPost.add proc() =
     let dLen = sqrt(dx * dx + dy * dy)
     if dLen < 10: # We're there, remove
       ker.remove(Walk, ent)
-      echo "removed walk: reached target"
       continue
     let dot = vx * dx / dLen + vy * dy / dLen
     if dot <= 7: # Velocity along target direction too low, remove
       ker.remove(Walk, ent)
-      echo "removed walk: obstructed"
 
 onPhysicsPost.add proc() =
   # Read player physics
