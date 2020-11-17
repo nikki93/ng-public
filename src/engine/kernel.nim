@@ -11,20 +11,16 @@ type
   Kernel = object
     reg: Registry
 
-    typeMetas: seq[TypeMeta]
 
-  TypeMeta = object
-    name: string
-    add: proc(ent: Entity): pointer
-    remove: proc(ent: Entity)
-    get: proc(ent: Entity): pointer
-
-
-# Meta compile-time vars
+# Meta vars that need to be defined early
 
 var typeIdents {.compileTime.}: seq[NimNode]
 
 var typeNames {.compileTime.}: HashSet[string]
+
+var typeRemovers: seq[proc(ent: Entity) {.nimcall.}]
+
+var metaInitialized: bool
 
 
 # Ids
@@ -49,13 +45,14 @@ proc `$`*(ent: Entity): string {.inline.} =
 proc create*(ker: var Kernel): Entity {.inline.} =
   proc create(reg: var Registry): Entity
     {.importcpp.}
+  doAssert(metaInitialized, "'initMeta' must be called before using kernel")
   ker.reg.create()
 
 proc destroy*(ker: var Kernel, ent: Entity) {.inline.} =
   proc destroy(reg: var Registry, ent: Entity)
     {.importcpp.}
-  for typeMeta in ker.typeMetas:
-    typeMeta.remove(ent)
+  for remover in typeRemovers:
+    remover(ent)
   ker.reg.destroy(ent)
 
 
@@ -236,31 +233,36 @@ var ker*: Kernel
 
 # Meta
 
+var typesFrozenBy {.compileTime.}: NimNode
+
 macro ng*(body: untyped) =
   let ident = body[0][0]
   ident.expectKind nnkIdent
+  when not defined(nimsuggest):
+    if typesFrozenBy != nil:
+      error("type '" & $ident & "' registered too late, type info" &
+        " already used at " & typesFrozenBy.lineInfo)
   typeIdents.add(ident)
   typeNames.incl($ident)
   body
 
-proc registerTypeMeta[T](name: string) =
-  var tm: TypeMeta
-  tm.name = name
-  tm.add = proc(ent: Entity): pointer =
-    ker.add(T, ent)
-  tm.remove = proc(ent: Entity) =
-    ker.remove(T, ent)
-  tm.get = proc(ent: Entity): pointer =
-    ker.get(T, ent)
-  ker.typeMetas.add(tm)
-
-macro initMeta*() =
-  ## Initializes the ng meta system. This macro must be invoked after all
-  ## registered types and their hooks have been defined, and before meta
-  ## information is read.
+macro forEachRegisteredType*(ident: untyped, body: untyped) =
+  body.expectKind nnkStmtList
+  if typesFrozenBy == nil:
+    typesFrozenBy = body
   result = newStmtList()
   for typeIdent in typeIdents:
-    let name = $typeIdent
-    result.add quote do:
-      registerTypeMeta[`typeIdent`](`name`)
-  result = newBlockStmt(result)
+    let blockStmts = newStmtList()
+    result.add(newBlockStmt(blockStmts))
+    blockStmts.add quote do:
+      type `ident` = `typeIdent`
+    for stmt in body:
+      blockStmts.add stmt.copy
+  #echo "expanded to: "
+  #echo result.repr
+
+template initMeta*() =
+  metaInitialized = true
+  forEachRegisteredType(T):
+    typeRemovers.add(proc(ent: Entity) =
+      ker.remove(T, ent))

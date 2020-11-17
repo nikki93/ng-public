@@ -132,6 +132,9 @@ onPhysicsPost.add proc() =
 proc main() =
   initMeta()
 
+  forEachRegisteredType(T):
+    echo "registered type: ", $T
+
   block: # Create player entity
     let ent = ker.create()
 
