@@ -110,7 +110,18 @@ onPhysicsPost.add proc() =
 
 onPhysicsPost.add proc() =
   # Set player depth behind objects that obscure it
-  discard
+  for ent, _, feet, spr in ker.each(Player, Feet, Sprite):
+    spr.depth = 1000
+    template query(x, y: float) =
+      for res in phy.segmentQuery((x, y), (x, y + 1e4), 1):
+        if res.entity != null and res.entity != ent:
+          let otherSpr = ker.get(Sprite, res.entity)
+          if otherSpr != nil:
+            spr.depth = min(spr.depth, otherSpr.depth - 0.2)
+    let (x, y) = feet.body.position
+    query(x + 22, y)
+    query(x - 22, y)
+    query(x, y)
 
 let footprintsImg = gfx.loadImage("assets/footprints.png")
 onDrawOverlay.add proc() =
@@ -152,6 +163,7 @@ proc load(path: string) =
       if typeName == "Feet":
         let feet = ker.add(Feet, ent)
         feet.body = phy.createStatic()
+        feet.body.entity = ent
         let pos = ker.get(Position, ent)
         if pos != nil:
           feet.body.position = (pos.x, pos.y)
@@ -160,6 +172,7 @@ proc load(path: string) =
         for i in 0..<vertsJson.len:
           verts.add((vertsJson[i].getFloat(), vertsJson[i + 1].getFloat()))
         feet.shape = phy.createPoly(feet.body, verts)
+        feet.shape.entity = ent
 
 
 # main
@@ -188,6 +201,7 @@ proc main() =
     feet.body.position = (pos.x, pos.y + feet.offsetY)
     const rad = 8.0
     feet.shape = phy.createBox(feet.body, 45 - 2 * rad, 20 - 2 * rad, rad)
+    feet.shape.entity = ent
 
     let fric = ker.add(Friction, ent)
     fric.constr = phy.createPivot(phy.getBackground(), feet.body)
