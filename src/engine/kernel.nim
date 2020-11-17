@@ -233,23 +233,26 @@ var ker*: Kernel
 
 # Meta
 
-var typesFrozenBy {.compileTime.}: NimNode
+var typeInfoFirstUsedAt {.compileTime.}: string
 
 macro ng*(body: untyped) =
   let ident = body[0][0]
   ident.expectKind nnkIdent
   when not defined(nimsuggest):
-    if typesFrozenBy != nil:
+    if typeInfoFirstUsedAt != "":
       error("type '" & $ident & "' registered too late, type info" &
-        " already used at " & typesFrozenBy.lineInfo)
+        " first used at: " & typeInfoFirstUsedAt)
   typeIdents.add(ident)
   typeNames.incl($ident)
   body
 
+proc markTypeInfoUsed(at: string) =
+  if typeInfoFirstUsedAt == "":
+    typeInfoFirstUsedAt = at
+
 macro forEachRegisteredType*(ident: untyped, body: untyped) =
+  markTypeInfoUsed(body.lineInfo)
   body.expectKind nnkStmtList
-  if typesFrozenBy == nil:
-    typesFrozenBy = body
   result = newStmtList()
   for typeIdent in typeIdents:
     let blockStmts = newStmtList()
@@ -262,6 +265,8 @@ macro forEachRegisteredType*(ident: untyped, body: untyped) =
   #echo result.repr
 
 template initMeta*() =
+  static:
+    markTypeInfoUsed($instantiationInfo())
   metaInitialized = true
   forEachRegisteredType(T):
     typeRemovers.add(proc(ent: Entity) =
