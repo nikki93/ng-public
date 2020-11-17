@@ -190,9 +190,6 @@ proc load(T: typedesc, ent: Entity, node: JsonNode) =
   when compiles(load(inst[], ent, node)):
     load(inst[], ent, node)
 
-when not defined(nimsuggest):
-  {.hint: "automatic loading skipped for: " & skippedFields.join(", ").}
-
 
 proc loadScene(path: string) =
   let root = parseJson(open(path).readAll())
@@ -203,6 +200,10 @@ proc loadScene(path: string) =
       forEachRegisteredType(T): # Check which registered type this is
         if typeName == $T:
           load(T, ent, typeJson)
+
+
+when not defined(nimsuggest):
+  {.hint: "automatic loading skipped for: " & skippedFields.join(", ").}
 
 
 # main
