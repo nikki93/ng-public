@@ -127,13 +127,48 @@ onPhysicsPost.add proc() =
   discard
 
 
+# Loading
+
+import std/json
+
+proc load(path: string) =
+  let root = parseJson(open(path).readAll())
+  for entJson in root["entities"]:
+    let ent = ker.create()
+    for typeJson in entJson["types"]:
+      let typeName = typeJson["_type"].getStr()
+
+      if typeName == "Position":
+        let pos = ker.add(Position, ent)
+        pos.x = typeJson["x"].getFloat()
+        pos.y = typeJson["y"].getFloat()
+
+      if typeName == "Sprite":
+        let spr = ker.add(Sprite, ent)
+        spr.image = gfx.loadImage("assets/" & typeJson["imageName"].getStr())
+        spr.scale = typeJson["scale"].getFloat()
+        spr.depth = typeJson["depth"].getFloat()
+
+      if typeName == "Feet":
+        let feet = ker.add(Feet, ent)
+        feet.body = phy.createStatic()
+        let pos = ker.get(Position, ent)
+        if pos != nil:
+          feet.body.position = (pos.x, pos.y)
+        var verts: seq[Vec2]
+        let vertsJson = typeJson["verts"]
+        for i in 0..<vertsJson.len:
+          verts.add((vertsJson[i].getFloat(), vertsJson[i + 1].getFloat()))
+        feet.shape = phy.createPoly(feet.body, verts)
+
+
 # main
 
 proc main() =
   initMeta()
 
-  forEachRegisteredType(T):
-    echo "registered type: ", $T
+  block: # Load scene
+    load("assets/test.scn")
 
   block: # Create player entity
     let ent = ker.create()

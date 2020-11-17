@@ -1,0 +1,45 @@
+{
+  "entities": [{
+      "types": [{
+          "_type": "Position",
+          "x": 142.75,
+          "y": 354.5
+        }, {
+          "_type": "Sprite",
+          "scale": 0.5,
+          "depth": 2.0,
+          "imageName": "test__layer-4__2.png"
+        }, {
+          "_type": "Feet",
+          "verts": [-61.75, -5.5, 5.25, -16.5, 62.25, 16.5, -3.75, 57.5]
+        }]
+    }, {
+      "types": [{
+          "_type": "Position",
+          "x": 366.0,
+          "y": 282.25
+        }, {
+          "_type": "Sprite",
+          "scale": 0.5,
+          "depth": 1.0,
+          "imageName": "test__layer-4__1.png"
+        }, {
+          "_type": "Feet",
+          "verts": [-76.0, 4.75, 18.0, 7.75, 76.0, 63.75, -16.0, 62.75]
+        }]
+    }, {
+      "types": [{
+          "_type": "Position",
+          "x": 150.5,
+          "y": 158.5
+        }, {
+          "_type": "Sprite",
+          "scale": 0.5,
+          "depth": 0.0,
+          "imageName": "test__layer-1__1.png"
+        }, {
+          "_type": "Feet",
+          "verts": [-71.5, 29.5, -54.5, 18.5, -19.5, 10.5, 20.5, 12.5, 46.5, 23.5, 27.5, 31.5, -5.5, 39.5, -49.5, 37.5]
+        }]
+    }]
+}
