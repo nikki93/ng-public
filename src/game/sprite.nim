@@ -2,7 +2,7 @@ import std/json
 
 import ng
 
-import types, triggers
+import types, triggers, editing
 
 
 # Loading
@@ -19,3 +19,11 @@ onDraw.add proc() =
     a.depth < b.depth)
   for _, spr, pos in ker.each(Sprite, Position):
     gfx.drawImage(spr.image, pos.x, pos.y, spr.scale)
+
+
+# Editing
+
+onEditUpdateBoxes.add proc() =
+  for ent, pos, spr in ker.each(Position, Sprite):
+    let (imgW, imgH) = spr.image.size
+    edit.updateBox(ent, pos.x, pos.y, spr.scale * imgW, spr.scale * imgH)

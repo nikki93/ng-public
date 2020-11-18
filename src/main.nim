@@ -2,7 +2,7 @@ import std/math
 
 import ng
 
-import types, triggers, saveload
+import types, triggers, saveload, editing
 
 
 proc main() =
@@ -43,15 +43,43 @@ proc main() =
     if tim.dt >= 3 * 1 / 60.0 or not ev.windowFocused:
       return
 
-    onPhysicsPre.run() # Step physics, running pre / post triggers
-    phy.frame()
-    onPhysicsPost.run()
+    # Update
+    if edit.isEnabled:
+      # Edit
+      edit.frame()
+    else:
+      # Physics
+      onPhysicsPre.run()
+      phy.frame()
+      onPhysicsPost.run()
 
-    gfx.frame: # Draw graphics
+    # Graphics
+    gfx.frame:
+      # Background color
+      gfx.clear(0xcc, 0xe4, 0xf5)
+
+      # Draw
+      if edit.isEnabled:
+        edit.applyView()
+      else:
+        discard # TODO(nikki): `onApplyView` trigger
       onDraw.run()
       onDrawOverlay.run()
+      if edit.isEnabled:
+        edit.draw()
 
-    ui.frame: # Show UI
+    # UI
+    ui.frame:
+      # Top
+      ui.patch("top"):
+        ui.box("toolbar"):
+          edit.toolbar()
+
+      # Side
+      ui.patch("side"):
+        edit.inspector()
+
+      # Bottom
       ui.patch("bottom"):
         ui.box("status"):
           ui.box:

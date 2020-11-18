@@ -40,3 +40,12 @@ type
   # Player
 
   Player* {.ng.} = object
+
+
+  # Edit
+
+  EditSelect* {.ng.} = object
+
+  EditBox* {.ng.} = object
+    x*, y*: float
+    width*, height*: float

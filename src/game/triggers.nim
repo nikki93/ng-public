@@ -24,3 +24,11 @@ var onPhysicsPost*: Trigger
 
 var onDraw*: Trigger
 var onDrawOverlay*: Trigger
+
+
+# Edit
+
+var onEditUpdateBoxes*: Trigger
+var onEditApplyMoves*: Trigger
+var onEditInput*: Trigger
+var onEditDraw*: Trigger
