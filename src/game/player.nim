@@ -1,4 +1,8 @@
-import all
+import std/math
+
+import ng
+
+import types, triggers
 
 
 # Walking

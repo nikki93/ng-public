@@ -1,16 +1,4 @@
-## This is the module to import at the top of all other game modules. We
-## organize things this way so that import order is clear and type-specific
-## hooks are visible in modules that need them (eg. `load` being needed by
-## 'saveload'). All modules should be listed here in dependency order.
-
-
-import math, json, strutils
-export math, json, strutils
-
-
-import ng
-export ng
-
+## Must be imported in modules that need access to type-specific hooks
 
 import types
 export types
@@ -20,7 +8,3 @@ export triggers
 
 import sprite, feet, player
 export sprite, feet, player
-
-
-import saveload
-export saveload

@@ -1,4 +1,4 @@
-import all
+import ng
 
 
 ## All of the types that can be added to entities in the game.
