@@ -3,9 +3,9 @@
 
 type
   Trigger* = object
-    procs: seq[proc()]
+    procs: seq[proc() {.nimcall.}]
 
-proc add*(trig: var Trigger, p: proc()) =
+proc add*(trig: var Trigger, p: proc() {.nimcall.}) =
   trig.procs.add(p)
 
 proc run*(trig: Trigger) =
