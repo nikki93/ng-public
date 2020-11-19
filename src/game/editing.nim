@@ -1,12 +1,12 @@
-import std/[algorithm, strutils, macros]
+import std/algorithm
 
 import ng
 
-import types
+import types, triggers
 
 
 type
-  Edit = object
+  Edit* = object
     enabled: bool
     mode: string
 
@@ -53,10 +53,6 @@ proc updateBox*(edit: var Edit, ent: Entity, x, y, width, height: float)
     (box.x, box.y, box.width, box.height) = (x, y, width, height)
 
 
-import all # Keep above exports above this so type-specific
-           # hooks can use them
-
-
 # Draw
 
 proc applyView*(edit: var Edit) =
@@ -85,65 +81,6 @@ proc draw*(edit: var Edit) =
         gfx.drawRectangle(x, y, w + 4, h + 4)
 
   onEditDraw.run()
-
-
-# UI
-
-proc toolbar*(edit: var Edit) =
-  # Play / stop
-  ui.button(class = if edit.enabled: "play" else: "stop"):
-    ui.event("click"):
-      if edit.enabled:
-        edit.play()
-      else:
-        edit.stop()
-
-proc status*(edit: var Edit) =
-  discard
-
-func titleify(title: string): string =
-  ## Turn "TitlesYay" into "titles yay"
-  for i, c in title:
-    if c.isUpperAscii:
-      if i > 0:
-        result.add(" ")
-      result.add(c.toLowerAscii)
-    else:
-      result.add(c)
-
-proc inspector*(edit: var Edit) =
-  # Inspectors for selected entities
-  for ent, _ in ker.each(EditSelect):
-    ui.box("inspector"):
-      # Collect procs to run after, preventing UI inconsistencies
-      var after: seq[proc()]
-
-      # Section for each type that isn't marked `{.noedit.}`
-      forEachRegisteredTypeSkip(T, "noedit"):
-        let inst = ker.get(T, ent)
-        if inst != nil:
-          const title = titleify($T)
-          ui.elem("details", class = title, key = title, open = true):
-            # Header with title and remove button
-            ui.elem("summary"):
-              ui.text(title)
-              ui.button("remove"):
-                ui.event("click"):
-                  after.add proc() =
-                    ker.remove(T, ent)
-            
-            # TODO(nikki): Custom inspect
-
-            # Simple fields
-            for name, value in fieldPairs(inst[]):
-              when value is SomeFloat:
-                ui.box("info"):
-                  let valueStr = value.formatFloat(ffDecimal, precision = 2)
-                  ui.text(name & ": " & valueStr)
-
-      # Run after procs
-      for p in after:
-        p()
 
 
 # Frame

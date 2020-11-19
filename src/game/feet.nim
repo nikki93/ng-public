@@ -14,10 +14,13 @@ proc load*(feet: var Feet, ent: Entity, node: JsonNode) =
   if pos != nil:
     feet.body.position = (pos.x, pos.y)
 
-  var verts: seq[Vec2]
-  let vertsJson = node["verts"]
-  while 2 * verts.len + 1 < vertsJson.len:
-    verts.add((vertsJson[2 * verts.len].getFloat(),
-      vertsJson[2 * verts.len + 1].getFloat()))
-  feet.shape = phy.createPoly(feet.body, verts)
+  let vertsJson = node{"verts"}
+  if vertsJson != nil:
+    var verts: seq[Vec2]
+    while 2 * verts.len + 1 < vertsJson.len:
+      verts.add((vertsJson[2 * verts.len].getFloat(),
+        vertsJson[2 * verts.len + 1].getFloat()))
+    feet.shape = phy.createPoly(feet.body, verts)
+  else:
+    feet.shape = phy.createBox(feet.body, 40, 40)
   feet.shape.entity = ent

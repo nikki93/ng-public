@@ -8,7 +8,13 @@ import types, triggers, editing
 # Loading
 
 proc load*(spr: var Sprite, ent: Entity, node: JsonNode) =
-  spr.image = gfx.loadImage("assets/" & node["imageName"].getStr())
+  if not node.hasKey("scale"):
+    spr.scale = 0.25
+  let imageNameJson = node{"imageName"}
+  if imageNameJson != nil:
+    spr.image = gfx.loadImage("assets/" & imageNameJson.getStr())
+  else:
+    spr.image = gfx.loadImage("assets/player.png")
 
 
 # Drawing
