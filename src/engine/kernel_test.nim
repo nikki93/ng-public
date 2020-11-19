@@ -183,7 +183,7 @@ proc main() =
       let s = ker.add(Stuff, e)
       s.i = 10 - i
 
-    ker.isort(Stuff, proc (a: auto, b: auto): auto {.cdecl.} = a.i < b.i)
+    ker.isort(Stuff, proc (a: auto, b: auto): auto = a.i < b.i)
 
     var order: seq[int]
     for _, s in ker.each(Stuff):

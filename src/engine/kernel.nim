@@ -209,7 +209,7 @@ proc clear*[T](ker: var Kernel, _: typedesc[T]) {.inline.} =
 proc isort*[T](
   ker: var Kernel,
   _: typedesc[T],
-  compare: proc (a: ptr T, b: ptr T): bool {.cdecl.},
+  compare: proc (a: ptr T, b: ptr T): bool {.nimcall.},
 ) {.inline.} =
   {.emit: [ker.reg, ".sort<", T, ">([&](const auto &a, const auto &b) {",
     "return ", compare, "(const_cast<", T, "*>(&a), const_cast<", T, "*>(&b));",

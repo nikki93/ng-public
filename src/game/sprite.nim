@@ -15,7 +15,7 @@ proc load*(spr: var Sprite, ent: Entity, node: JsonNode) =
 
 onDraw.add proc() =
   # Draw sprites in depth order
-  ker.isort(Sprite, proc (a, b: ptr Sprite): bool {.cdecl.} =
+  ker.isort(Sprite, proc (a, b: ptr Sprite): bool =
     a.depth < b.depth)
   for _, spr, pos in ker.each(Sprite, Position):
     gfx.drawImage(spr.image, pos.x, pos.y, spr.scale)
