@@ -28,7 +28,9 @@ var metaInitialized: bool
 let null* {.importcpp: "kernel_null".}: Entity
 {.emit: "entt::entity kernel_null = entt::null;".}
 
-proc `==`*(a: Entity, b: Entity): bool {.importcpp: "# == #".}
+proc `==`*(a: Entity, b: Entity): bool {.importcpp: "(# == #)".}
+
+proc `<`*(a: Entity, b: Entity): bool {.importcpp: "(# < #)".}
 
 proc toIntegral*(ent: Entity): uint32
   {.importcpp: "entt::to_integral(#)".}
