@@ -1,4 +1,4 @@
-import std/algorithm
+import std/[algorithm, strutils]
 
 import ng
 
@@ -101,8 +101,43 @@ proc toolbar*(edit: var Edit) =
 proc status*(edit: var Edit) =
   discard
 
+func titleify(title: string): string =
+  ## Turn "TitlesYay" into "titles yay"
+  for i, c in title:
+    if c.isUpperAscii:
+      if i > 0:
+        result.add(" ")
+      result.add(c.toLowerAscii)
+    else:
+      result.add(c)
+
 proc inspector*(edit: var Edit) =
-  discard
+  # Inspectors for selected entities
+  for ent, _ in ker.each(EditSelect):
+    ui.box("inspector"):
+      # Section for each type
+      forEachRegisteredType(T):
+        let inst = ker.get(T, ent)
+        if inst != nil:
+          const title = titleify($T)
+          ui.elem("details", class = title, key = title, open = true):
+            # Header with title and remove button
+            ui.elem("summary"):
+              ui.text(title)
+              ui.button("remove"):
+                ui.event("click"):
+                  discard # TODO(nikki): Removing types
+            
+            # TODO(nikki): Custom inspect
+
+            # Simple fields
+            for name, value in fieldPairs(inst[]):
+              when value is SomeFloat:
+                ui.box("info"):
+                  let valueStr = value.formatFloat(ffDecimal, precision = 2)
+                  ui.text(name & ": " & valueStr)
+
+      # TODO(nikki): Adding types
 
 
 # Frame
