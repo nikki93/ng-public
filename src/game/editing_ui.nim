@@ -2,7 +2,11 @@ import std/[strutils, json]
 
 import ng
 
-import all, editing
+import editing, all
+
+
+# This is in a separate file so we can import 'all', while still allowing
+# type-specific modules to import 'editing'
 
 
 # UI
