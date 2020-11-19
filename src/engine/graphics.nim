@@ -594,7 +594,8 @@ template frame*(gfx: var Graphics, body: typed) =
   ## generally be called once per iteration of the event loop (see the
   ## `events` module).
   beginFrame(gfx)
-  scope(gfx, body)
+  block:
+    body
   endFrame(gfx)
 
 
