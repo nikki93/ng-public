@@ -1,4 +1,4 @@
-import std/[json, strutils]
+import std/[json, strutils, macros]
 
 import ng
 
@@ -49,7 +49,7 @@ proc loadScene*(path: string) =
     let ent = ker.create()
     for typeJson in entJson["types"]: # Each type
       let typeName = typeJson["_type"].getStr()
-      forEachRegisteredType(T): # Check which registered type this is
+      forEachRegisteredTypeSkip(T, "nosave"): # Skip `{.nosave.}` types
         if typeName == $T:
           load(T, ent, typeJson)
 

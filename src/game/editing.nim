@@ -1,4 +1,4 @@
-import std/[algorithm, strutils]
+import std/[algorithm, strutils, macros]
 
 import ng
 
@@ -115,8 +115,8 @@ proc inspector*(edit: var Edit) =
   # Inspectors for selected entities
   for ent, _ in ker.each(EditSelect):
     ui.box("inspector"):
-      # Section for each type
-      forEachRegisteredType(T):
+      # Section for each type that isn't marked `{.noedit.}`
+      forEachRegisteredTypeSkip(T, "noedit"):
         let inst = ker.get(T, ent)
         if inst != nil:
           const title = titleify($T)

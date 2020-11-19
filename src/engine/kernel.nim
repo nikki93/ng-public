@@ -1,4 +1,4 @@
-import macros, sets
+import macros, sets, tables
 
 
 const enttH = "\"precomp.h\""
@@ -17,6 +17,8 @@ type
 var typeIdents {.compileTime.}: seq[NimNode]
 
 var typeNames {.compileTime.}: HashSet[string]
+
+var typePragmas {.compileTime.}: Table[string, NimNode]
 
 var typeRemovers: seq[proc(ent: Entity) {.nimcall.}]
 
@@ -248,6 +250,7 @@ macro ng*(body: untyped) =
         " first used at: " & typeInfoFirstUsedAt)
   typeIdents.add(ident)
   typeNames.incl($ident)
+  typePragmas[$ident] = body[0][1]
   body
 
 proc markTypeInfoUsed(at: string) =
@@ -267,6 +270,16 @@ macro forEachRegisteredType*(ident: untyped, body: untyped) =
       blockStmts.add stmt.copy
   #echo "expanded to: "
   #echo result.repr
+
+proc typeHasPragma*(typeName: string, pragma: string): bool =
+  for child in typePragmas[typeName]:
+    if $child == pragma:
+      return true
+
+template forEachRegisteredTypeSkip*(ident: untyped, skip: string, body: untyped) =
+  forEachRegisteredType(ident):
+    when not typeHasPragma($ident, skip):
+      body
 
 template initMeta*() =
   static:

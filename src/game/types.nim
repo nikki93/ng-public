@@ -1,6 +1,13 @@
 import ng
 
 
+# Pragmas
+
+template nosave() {.pragma.} # Don't save / load this type
+
+template noedit() {.pragma.} # Don't display this type in the editor UI
+
+
 ## All of the types that can be added to entities in the game.
 
 type
@@ -28,7 +35,7 @@ type
 
   # Motion
 
-  Walk* {.ng.} = object
+  Walk* {.ng, nosave.} = object
     target*: Body
     constr*: Constraint
     touchTime*: float
@@ -44,8 +51,8 @@ type
 
   # Edit
 
-  EditSelect* {.ng.} = object
+  EditSelect* {.ng, nosave, noedit.} = object
 
-  EditBox* {.ng.} = object
+  EditBox* {.ng, nosave, noedit.} = object
     x*, y*: float
     width*, height*: float
