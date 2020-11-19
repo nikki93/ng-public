@@ -115,6 +115,9 @@ proc inspector*(edit: var Edit) =
   # Inspectors for selected entities
   for ent, _ in ker.each(EditSelect):
     ui.box("inspector"):
+      # Collect procs to run after, preventing UI inconsistencies
+      var after: seq[proc()]
+
       # Section for each type that isn't marked `{.noedit.}`
       forEachRegisteredTypeSkip(T, "noedit"):
         let inst = ker.get(T, ent)
@@ -126,7 +129,8 @@ proc inspector*(edit: var Edit) =
               ui.text(title)
               ui.button("remove"):
                 ui.event("click"):
-                  discard # TODO(nikki): Removing types
+                  after.add proc() =
+                    ker.remove(T, ent)
             
             # TODO(nikki): Custom inspect
 
@@ -137,7 +141,9 @@ proc inspector*(edit: var Edit) =
                   let valueStr = value.formatFloat(ffDecimal, precision = 2)
                   ui.text(name & ": " & valueStr)
 
-      # TODO(nikki): Adding types
+      # Run after procs
+      for p in after:
+        p()
 
 
 # Frame
