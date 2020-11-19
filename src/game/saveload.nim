@@ -10,16 +10,18 @@ import all
 var loadSkipped {.compileTime.}: seq[string]
 
 
+proc loadField(val: var int, node: JsonNode) {.used.} =
+  val = node.getInt()
+
+proc loadField(val: var float, node: JsonNode) {.used.} =
+  val = node.getFloat()
+
+proc loadField(val: var string, node: JsonNode) {.used.} =
+  val = node.getStr()
+
+
 proc load(T: typedesc, ent: Entity, node: JsonNode) =
   ## Load a type into an entity, adding it if needed
-
-  # Simple field loaders
-  proc loadField(val: var int, node: JsonNode) {.used.} =
-    val = node.getInt()
-  proc loadField(val: var float, node: JsonNode) {.used.} =
-    val = node.getFloat()
-  proc loadField(val: var string, node: JsonNode) {.used.} =
-    val = node.getStr()
 
   # Read into type from JSON
   var inst = ker.get(T, ent)
