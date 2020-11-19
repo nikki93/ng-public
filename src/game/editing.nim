@@ -9,7 +9,7 @@ type
   Edit = object
     enabled: bool
     mode: string
-    
+
     viewX, viewY: float
     viewWidth, viewHeight: float
 

@@ -276,7 +276,8 @@ proc typeHasPragma*(typeName: string, pragma: string): bool =
     if $child == pragma:
       return true
 
-template forEachRegisteredTypeSkip*(ident: untyped, skip: string, body: untyped) =
+template forEachRegisteredTypeSkip*(
+  ident: untyped, skip: string, body: untyped) =
   forEachRegisteredType(ident):
     when not typeHasPragma($ident, skip):
       body
