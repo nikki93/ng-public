@@ -1,3 +1,5 @@
+import std/algorithm
+
 import ng
 
 import types
@@ -69,7 +71,18 @@ proc draw*(edit: var Edit) =
         gfx.drawRectangle(box.x, box.y, box.width, box.height)
 
   if edit.mode == "select" or edit.mode == "move":
-    discard
+    # Doubled green boxes for selected
+    gfx.scope:
+      let (vx, vy, vw, vh) = gfx.view
+      gfx.setColor(0, 0x80, 0x40)
+      for _, _, box in ker.each(EditSelect, EditBox):
+        var (x, y, w, h) = (box.x, box.y, box.width, box.height)
+        if x - 0.5 * w <= vx - 0.5 * vw and x + 0.5 * w >= vx + 0.5 * vw and
+          y - 0.5 * h <= vy - 0.5 * vh and y + 0.5 * h >= vy + 0.5 * vh:
+          # Covers entire view, just draw at boundary
+          (x, y, w, h) = (vx, vy, vw - 4, vh - 4)
+        gfx.drawRectangle(x, y, w, h)
+        gfx.drawRectangle(x, y, w + 4, h + 4)
 
   onEditDraw.run()
 
@@ -95,7 +108,32 @@ proc inspector*(edit: var Edit) =
 # Frame
 
 proc input(edit: var Edit) =
-  discard
+  onEditInput.run()
+
+  if edit.mode == "select":
+    # Touch-to-select
+    if ev.touches.len == 1 and ev.touches[0].pressed:
+      # Collect hits in ascending area order
+      let (tx, ty) = (ev.touches[0].x, ev.touches[0].y)
+      var hits: seq[(float, Entity)]
+      for ent, box in ker.each(EditBox):
+        if abs(tx - box.x) < 0.5 * box.width and
+          abs(ty - box.y) < 0.5 * box.height:
+          hits.add((box.width * box.height, ent))
+      hits.sort()
+
+      # Pick after current selection, or first if none
+      var pick = null
+      var pickNext = true
+      for (_, ent) in hits:
+        if ker.get(EditSelect, ent) != nil:
+          pickNext = true
+        elif pickNext:
+          pick = ent
+          pickNext = false
+      ker.clear(EditSelect)
+      if pick != null:
+        discard ker.add(EditSelect, pick)
 
 proc frame*(edit: var Edit) =
   edit.input()
