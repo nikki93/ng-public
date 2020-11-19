@@ -127,7 +127,7 @@ proc `=destroy`(body: var Body) =
   destroyFields(body)
 
 proc initBody(cp: ptr cpBody): Body =
-  cp.userData = null.toIntegral
+  cp.userData = nullEntity.toIntegral
   Body(cp: cp)
 
 proc entity*(body: Body): Entity {.inline.} =
@@ -171,7 +171,7 @@ proc `=destroy`(constr: var Constraint) =
   destroyFields(constr)
 
 proc initConstraint(cp: ptr cpConstraint): Constraint =
-  cp.userData = null.toIntegral
+  cp.userData = nullEntity.toIntegral
   Constraint(cp: cp)
 
 proc entity*(constr: Constraint): Entity {.inline.} =
@@ -215,7 +215,7 @@ proc `=destroy`(shape: var Shape) =
   destroyFields(shape)
 
 proc initShape(cp: ptr cpShape): Shape =
-  cp.userData = null.toIntegral
+  cp.userData = nullEntity.toIntegral
   Shape(cp: cp)
 
 proc entity*(shape: Shape): Entity {.inline.} =

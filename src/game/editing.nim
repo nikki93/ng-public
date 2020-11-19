@@ -101,7 +101,7 @@ proc input(edit: var Edit) =
       hits.sort()
 
       # Pick after current selection, or first if none
-      var pick = null
+      var pick = nullEntity
       var pickNext = true
       for (_, ent) in hits:
         if ker.get(EditSelect, ent) != nil:
@@ -110,7 +110,7 @@ proc input(edit: var Edit) =
           pick = ent
           pickNext = false
       ker.clear(EditSelect)
-      if pick != null:
+      if pick != nullEntity:
         discard ker.add(EditSelect, pick)
 
 proc frame*(edit: var Edit) =

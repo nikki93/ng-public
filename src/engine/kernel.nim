@@ -27,8 +27,8 @@ var metaInitialized: bool
 
 # Ids
 
-let null* {.importcpp: "kernel_null".}: Entity
-{.emit: "entt::entity kernel_null = entt::null;".}
+let nullEntity* {.importcpp: "kernel_nullEntity".}: Entity
+{.emit: "entt::entity kernel_nullEntity = entt::null;".}
 
 proc `==`*(a: Entity, b: Entity): bool {.importcpp: "(# == #)".}
 

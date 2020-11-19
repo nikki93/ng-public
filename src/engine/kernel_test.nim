@@ -41,7 +41,7 @@ proc main() =
   proc basic() =
     # create
     let ent = ker.create()
-    doAssert ent != null
+    doAssert ent != nullEntity
 
     block: # add
       var pos = ker.add(Position, ent)

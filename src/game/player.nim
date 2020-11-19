@@ -58,7 +58,7 @@ onPhysicsPost.add proc() =
     spr.depth = 1000
     template query(x, y: float) =
       for res in phy.segmentQuery((x, y), (x, y + 1e4), 1):
-        if res.entity != null and res.entity != ent:
+        if res.entity != nullEntity and res.entity != ent:
           let otherSpr = ker.get(Sprite, res.entity)
           if otherSpr != nil:
             spr.depth = min(spr.depth, otherSpr.depth - 0.2)
