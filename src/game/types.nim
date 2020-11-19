@@ -1,11 +1,11 @@
 import ng
 
 
-# Pragmas
+# Annotations
 
-template nosave() {.pragma.} # Don't save / load this type
+template nosave() {.pragma.} # Skip save / load for type
 
-template noedit() {.pragma.} # Don't display this type in the editor UI
+template noedit() {.pragma.} # Skip display of type in editor UI
 
 
 ## All of the types that can be added to entities in the game.
