@@ -1,6 +1,6 @@
 # Running
 
-Make sure the submodules are in sync with: 
+Make sure the submodules are in sync with:
 
 ```
 git submodule update --init --recursive`
@@ -30,13 +30,13 @@ You can also do this to run with Valgrind if you have it installed (to check for
 VALGRIND=on ./run.sh release
 ```
 
-Or, this to run tests in `when defined(runTests):` blocks:
+Use `MAIN=` to set the entrypoint module.
 
 ```
-TESTS=on ./run.sh release
+MAIN=src/engine/kernel_test.nim ./run.sh release
 ```
 
-You can combine `VALGRIND=on TESTS=on` too.
+You can combine `VALGRIND=on` with `MAIN=...` too.
 
 ## Web
 
