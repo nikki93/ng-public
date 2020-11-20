@@ -40,36 +40,36 @@ proc inspect*(spr: var Sprite, ent: Entity) =
 
   # Image picker
   var picking {.global.} = false
-  var entries {.global.}: seq[tuple[image: Image, filename: string]]
+  var entries {.global.}: seq[Image]
   if not picking:
     entries.setLen 0
   ui.box("info"):
     ui.text "path: ", spr.image.path
     ui.button("pick", selected = picking):
-      ui.event("click"):
+      ui.event("click"): # On click, enable picker and populate entries
         picking = true
         entries.setLen 0
         for kind, path in walkDir("assets/"):
           if kind == pcFile:
             let split = path.splitFile
             if split.ext == ".png":
-              entries.add((gfx.loadImage(path), path.extractFilename))
+              entries.add(gfx.loadImage(path))
   if picking:
-    ui.box("picker-container"):
-      ui.event("click"):
+    ui.box("picker-container"): # Darkened background overlay
+      ui.event("click"): # Dismiss if background clicked
         picking = false
-      ui.box("picker"):
-        ui.box("content"):
+      ui.box("picker"): # Popup container
+        ui.box("content"): # Scroll view
           for entry in entries:
-            ui.box("cell"):
+            ui.box("cell"): # Clickable cell per image
               ui.event("click"):
                 if picking:
-                  spr.image = entry.image.copy
+                  spr.image = entry.copy
                   picking = false
               ui.box("thumbnail-container"):
-                ui.elem("img", "thumbnail checker", src = entry.image.blobUrl)
+                ui.elem("img", "thumbnail checker", src = entry.blobUrl)
               ui.box("filename"):
-                ui.text(entry.filename)
+                ui.text(entry.path.extractFilename)
 
   # General details
   ui.box("info"):
