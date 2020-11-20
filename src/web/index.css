@@ -330,6 +330,15 @@ div.scene-switcher > div.name {
 
 /* --- Components ----------------------------------------------------------------- */
 
+/* Scrollbar base */
+::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+}
+::-webkit-scrollbar {
+  background-color: transparent;
+}
+
 /* Input base */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
