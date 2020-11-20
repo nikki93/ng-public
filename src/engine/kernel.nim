@@ -91,11 +91,6 @@ proc remove*(ker: var Kernel, T: typedesc, ent: Entity) {.inline.} =
     `=destroy`(got[])
     ker.reg.remove[:T](ent, nil)
 
-#proc ensure*(ker: var Kernel, T: typedesc, ent: Entity): ptr T {.inline.} =
-#  result = ker.get(T, ent)
-#  if result == nil:
-#    result = ker.add(T, ent)
-
 
 # Queries
 
