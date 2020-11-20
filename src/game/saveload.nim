@@ -60,4 +60,5 @@ proc loadScene*(path: string) =
 
 
 when not defined(nimsuggest):
+  import strutils
   {.hint: "automatic loading skipped for: " & loadSkipped.join(", ").}
