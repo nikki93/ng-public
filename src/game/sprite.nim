@@ -53,7 +53,7 @@ proc inspect*(spr: var Sprite, ent: Entity) =
           if kind == pcFile:
             let split = path.splitFile
             if split.ext == ".png":
-              entries.add((gfx.loadImage(path), split.name))
+              entries.add((gfx.loadImage(path), path.extractFilename))
   if picking:
     ui.box("picker-container"):
       ui.event("click"):
