@@ -165,6 +165,10 @@ proc initImage(tex: ptr Texture): Image =
   inc tex.handleCount
   result.tex = tex
 
+proc copy*(img: Image): Image =
+  ## Explicitly create a copy of this image handle
+  initImage(img.tex)
+
 proc loadImage*(gfx: var Graphics, path: string): Image =
   ## Load an `Image` from the file at the given path. If an image for
   ## that file is already currently loaded, this just returns another
@@ -200,7 +204,6 @@ proc blobUrl*(img: Image): lent string =
   ## Get a URL for a DOM blob object containing the image. Can be used
   ## for the `src` attribute of an `img` DOM element. Returns an empty
   ## string on non-browser targets.
-
   when defined(emscripten):
     if img.tex.blobUrl == "":
       proc JS_getBlobUrl(path: cstring): cstring
@@ -213,6 +216,9 @@ proc blobUrl*(img: Image): lent string =
   else:
     let empty {.global.} = ""
     return empty
+
+proc path*(img: Image): lent string {.inline.} =
+  img.tex.path
   
 
 # Effect
