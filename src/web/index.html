@@ -12,10 +12,14 @@
 
     <!-- Styles -->
     <style>
-      /* Keeping background color inline for while 'index.css' loads */
+      /* Some basic styles to prevent jank before 'index.css' loads */
       body {
         background-color: #121212;
         color: rgba(255, 255, 255, 0.8);
+      }
+      canvas.scene {
+        background-color: black;
+        outline: none;
       }
     </style>
     <script type="text/javascript">
