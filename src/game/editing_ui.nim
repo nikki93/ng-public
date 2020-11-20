@@ -62,7 +62,7 @@ proc inspector*(edit: var Edit) =
               when value is SomeFloat:
                 ui.box("info"):
                   let valueStr = value.formatFloat(ffDecimal, precision = 2)
-                  ui.text(name & ": " & valueStr)
+                  ui.text name, ": ", valueStr
 
       # Add button for each type the entity doesn't have
       ui.box("add-bar"):

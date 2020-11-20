@@ -83,6 +83,6 @@ proc main() =
       ui.patch("bottom"):
         ui.box("status"):
           ui.box:
-            ui.text "fps: " & $tim.fps.round.toInt
+            ui.text "fps: ", $tim.fps.round.toInt
 
 main()

@@ -157,6 +157,11 @@ proc text*(ui: var UI, value: string) {.inline.} =
     proc JS_uiText(value: cstring) {.importc.}
     JS_uiText(value)
 
+proc text*(ui: var UI, values: varargs[string, `$`]) {.inline.} =
+  ## Add concatenation of given texts as a child of the enclosing UI element.
+  when defined(emscripten):
+    ui.text(values.join())
+
 
 # Events
 

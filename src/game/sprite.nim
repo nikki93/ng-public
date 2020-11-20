@@ -36,4 +36,5 @@ onEditUpdateBoxes.add proc() =
 
 proc inspect*(spr: var Sprite, ent: Entity) =
   ui.box("info"):
-    ui.text("hello, world!")
+    let (imgW, imgH) = spr.image.size
+    ui.text "width: ", imgW, ", height: ", imgH
