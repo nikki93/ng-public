@@ -1,3 +1,8 @@
+## Implements the in-game scene editor. The UI implementation depends on
+## type-specific hooks (`load`, `inspect`, ...), but type-specific hooks
+## depend on parts of the editing API (`updateBox`, ...), so the UI
+## implementation is in a separate 'editing_ui' file.
+
 import std/algorithm
 
 import ng

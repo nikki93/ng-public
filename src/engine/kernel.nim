@@ -1,3 +1,7 @@
+## An interface to an "entity-component" data structure. Component types must
+## be registered and are statically tracked. Type metadata is available for use
+## from other modules.
+
 import macros, sets, tables
 
 

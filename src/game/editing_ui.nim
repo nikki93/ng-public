@@ -1,12 +1,11 @@
+## Implementation of the editor UI. This is in a separate file so we can import
+## 'all' for type-specific hooks.
+
 import std/[strutils, json]
 
 import ng
 
 import editing, all
-
-
-# This is in a separate file so we can import 'all', while still allowing
-# type-specific modules to import 'editing'
 
 
 # UI
