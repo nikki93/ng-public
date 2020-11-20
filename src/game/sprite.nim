@@ -35,6 +35,10 @@ onEditUpdateBoxes.add proc() =
     edit.updateBox(ent, pos.x, pos.y, spr.scale * imgW, spr.scale * imgH)
 
 proc inspect*(spr: var Sprite, ent: Entity) =
+  # Image preview
+  ui.elem("img", "preview checker", src = spr.image.blobUrl)
+
+  # General details
   ui.box("info"):
     let (imgW, imgH) = spr.image.size
     ui.text "width: ", imgW, ", height: ", imgH

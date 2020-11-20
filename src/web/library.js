@@ -15,6 +15,15 @@ mergeInto(LibraryManager.library, {
     return document.querySelector('#canvas').getBoundingClientRect().width;
   },
 
+  JS_getBlobUrl: function (path) {
+    const bytes = FS.readFile(UTF8ToString(path));
+    const options = {};
+    options.type = 'image/png';
+    const blob = new Blob([bytes], options);
+    const url = URL.createObjectURL(blob);
+    return allocate(intArrayFromString(url), ALLOC_NORMAL);
+  },
+
   //
   // uis
   //

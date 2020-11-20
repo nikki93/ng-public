@@ -61,10 +61,10 @@ type
     gpuImage: ptr GPUImage
     path: string
     handleCount: int
+    blobUrl: string
 
   Image* = object
     tex: ptr Texture
-
 
   Uniform = object
     name: string
@@ -196,6 +196,24 @@ proc size*(img: Image): (float, float) =
   result[0] = cast[int](img.tex.gpuImage.w).toBiggestFloat
   result[1] = cast[int](img.tex.gpuImage.h).toBiggestFloat
 
+proc blobUrl*(img: Image): lent string =
+  ## Get a URL for a DOM blob object containing the image. Can be used
+  ## for the `src` attribute of an `img` DOM element. Returns an empty
+  ## string on non-browser targets.
+
+  when defined(emscripten):
+    if img.tex.blobUrl == "":
+      proc JS_getBlobUrl(path: cstring): cstring
+        {.importc.}
+      let cBlobUrl = JS_getBlobUrl(img.tex.path)
+      img.tex.blobUrl = $cBlobUrl
+      proc free(s: pointer) {.importc.}
+      free(cBlobUrl)
+    return img.tex.blobUrl
+  else:
+    let empty {.global.} = ""
+    return empty
+  
 
 # Effect
 
