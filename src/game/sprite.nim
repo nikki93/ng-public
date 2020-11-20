@@ -33,3 +33,7 @@ onEditUpdateBoxes.add proc() =
   for ent, pos, spr in ker.each(Position, Sprite):
     let (imgW, imgH) = spr.image.size
     edit.updateBox(ent, pos.x, pos.y, spr.scale * imgW, spr.scale * imgH)
+
+proc inspect*(spr: var Sprite, ent: Entity) =
+  ui.box("info"):
+    ui.text("hello, world!")

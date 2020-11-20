@@ -53,7 +53,9 @@ proc inspector*(edit: var Edit) =
                   after.add proc() =
                     ker.remove(T, ent)
 
-            # TODO(nikki): Custom inspect
+            # Custom `inspect` hook
+            when compiles(inspect(inst[], ent)):
+              inspect(inst[], ent)
 
             # Simple fields
             for name, value in fieldPairs(inst[]):
@@ -70,6 +72,7 @@ proc inspector*(edit: var Edit) =
             ui.button("add", label = title):
               ui.event("click"):
                 let inst = ker.add(T, ent)
+                # Custom `load` hook
                 when compiles(load(inst[], ent, JsonNode())):
                   load(inst[], ent, JsonNode())
 

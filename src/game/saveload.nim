@@ -41,7 +41,7 @@ proc load(T: typedesc, ent: Entity, node: JsonNode) =
       static:
         loadSkipped.add($T & "." & name)
 
-  # Call `load` hook if type has one
+  # Custom `load` hook
   when compiles(load(inst[], ent, node)):
     load(inst[], ent, node)
 
