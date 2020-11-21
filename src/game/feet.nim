@@ -2,7 +2,8 @@ import std/json
 
 import ng
 
-import types, triggers, editing
+import types, triggers
+import editing
 
 
 # Loading

@@ -1,42 +1,14 @@
-## Implementation of the editor UI. This is in a separate file so we can import
-## 'all' for type-specific hooks.
+## Editor entity inspector UI. This is in a separate file so we can import
+## 'all' to get type-specific hooks, yet allow types to import the rest of
+## 'editing'.
 
 import std/[strutils, json]
 
 import ng
 
-import editing, all
+import editing
+import all
 
-
-# UI
-
-proc toolbar*(edit: var Edit) =
-  # Play / stop
-  ui.button(class = if edit.isEnabled: "play" else: "stop"):
-    ui.event("click"):
-      if edit.isEnabled:
-        edit.play()
-      else:
-        edit.stop()
-
-  ui.box("flex-gap")
-
-  if edit.isEnabled:
-    # Pan
-    ui.button("view pan", selected = edit.getMode == "view pan"):
-      ui.event("click"):
-        edit.setMode(if edit.getMode == "view pan": "select" else: "view pan")
-
-proc status*(edit: var Edit) =
-  if edit.isEnabled:
-    ui.box: # Zoom level
-      let (_, _, vw, _) = edit.getView
-      ui.text vw / 800, "x"
-
-    ui.box("small-gap")
-
-    ui.box: # Mode
-      ui.text edit.getMode
 
 func titleify(title: string): string =
   ## Turn "TitlesYay" into "titles yay"
@@ -48,7 +20,10 @@ func titleify(title: string): string =
     else:
       result.add(c)
 
+
 proc inspector*(edit: var Edit) =
+  ## Top-level entrypoint for the inspector UI
+
   # Inspectors for selected entities
   for ent, _ in ker.each(EditSelect):
     ui.box("inspector"):

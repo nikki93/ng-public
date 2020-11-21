@@ -1,5 +1,4 @@
-## Loading and saving scenes, types and entities from / to JSON. The
-## implementation depends on type-specific hooks (`load`, ...).
+## Loading and saving scenes, types and entities from / to JSON.
 
 import std/[json, macros]
 

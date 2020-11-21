@@ -2,7 +2,8 @@ import std/math
 
 import ng
 
-import types, triggers, saveload, editing, editing_ui
+import types, triggers
+import saveload, editing, inspector
 
 
 proc main() =

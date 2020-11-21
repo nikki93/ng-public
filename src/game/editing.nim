@@ -1,7 +1,5 @@
-## Implements the in-game scene editor. The UI implementation depends on
-## type-specific hooks (`load`, `inspect`, ...), but type-specific hooks
-## depend on parts of the editing API (`updateBox`, ...), so the UI
-## implementation is in a separate 'editing_ui' file.
+## Implements the in-game scene editor. The inspector UI is in a separate file
+## for reasons explained at the top of that file.
 
 import std/algorithm
 
@@ -71,9 +69,6 @@ proc updateBox*(edit: var Edit, ent: Entity, x, y, width, height: float)
 proc applyView*(edit: var Edit) =
   gfx.setView(edit.viewX, edit.viewY, edit.viewWidth, edit.viewHeight)
 
-proc getView*(edit: var Edit): (float, float, float, float) {.inline.} =
-  (edit.viewX, edit.viewY, edit.viewWidth, edit.viewHeight)
-
 proc draw*(edit: var Edit) =
   if edit.mode == "select":
     # Red boxes for unselected
@@ -99,7 +94,37 @@ proc draw*(edit: var Edit) =
   onEditDraw.run()
 
 
-# Frame
+# Non-inspector UI
+
+proc toolbar*(edit: var Edit) =
+  # Play / stop
+  ui.button(class = if edit.isEnabled: "play" else: "stop"):
+    ui.event("click"):
+      if edit.isEnabled:
+        edit.play()
+      else:
+        edit.stop()
+
+  ui.box("flex-gap")
+
+  if edit.isEnabled:
+    # Pan
+    ui.button("view pan", selected = edit.getMode == "view pan"):
+      ui.event("click"):
+        edit.setMode(if edit.getMode == "view pan": "select" else: "view pan")
+
+proc status*(edit: var Edit) =
+  if edit.isEnabled:
+    ui.box: # Zoom level
+      ui.text edit.viewWidth / 800, "x"
+
+    ui.box("small-gap")
+
+    ui.box: # Mode
+      ui.text edit.getMode
+
+
+# Input
 
 proc input(edit: var Edit) =
   onEditInput.run()
@@ -137,6 +162,9 @@ proc input(edit: var Edit) =
       let (dx, dy) = gfx.viewToWorld(touch.screenDX, touch.screenDY)
       edit.viewX -= dx - zx
       edit.viewY -= dy - zy
+
+
+# Frame
 
 proc frame*(edit: var Edit) =
   edit.input()
