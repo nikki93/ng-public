@@ -129,6 +129,15 @@ proc input(edit: var Edit) =
       if pick != nullEntity:
         discard ker.add(EditSelect, pick)
 
+  if edit.mode == "view pan":
+    # Pan view by dragging
+    if ev.touches.len == 1:
+      let touch = ev.touches[0]
+      let (zx, zy) = gfx.viewToWorld(0, 0)
+      let (dx, dy) = gfx.viewToWorld(touch.screenDX, touch.screenDY)
+      edit.viewX -= dx - zx
+      edit.viewY -= dy - zy
+
 proc frame*(edit: var Edit) =
   edit.input()
 

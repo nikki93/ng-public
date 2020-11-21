@@ -19,15 +19,23 @@ proc toolbar*(edit: var Edit) =
       else:
         edit.stop()
 
+  ui.box("flex-gap")
+
+  if edit.isEnabled:
+    # Pan
+    ui.button("view pan", selected = edit.getMode == "view pan"):
+      ui.event("click"):
+        edit.setMode(if edit.getMode == "view pan": "select" else: "view pan")
+
 proc status*(edit: var Edit) =
   if edit.isEnabled:
-    ui.box:
+    ui.box: # Zoom level
       let (_, _, vw, _) = edit.getView
       ui.text vw / 800, "x"
 
     ui.box("small-gap")
 
-    ui.box:
+    ui.box: # Mode
       ui.text edit.getMode
 
 func titleify(title: string): string =
