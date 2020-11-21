@@ -30,6 +30,12 @@ nim_gen_srcs() { # Parse Nim's JSON output to get list of C/C++ sources
 }
 
 case "$1" in
+  # CLOC
+  cloc)
+    cloc --by-file $(find src -name '*.nim') src/web/library.js 
+    exit 0
+    ;;
+
   # DB
   db)
     $CMAKE -DNIM_GEN_SRCS=$(nim_gen_srcs build/nim-gen-release) -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -H. -Bbuild/db -GNinja
