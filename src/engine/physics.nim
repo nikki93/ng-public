@@ -7,7 +7,7 @@
 ## automatically remove the objects and destroy them in their destructor. They
 ## can also store an association to an `Entity` for game logic purposes.
 
-import timing, kernel, utils
+import timing, kernel, graphics, utils
 
 
 const cpH = "\"precomp.h\""
@@ -23,7 +23,14 @@ type
     space: ptr cpSpace
     userData: uint32
 
+  cpShapeType {.importc: "cpShapeType", header: cpH.} = enum
+    PolyShape = 2
+
+  cpShapeClass {.importc: "cpShapeClass", header: cpH.} = object
+    `type`: cpShapeType
+
   cpShape {.importc: "cpShape", header: cpH.} = object
+    klass: ptr cpShapeClass
     space: ptr cpSpace
     userData: uint32
 
@@ -63,7 +70,7 @@ converter toCpVect(value: Vec2): cpVect {.inline.} =
   result.y = value.y
 
 
-# Chipmunk objects removal
+# Chipmunk object removal
 
 proc remove(body: ptr cpBody) =
   proc cpSpaceRemoveBody(space: ptr cpSpace, body: ptr cpBody)
@@ -86,6 +93,22 @@ proc remove(shape: ptr cpShape) =
 
 # Body wrapper
 
+proc cpBodyEachShape(
+  body: ptr cpBody,
+  fn: proc(body: ptr cpBody, shape: ptr cpShape, data: pointer)
+    {.cdecl.},
+  data: pointer)
+  {.importc, header: cpH.}
+
+proc cpBodyLocalToWorld(body: ptr cpBody, point: cpVect): cpVect
+  {.importc, header: cpH.}
+
+proc cpPolyShapeGetCount(shape: ptr cpShape): int
+  {.importc, header: cpH.}
+
+proc cpPolyShapeGetVert(shape: ptr cpShape, index: int): cpVect
+  {.importc, header: cpH.}
+
 proc `=copy`(a: var Body, b: Body) {.error.}
 
 proc `=destroy`(body: var Body) =
@@ -100,23 +123,9 @@ proc `=destroy`(body: var Body) =
       data: pointer)
       {.importc, header: cpH.}
     cpBodyEachConstraint(
-      body.cp,
-      proc(body: ptr cpBody, constr: ptr cpConstraint, data: pointer)
-        {.cdecl.} =
-      remove(constr),
-      nil)
-    proc cpBodyEachShape(
-      body: ptr cpBody,
-      fn: proc(body: ptr cpBody, shape: ptr cpShape, data: pointer)
-        {.cdecl.},
-      data: pointer)
-      {.importc, header: cpH.}
+      body.cp, proc(body, constr, data: auto) {.cdecl.} = remove(constr), nil)
     cpBodyEachShape(
-      body.cp,
-      proc(body: ptr cpBody, shape: ptr cpShape, data: pointer)
-        {.cdecl.} =
-      remove(shape),
-      nil)
+      body.cp, proc(body, shape, data: auto) {.cdecl.} = remove(shape), nil)
 
     # Remove body from space and free it
     remove(body.cp)
@@ -155,6 +164,25 @@ proc `velocity=`*(body: Body, value: Vec2) {.inline.} =
   proc cpBodySetVelocity(body: ptr cpBody, value: cpVect)
     {.importc, header: cpH.}
   cpBodySetVelocity(body.cp, value)
+
+proc toWorld*(body: Body, point: Vec2): Vec2 {.inline.} =
+  cpBodyLocalToWorld(body.cp, point)
+
+proc toLocal*(body: Body, point: Vec2): Vec2 {.inline.} =
+  proc cpBodyWorldToLocal(body: ptr cpBody, point: cpVect): cpVect
+    {.importc, header: cpH.}
+  cpBodyWorldToLocal(body.cp, point)
+
+proc draw*(body: Body) =
+  proc visit(body, shape, data: auto) {.cdecl.} =
+    if shape.klass.`type` == PolyShape:
+      let count = cpPolyShapeGetCount(shape)
+      for i in 0..<count:
+        let v1 = cpBodyLocalToWorld(body, cpPolyShapeGetvert(shape, i))
+        let nextI = if i == count - 1: 0 else: i + 1
+        let v2 = cpBodyLocalToWorld(body, cpPolyShapeGetVert(shape, nextI))
+        gfx.drawLine(v1.x, v1.y, v2.x, v2.y)
+  cpBodyEachShape(body.cp, visit, nil)
 
 
 # Constraint wrapper
@@ -223,6 +251,12 @@ proc entity*(shape: Shape): Entity {.inline.} =
 
 proc `entity=`*(shape: Shape, ent: Entity) {.inline.} =
   shape.cp.userData = ent.toIntegral
+
+proc numVerts*(shape: Shape): int {.inline.} =
+  cpPolyShapeGetCount(shape.cp)
+
+proc vert*(shape: Shape, index: int): Vec2 {.inline.} =
+  cpPolyShapeGetVert(shape.cp, index)
 
 
 # Constructors

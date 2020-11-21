@@ -2,7 +2,7 @@ import std/json
 
 import ng
 
-import types, triggers
+import types, triggers, editing
 
 
 # Loading
@@ -24,3 +24,13 @@ proc load*(feet: var Feet, ent: Entity, node: JsonNode) =
   else:
     feet.shape = phy.createBox(feet.body, 40, 40)
   feet.shape.entity = ent
+
+
+# Editing
+
+onEditDraw.add proc() =
+  if edit.getMode == "select":
+    gfx.scope:
+      gfx.setColor(0, 0, 0xff)
+      for _, feet in ker.each(Feet):
+        feet.body.draw()

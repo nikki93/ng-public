@@ -21,6 +21,8 @@ type
 
 # Singleton
 
+proc `=copy`(a: var Edit, b: Edit) {.error.}
+
 var edit*: Edit
 
 
@@ -35,6 +37,12 @@ proc play*(edit: var Edit) =
 proc stop*(edit: var Edit) =
   edit.enabled = true
   edit.mode = "select"
+
+proc getMode*(edit: Edit): lent string {.inline.} =
+  edit.mode
+
+proc setMode*(edit: var Edit, mode: string) =
+  edit.mode = mode
 
 
 # Boxes
