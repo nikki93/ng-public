@@ -20,7 +20,15 @@ proc toolbar*(edit: var Edit) =
         edit.stop()
 
 proc status*(edit: var Edit) =
-  discard
+  if edit.isEnabled:
+    ui.box:
+      let (_, _, vw, _) = edit.getView
+      ui.text vw / 800, "x"
+
+    ui.box("small-gap")
+
+    ui.box:
+      ui.text edit.getMode
 
 func titleify(title: string): string =
   ## Turn "TitlesYay" into "titles yay"

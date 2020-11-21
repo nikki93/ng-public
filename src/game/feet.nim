@@ -28,9 +28,59 @@ proc load*(feet: var Feet, ent: Entity, node: JsonNode) =
 
 # Editing
 
+onEditInput.add proc() =
+  if edit.getMode == "feet shape":
+    var empty = true
+    for ent, _, feet in ker.each(EditSelect, Feet):
+      # Edit shape for selected feet
+      empty = false
+      if ev.touches.len == 1:
+        let touch = ev.touches[0]
+        if touch.pressed or touch.released:
+          # Remove point near touch press, add point at touch release
+          var newVerts: seq[Vec2]
+          for i in 0..<feet.shape.numVerts:
+            # Keep if not too close to touch
+            let v = feet.shape.vert(i)
+            let (wx, wy) = feet.body.toWorld(v)
+            if not (abs(touch.x - wx) < 2 and abs(touch.y - wy) < 2):
+              newVerts.add(v)
+          if touch.released or newVerts.len == 0:
+            # Add on release or if it's gonna be empty
+            newVerts.add(feet.body.toLocal((touch.x, touch.y)))
+          feet.shape = phy.createPoly(feet.body, newVerts)
+          feet.shape.entity = ent
+    if empty:
+      # No selected feet, exit mode
+      edit.setMode("select")
+
 onEditDraw.add proc() =
+  if edit.getMode == "feet shape":
+    # Feet shape and vertices only for selected
+    gfx.scope:
+      gfx.setColor(0, 0, 0xff)
+      for _, _, feet in ker.each(EditSelect, Feet):
+        feet.body.draw()
+        for i in 0..<feet.shape.numVerts:
+          let (wx, wy) = feet.body.toWorld(feet.shape.vert(i))
+          gfx.drawRectangleFill(wx, wy, 4, 4)
+
   if edit.getMode == "select":
+    # All feet shapes
     gfx.scope:
       gfx.setColor(0, 0, 0xff)
       for _, feet in ker.each(Feet):
         feet.body.draw()
+
+proc inspect*(feet: var Feet, ent: Entity) =
+  ui.box("info"):
+    ui.text "shape: ", feet.shape.numVerts, " vertices"
+
+    if edit.isEnabled and ker.get(Player, ent) == nil:
+      # Button to enter feet shape mode
+      ui.button("feet shape", selected = edit.getMode == "feet shape"):
+        ui.event("click"):
+          if edit.getMode == "feet shape":
+            edit.setMode("select")
+          else:
+            edit.setMode("feet shape")

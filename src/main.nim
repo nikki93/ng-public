@@ -85,4 +85,8 @@ proc main() =
           ui.box:
             ui.text "fps: ", $tim.fps.round.toInt
 
+          ui.box("flex-gap")
+
+          edit.status()
+
 main()

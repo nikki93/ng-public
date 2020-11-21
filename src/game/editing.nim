@@ -71,6 +71,9 @@ proc updateBox*(edit: var Edit, ent: Entity, x, y, width, height: float)
 proc applyView*(edit: var Edit) =
   gfx.setView(edit.viewX, edit.viewY, edit.viewWidth, edit.viewHeight)
 
+proc getView*(edit: var Edit): (float, float, float, float) {.inline.} =
+  (edit.viewX, edit.viewY, edit.viewWidth, edit.viewHeight)
+
 proc draw*(edit: var Edit) =
   if edit.mode == "select":
     # Red boxes for unselected
