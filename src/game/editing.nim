@@ -113,6 +113,16 @@ proc toolbar*(edit: var Edit) =
       ui.event("click"):
         edit.setMode(if edit.getMode == "view pan": "select" else: "view pan")
 
+    # Zoom
+    ui.button("zoom-in"):
+      ui.event("click"):
+        edit.viewWidth *= 0.5
+        edit.viewHeight *= 0.5
+    ui.button("zoom-out"):
+      ui.event("click"):
+        edit.viewWidth *= 2
+        edit.viewHeight *= 2
+
 proc status*(edit: var Edit) =
   if edit.isEnabled:
     ui.box: # Zoom level
