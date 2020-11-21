@@ -33,7 +33,7 @@ proc main() =
     feet.shape.entity = ent
 
     let fric = ker.add(Friction, ent)
-    fric.constr = phy.createPivot(phy.getBackground(), feet.body)
+    fric.constr = phy.createPivot(phy.background, feet.body)
     fric.constr.maxForce = 800
     fric.constr.maxBias = 0
 
@@ -45,7 +45,7 @@ proc main() =
       return
 
     # Update
-    if edit.isEnabled:
+    if edit.enabled:
       # Edit
       edit.frame()
     else:
@@ -60,13 +60,13 @@ proc main() =
       gfx.clear(0xcc, 0xe4, 0xf5)
 
       # Draw
-      if edit.isEnabled:
+      if edit.enabled:
         edit.applyView()
       else:
         discard # TODO(nikki): `onApplyView` trigger
       onDraw.run()
       onDrawOverlay.run()
-      if edit.isEnabled:
+      if edit.enabled:
         edit.draw()
 
     # UI

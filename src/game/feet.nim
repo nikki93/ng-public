@@ -30,7 +30,7 @@ proc load*(feet: var Feet, ent: Entity, node: JsonNode) =
 # Editing
 
 onEditInput.add proc() =
-  if edit.getMode == "feet shape":
+  if edit.mode == "feet shape":
     var empty = true
     for ent, _, feet in ker.each(EditSelect, Feet):
       # Edit shape for selected feet
@@ -56,7 +56,7 @@ onEditInput.add proc() =
       edit.setMode("select")
 
 onEditDraw.add proc() =
-  if edit.getMode == "feet shape":
+  if edit.mode == "feet shape":
     # Feet shape and vertices only for selected
     gfx.scope:
       gfx.setColor(0, 0, 0xff)
@@ -66,7 +66,7 @@ onEditDraw.add proc() =
           let (wx, wy) = feet.body.toWorld(feet.shape.vert(i))
           gfx.drawRectangleFill(wx, wy, 4, 4)
 
-  if edit.getMode == "select":
+  if edit.mode == "select":
     # All feet shapes
     gfx.scope:
       gfx.setColor(0, 0, 0xff)
@@ -77,11 +77,11 @@ proc inspect*(feet: var Feet, ent: Entity) =
   ui.box("info"):
     ui.text "shape: ", feet.shape.numVerts, " vertices"
 
-    if edit.isEnabled and ker.get(Player, ent) == nil:
+    if edit.enabled and ker.get(Player, ent) == nil:
       # Button to enter feet shape mode
-      ui.button("feet shape", selected = edit.getMode == "feet shape"):
+      ui.button("feet shape", selected = edit.mode == "feet shape"):
         ui.event("click"):
-          if edit.getMode == "feet shape":
+          if edit.mode == "feet shape":
             edit.setMode("select")
           else:
             edit.setMode("feet shape")

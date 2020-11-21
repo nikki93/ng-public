@@ -26,7 +26,7 @@ var edit*: Edit
 
 # Mode
 
-proc isEnabled*(edit: Edit): bool {.inline.} =
+proc enabled*(edit: Edit): bool {.inline.} =
   edit.enabled
 
 proc play*(edit: var Edit) =
@@ -36,7 +36,7 @@ proc stop*(edit: var Edit) =
   edit.enabled = true
   edit.mode = "select"
 
-proc getMode*(edit: Edit): lent string {.inline.} =
+proc mode*(edit: Edit): lent string {.inline.} =
   edit.mode
 
 proc setMode*(edit: var Edit, mode: string) =

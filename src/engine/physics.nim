@@ -340,7 +340,7 @@ proc createPoly*(
 
 # Background
 
-proc getBackground*(phy: var Physics): lent Body =
+proc background*(phy: var Physics): lent Body =
   phy.background
 
 
