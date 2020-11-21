@@ -1,6 +1,6 @@
 ## Loading and saving scenes, types and entities from / to JSON.
 
-import std/[json, macros]
+import std/[json, macros, hashes]
 
 import ng
 
@@ -53,8 +53,11 @@ proc loadScene*(path: string) =
     let ent = ker.create()
     for typeJson in entJson["types"]: # Each type
       let typeName = typeJson["_type"].getStr()
+      let typeNameHash = hash(typeName)
       forEachRegisteredTypeSkip(T, "nosave"): # Skip `{.nosave.}` types
-        if typeName == $T:
+        const TName = $T
+        const TNameHash = hash($T) # Can hash `$T` at compile time
+        if typeNameHash == TNameHash and typeName == TName:
           load(T, ent, typeJson)
 
 
