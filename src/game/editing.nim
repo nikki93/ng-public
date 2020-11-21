@@ -98,20 +98,20 @@ proc draw*(edit: var Edit) =
 
 proc toolbar*(edit: var Edit) =
   # Play / stop
-  ui.button(class = if edit.isEnabled: "play" else: "stop"):
+  ui.button(class = if edit.enabled: "play" else: "stop"):
     ui.event("click"):
-      if edit.isEnabled:
+      if edit.enabled:
         edit.play()
       else:
         edit.stop()
 
   ui.box("flex-gap")
 
-  if edit.isEnabled:
+  if edit.enabled:
     # Pan
-    ui.button("view pan", selected = edit.getMode == "view pan"):
+    ui.button("view pan", selected = edit.mode == "view pan"):
       ui.event("click"):
-        edit.setMode(if edit.getMode == "view pan": "select" else: "view pan")
+        edit.setMode(if edit.mode == "view pan": "select" else: "view pan")
 
     # Zoom
     ui.button("zoom-in"):
@@ -124,14 +124,14 @@ proc toolbar*(edit: var Edit) =
         edit.viewHeight *= 2
 
 proc status*(edit: var Edit) =
-  if edit.isEnabled:
+  if edit.enabled:
     ui.box: # Zoom level
       ui.text edit.viewWidth / 800, "x"
 
     ui.box("small-gap")
 
     ui.box: # Mode
-      ui.text edit.getMode
+      ui.text edit.mode
 
 
 # Input
