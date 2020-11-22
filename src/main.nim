@@ -1,4 +1,4 @@
-import std/math
+import std/[math, json]
 
 import ng
 
@@ -75,6 +75,15 @@ proc main() =
       ui.patch("top"):
         ui.box("toolbar"):
           edit.toolbar()
+
+        if edit.enabled:
+          ui.box("small-gap")
+
+          # Save button
+          ui.button("save"):
+            ui.event("click"):
+              echo "saving scene..."
+              echo saveScene().pretty
 
       # Side
       ui.patch("side"):
