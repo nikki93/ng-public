@@ -22,6 +22,7 @@ var onPhysicsPost*: Trigger
 
 # Draw
 
+var onApplyView*: Trigger
 var onDraw*: Trigger
 var onDrawOverlay*: Trigger
 

@@ -10,3 +10,4 @@ template system(ident: untyped) =
 system sprite
 system feet
 system player
+system view_follow

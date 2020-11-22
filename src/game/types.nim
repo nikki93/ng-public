@@ -45,6 +45,15 @@ type
     constr*: Constraint
 
 
+  # View
+
+  ViewFollow* {.ng.} = object
+    x*, y*: float
+    offsetX*, offsetY*: float
+    border*: float
+    rate*: float
+
+
   # Player
 
   Player* {.ng.} = object

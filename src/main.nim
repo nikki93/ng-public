@@ -37,6 +37,12 @@ proc main() =
     fric.constr.maxForce = 800
     fric.constr.maxBias = 0
 
+    let vf = ker.add(ViewFollow, ent)
+    (vf.x, vf.y) = (pos.x, pos.y)
+    vf.offsetY = 30
+    vf.border = 180
+    vf.rate = 200
+
     discard ker.add(Player, ent)
 
   block: # Save starting undo point
@@ -67,7 +73,7 @@ proc main() =
       if edit.enabled:
         edit.applyView()
       else:
-        discard # TODO(nikki): `onApplyView` trigger
+        onApplyView.run()
       onDraw.run()
       onDrawOverlay.run()
       if edit.enabled:
