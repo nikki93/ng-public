@@ -3,5 +3,10 @@
 import types
 export types
 
-import sprite, feet, player
-export sprite, feet, player
+template system(ident: untyped) =
+  import ident
+  export ident
+
+system sprite
+system feet
+system player
