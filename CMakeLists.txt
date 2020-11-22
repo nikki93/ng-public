@@ -63,7 +63,7 @@ if(LIB)
   list(REMOVE_ITEM MY_SOURCES "${CMAKE_SOURCE_DIR}/src/main.c")
 endif()
 target_sources(ng PRIVATE ${MY_SOURCES})
-target_include_directories(ng PRIVATE src/engine)
+target_include_directories(ng PRIVATE src/core)
 
 # Standard
 target_compile_features(ng PRIVATE cxx_std_17)
@@ -77,7 +77,7 @@ endif()
 
 # Precompiled header
 if(NOT CMAKE_EXPORT_COMPILE_COMMANDS)
-  target_precompile_headers(ng PRIVATE src/engine/precomp.h)
+  target_precompile_headers(ng PRIVATE src/core/precomp.h)
 endif()
 
 # Web flags

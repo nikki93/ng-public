@@ -7,7 +7,8 @@ import std/[strutils, json]
 import ng
 
 import editing
-import systems
+
+import systems/all
 
 
 func titleify(title: string): string =

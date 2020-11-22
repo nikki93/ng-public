@@ -33,7 +33,7 @@ VALGRIND=on ./run.sh release
 Use `MAIN=` to set the entrypoint module.
 
 ```
-MAIN=src/engine/kernel_test.nim ./run.sh release
+MAIN=src/core/kernel_test.nim ./run.sh release
 ```
 
 You can combine `VALGRIND=on` with `MAIN=...` too.

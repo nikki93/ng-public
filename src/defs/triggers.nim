@@ -13,7 +13,6 @@ proc run*(trig: Trigger) =
     p()
 
 
-
 # Physics
 
 var onPhysicsPre*: Trigger

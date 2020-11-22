@@ -1,4 +1,4 @@
-## Imports and re-exports all modules that register hooks or triggers
+## Imports and re-exports all system modules
 
 import types
 export types

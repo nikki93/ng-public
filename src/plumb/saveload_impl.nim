@@ -9,7 +9,8 @@ import std/[json, macros, hashes, sets]
 import ng
 
 import saveload
-import systems
+
+import systems/all
 
 
 # Automatically-handled field types
