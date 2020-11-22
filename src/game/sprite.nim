@@ -73,6 +73,7 @@ proc inspect*(spr: var Sprite, ent: Entity) =
                 if picking:
                   spr.image = entry.copy
                   picking = false
+                  edit.checkpoint("change image")
               ui.box("thumbnail-container"):
                 ui.elem("img", "thumbnail checker", src = entry.blobUrl)
               ui.box("filename"):

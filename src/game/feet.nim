@@ -63,6 +63,8 @@ onEditInput.add proc() =
             newVerts.add(feet.body.toLocal((touch.x, touch.y)))
           feet.shape = phy.createPoly(feet.body, newVerts)
           feet.shape.entity = ent
+          if touch.released: # Save an undo point on touch release
+            edit.checkpoint("edit feet shape")
     if empty:
       # No selected feet, exit mode
       edit.setMode("select")
@@ -91,7 +93,7 @@ proc inspect*(feet: var Feet, ent: Entity) =
 
     if edit.enabled and ker.get(Player, ent) == nil:
       # Button to enter feet shape mode
-      ui.button("feet shape", selected = edit.mode == "feet shape"):
+      ui.button("shape", selected = edit.mode == "feet shape"):
         ui.event("click"):
           if edit.mode == "feet shape":
             edit.setMode("select")

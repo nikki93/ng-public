@@ -1,20 +1,28 @@
 ## Implements the in-game scene editor. The inspector UI is in a separate file
 ## for reasons explained at the top of that file.
 
-import std/algorithm
+import std/[algorithm, json, deques]
 
 import ng
 
 import types, triggers
+import saveload
 
 
 type
+  Action = object
+    description: string ## What the user did (eg. "move entity")
+    node: JsonNode     ## Saved state after action
+
   Edit* = object
     enabled: bool
     mode: string
 
     viewX, viewY: float
     viewWidth, viewHeight: float
+
+    undos: Deque[Action]
+    redos: Deque[Action]
 
 
 # Singleton
@@ -94,6 +102,40 @@ proc draw*(edit: var Edit) =
   onEditDraw.run()
 
 
+# Undo / redo
+
+proc checkpoint*(edit: var Edit, description: string) =
+  echo "checkpointed: ", description
+  edit.undos.addLast(Action(
+    description: description,
+    node: saveScene(),
+  ))
+
+proc clearActions*(edit: var Edit) =
+  edit.undos.clear()
+  edit.redos.clear()
+
+proc restore(edit: var Edit) =
+  # Restore into kernel from last action in undo history
+  if edit.undos.len > 0:
+    ker.clear()
+    loadScene(edit.undos[^1].node)
+
+proc swapAction(src: var Deque[Action], dest: var Deque[Action]) =
+  dest.addLast(src.popLast())
+  edit.restore()
+
+proc undo*(edit: var Edit) =
+  if edit.undos.len > 1:
+    swapAction(src = edit.undos, dest = edit.redos)
+    echo "undid: ", edit.redos[^1].description
+
+proc redo*(edit: var Edit) =
+  if edit.redos.len > 0:
+    swapAction(src = edit.redos, dest = edit.undos)
+    echo "redid: ", edit.undos[^1].description
+
+
 # Non-inspector UI
 
 proc toolbar*(edit: var Edit) =
@@ -108,8 +150,18 @@ proc toolbar*(edit: var Edit) =
   ui.box("flex-gap")
 
   if edit.enabled:
+    # Undo / redo
+    ui.button("undo", disabled = edit.undos.len <= 1):
+      ui.event("click"):
+        edit.undo()
+    ui.button("redo", disabled = edit.redos.len <= 1):
+      ui.event("click"):
+        edit.redo()
+
+    ui.box("small-gap")
+
     # Pan
-    ui.button("view pan", selected = edit.mode == "view pan"):
+    ui.button("pan", selected = edit.mode == "view pan"):
       ui.event("click"):
         edit.setMode(if edit.mode == "view pan": "select" else: "view pan")
 
@@ -191,5 +243,9 @@ proc init(edit: var Edit) =
   edit.mode = "select"
   (edit.viewX, edit.viewY) = (400.0, 225.0)
   (edit.viewWidth, edit.viewHeight) = (800.0, 450.0)
+
+  # Reserve undo / redo buffer
+  edit.undos = initDeque[Action](50)
+  edit.redos = initDeque[Action](50)
 
 edit.init()

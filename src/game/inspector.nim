@@ -21,7 +21,7 @@ func titleify(title: string): string =
       result.add(c)
 
 
-proc inspector*(edit: var Edit) =
+proc inspector*(editx: var Edit) =
   ## Top-level entrypoint for the inspector UI
 
   # Inspectors for selected entities
@@ -43,6 +43,7 @@ proc inspector*(edit: var Edit) =
                 ui.event("click"):
                   after.add proc() =
                     ker.remove(T, ent)
+                    edit.checkpoint("remove " & $T)
 
             # Custom `inspect` hook
             when compiles(inspect(inst[], ent)):
@@ -63,9 +64,10 @@ proc inspector*(edit: var Edit) =
             ui.button("add", label = title):
               ui.event("click"):
                 let inst = ker.add(T, ent)
-                # Custom `load` hook
                 when compiles(load(inst[], ent, JsonNode())):
+                  # Custom `load` hook
                   load(inst[], ent, JsonNode())
+                edit.checkpoint("add " & $T)
 
       # Run after procs
       for p in after:

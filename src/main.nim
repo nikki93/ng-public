@@ -3,7 +3,8 @@ import std/[math, json]
 import ng
 
 import types, triggers
-import saveload, editing, inspector
+import saveload, saveload_impl
+import editing, inspector
 
 
 proc main() =
@@ -38,6 +39,10 @@ proc main() =
     fric.constr.maxBias = 0
 
     discard ker.add(Player, ent)
+
+  block: # Save starting undo point
+    edit.clearActions()
+    edit.checkpoint("loaded scene")
 
   ev.loop: # Main event loop
     tim.frame() # Step time, skip frame if frame drop or not focused
