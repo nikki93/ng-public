@@ -52,6 +52,7 @@ case "$1" in
       -d:danger \
       ${MACROS:+-f} \
       ${VALGRIND:+-d:useMalloc} \
+      ${PROFILE:+--profiler:on --stacktrace:on} \
       $MAIN
     if [[ -n "$MACROS" ]]; then
       exit 0;

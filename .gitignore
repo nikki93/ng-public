@@ -2,3 +2,5 @@ build/
 
 .clangd/
 compile_commands.json
+
+profile_results.txt

@@ -1,4 +1,6 @@
 import std/[math, json]
+when defined(profiler):
+  import nimprof
 
 import ng
 
