@@ -1,13 +1,19 @@
 ## Imports and re-exports all system modules
 
+import std/[os, macros]
+
 import types
 export types
 
-template system(ident: untyped) =
-  import ident
-  export ident
+macro generateImportsAndExports() =
+  result = newStmtList()
+  for kind, path in walkDir("./src/systems"):
+    if kind == pcFile:
+      let name = path.splitFile.name
+      if name != "all":
+        let ident = newIdentNode(name)
+        result.add quote do:
+          import `ident`
+          export `ident`
 
-system sprite
-system feet
-system player
-system view_follow
+generateImportsAndExports()
