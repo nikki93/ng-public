@@ -6,7 +6,7 @@ import types, triggers
 import editing
 
 
-# Loading
+# Loading / saving
 
 proc load*(feet: var Feet, ent: Entity, node: JsonNode) =
   feet.body = phy.createStatic()
@@ -25,6 +25,15 @@ proc load*(feet: var Feet, ent: Entity, node: JsonNode) =
   else:
     feet.shape = phy.createBox(feet.body, 40, 40)
   feet.shape.entity = ent
+
+proc save*(feet: Feet, ent: Entity, node: JsonNode) =
+  node["verts"] = block:
+    let verts = newJArray()
+    for i in 0..<feet.shape.numVerts:
+      let v = feet.shape.vert(i)
+      verts.add(%v.x)
+      verts.add(%v.y)
+    verts
 
 
 # Editing

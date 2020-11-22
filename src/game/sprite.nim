@@ -6,7 +6,7 @@ import types, triggers
 import editing
 
 
-# Loading
+# Loading / saving
 
 proc load*(spr: var Sprite, ent: Entity, node: JsonNode) =
   if not node.hasKey("scale"):
@@ -16,6 +16,9 @@ proc load*(spr: var Sprite, ent: Entity, node: JsonNode) =
     spr.image = gfx.loadImage("assets/" & imageNameJson.getStr())
   else:
     spr.image = gfx.loadImage("assets/player.png")
+
+proc save*(spr: Sprite, ent: Entity, node: JsonNode) =
+  node["imageName"] = %spr.image.path.extractFilename
 
 
 # Drawing
