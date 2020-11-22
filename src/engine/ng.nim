@@ -2,8 +2,8 @@
 ## deinitialization in the correct order. This is the module to import when
 ## using the engine from application or game code.
 
-import timing, graphics, events, physics, uis, kernel
-export timing, graphics, events, physics, uis, kernel
+import timing, profiling, graphics, events, physics, uis, kernel
+export timing, profiling, graphics, events, physics, uis, kernel
 
 
 # We use a destructor on a global variable to listen for program shutdown.

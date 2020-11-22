@@ -127,6 +127,7 @@ case "$1" in
       --cpu:wasm32 \
       --os:Linux \
       ${MACROS:+-f} \
+      ${PROFILE:+--profiler:on --stacktrace:on} \
       $MAIN
     if [[ -n "$MACROS" ]]; then
       exit 0;
