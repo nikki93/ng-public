@@ -11,7 +11,7 @@ proc main() =
   initMeta()
 
   block: # Load scene
-    loadScene("assets/test.scn")
+    loadScene("assets/pool.scn")
 
   block: # Create player entity
     let ent = ker.create()
@@ -47,6 +47,7 @@ proc main() =
     discard ker.add(Player, ent)
 
   block: # Save starting undo point
+    # TODO(nikki): Need to not do this when no editor
     edit.clearActions()
     edit.checkpoint("loaded scene")
 
