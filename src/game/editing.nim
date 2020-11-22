@@ -112,6 +112,9 @@ proc checkpoint*(edit: var Edit, description: string) =
     if ker.get(EditSelect, ent) != nil:
       node["selected"] = %true)
   edit.undos.addLast(Action(description: description, node: node))
+  while edit.undos.len > 50: # Limit undo buffer size
+    edit.undos.popFirst()
+  edit.redos.clear()
 
 proc clearActions*(edit: var Edit) =
   edit.undos.clear()
@@ -160,7 +163,7 @@ proc toolbar*(edit: var Edit) =
     ui.button("undo", disabled = edit.undos.len <= 1):
       ui.event("click"):
         edit.undo()
-    ui.button("redo", disabled = edit.redos.len <= 1):
+    ui.button("redo", disabled = edit.redos.len == 0):
       ui.event("click"):
         edit.redo()
 
