@@ -9,12 +9,14 @@ import editing
 # Loading / saving
 
 proc load*(feet: var Feet, ent: Entity, node: JsonNode) =
+  # Create body, setting to entity's position if it has one
   feet.body = phy.createStatic()
   feet.body.entity = ent
   let pos = ker.get(Position, ent)
   if pos != nil:
     feet.body.position = (pos.x, pos.y)
 
+  # Read vertices and create shape, defaulting to a box
   let vertsJson = node{"verts"}
   if vertsJson != nil:
     var verts: seq[Vec2]
@@ -27,6 +29,7 @@ proc load*(feet: var Feet, ent: Entity, node: JsonNode) =
   feet.shape.entity = ent
 
 proc save*(feet: Feet, ent: Entity, node: JsonNode) =
+  # Save vertices
   node["verts"] = block:
     let verts = newJArray()
     for i in 0..<feet.shape.numVerts:

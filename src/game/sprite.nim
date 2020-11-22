@@ -11,6 +11,8 @@ import editing
 proc load*(spr: var Sprite, ent: Entity, node: JsonNode) =
   if not node.hasKey("scale"):
     spr.scale = 0.25
+
+  # Load image, with a default fallback
   let imageNameJson = node{"imageName"}
   if imageNameJson != nil:
     spr.image = gfx.loadImage("assets/" & imageNameJson.getStr())
@@ -18,6 +20,7 @@ proc load*(spr: var Sprite, ent: Entity, node: JsonNode) =
     spr.image = gfx.loadImage("assets/player.png")
 
 proc save*(spr: Sprite, ent: Entity, node: JsonNode) =
+  # Save image name
   node["imageName"] = %spr.image.path.extractFilename
 
 
