@@ -88,7 +88,10 @@ proc main() =
           ui.button("save"):
             ui.event("click"):
               echo "saving scene..."
-              echo saveScene().pretty
+              let node = saveScene(
+                filter = proc(ent: Entity): bool =
+                  ker.get(Player, ent) == nil)
+              echo node.pretty
 
       # Side
       ui.patch("side"):

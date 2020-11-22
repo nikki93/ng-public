@@ -3,22 +3,43 @@
 
 import std/json
 
+import ng
 
-var loadSceneImpl*: proc(root: JsonNode)
+
+# Implementations to be filled-in by 'saveload_impl'
+
+var loadSceneImpl*: proc(
+  root: JsonNode,
+  extra: proc(ent: Entity, node: JsonNode),
+)
   ## Implemented in 'saveload_impl'
 
-var saveSceneImpl*: proc(): JsonNode
+var saveSceneImpl*: proc(
+  filter: proc(ent: Entity): bool,
+  extra: proc(ent: Entity, node: JsonNode),
+): JsonNode
   ## Implemented in 'saveload_impl'
 
 
-proc loadScene*(root: JsonNode) =
+# Public API
+
+proc loadScene*(
+  root: JsonNode,
+  extra: proc(ent: Entity, node: JsonNode) = nil,
+) =
   ## Load a game scene into the kernel from a JSON node
-  loadSceneImpl(root)
+  loadSceneImpl(root, extra)
 
-proc saveScene*(): JsonNode =
-  ## Save the current scene from the kernel as a JSON node
-  saveSceneImpl()
-
-proc loadScene*(path: string) =
+proc loadScene*(
+  path: string,
+  extra: proc(ent: Entity, node: JsonNode) = nil,
+) =
   ## Load a game scene into the kernel from an asset path
-  loadScene(parseJson(open(path).readAll()))
+  loadScene(parseJson(open(path).readAll()), extra)
+
+proc saveScene*(
+  filter: proc(ent: Entity): bool = nil,
+  extra: proc(ent: Entity, node: JsonNode) = nil,
+): JsonNode =
+  ## Save the current scene from the kernel as a JSON node
+  saveSceneImpl(filter, extra)

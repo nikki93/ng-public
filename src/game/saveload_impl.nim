@@ -81,7 +81,10 @@ proc saveComponent[T](inst: ptr T, ent: Entity, node: JsonNode) =
 
 # Scenes
 
-loadSceneImpl = proc(root: JsonNode) =
+loadSceneImpl = proc(
+  root: JsonNode,
+  extra: proc(ent: Entity, node: JsonNode),
+) =
   for entNode in root["entities"]: # Each entity
     let ent = ker.create()
     for typeNode in entNode["types"]: # Each type
@@ -92,13 +95,20 @@ loadSceneImpl = proc(root: JsonNode) =
         const TNameHash = hash($T) # Can hash `$T` at compile time
         if typeNameHash == TNameHash and typeName == TName:
           loadComponent(T, ent, typeNode)
+    if extra != nil:
+      extra(ent, entNode)
 
-saveSceneImpl = proc(): JsonNode =
+saveSceneImpl = proc(
+  filter: proc(ent: Entity): bool,
+  extra: proc(ent: Entity, node: JsonNode),
+): JsonNode =
   %{
     "entities": block:
       let entities = newJArray()
       for ent in ker.each():
-        entities.add(%{
+        if filter != nil and not filter(ent):
+          continue # Skip if filtered-out
+        var entNode = %{
           "types": block:
             let types = newJArray()
             forEachRegisteredTypeSkip(T, "nosave"): # Skip `{.nosave.}` types
@@ -110,7 +120,10 @@ saveSceneImpl = proc(): JsonNode =
                   saveComponent(inst, ent, typeNode)
                   typeNode
             types
-        })
+        }
+        if extra != nil:
+          extra(ent, entNode)
+        entities.add(entNode)
       entities
   }
 

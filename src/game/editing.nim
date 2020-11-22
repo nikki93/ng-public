@@ -12,7 +12,7 @@ import saveload
 type
   Action = object
     description: string ## What the user did (eg. "move entity")
-    node: JsonNode     ## Saved state after action
+    node: JsonNode      ## Saved state after action
 
   Edit* = object
     enabled: bool
@@ -105,21 +105,27 @@ proc draw*(edit: var Edit) =
 # Undo / redo
 
 proc checkpoint*(edit: var Edit, description: string) =
-  echo "checkpointed: ", description
-  edit.undos.addLast(Action(
-    description: description,
-    node: saveScene(),
-  ))
+  # Save an undo action with the scene data. Also keep track of which
+  # entities were selected at the time.
+  let node = saveScene(
+    extra = proc(ent: Entity, node: JsonNode) =
+    if ker.get(EditSelect, ent) != nil:
+      node["selected"] = %true)
+  edit.undos.addLast(Action(description: description, node: node))
 
 proc clearActions*(edit: var Edit) =
   edit.undos.clear()
   edit.redos.clear()
 
 proc restore(edit: var Edit) =
-  # Restore into kernel from last action in undo history
+  # Restore into kernel from last action in undo history. Also restore the
+  # selection state.
   if edit.undos.len > 0:
     ker.clear()
-    loadScene(edit.undos[^1].node)
+    loadScene(edit.undos[^1].node,
+      extra = proc(ent: Entity, node: JsonNode) =
+      if node{"selected"}.getBool(false):
+        discard ker.add(EditSelect, ent))
 
 proc swapAction(src: var Deque[Action], dest: var Deque[Action]) =
   dest.addLast(src.popLast())
