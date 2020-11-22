@@ -2,6 +2,7 @@ import std/[math, json]
 import ng
 
 import types, triggers
+import systems/all
 import saveload, saveload_impl
 import editing, inspector
 
