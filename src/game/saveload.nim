@@ -1,16 +1,13 @@
 ## Loading and saving scenes, types and entities from / to JSON.
 
-import std/[json, macros, hashes]
+import std/[json, macros, hashes, sets]
 
 import ng
 
 import all
 
 
-# Loading
-
-var loadSkipped {.compileTime.}: seq[string]
-
+# Simple field types
 
 proc loadField(val: var int, node: JsonNode) {.used.} =
   val = node.getInt()
@@ -21,6 +18,10 @@ proc loadField(val: var float, node: JsonNode) {.used.} =
 proc loadField(val: var string, node: JsonNode) {.used.} =
   val = node.getStr()
 
+
+# Types added to entities
+
+var autoSkipped {.compileTime.}: HashSet[string]
 
 proc load(T: typedesc, ent: Entity, node: JsonNode) =
   ## Load a type into an entity, adding it if needed
@@ -38,12 +39,14 @@ proc load(T: typedesc, ent: Entity, node: JsonNode) =
     else:
       # Not a simple field, keep track and hint
       static:
-        loadSkipped.add($T & "." & name)
+        autoSkipped.incl($T & "." & name)
 
   # Custom `load` hook
   when compiles(load(inst[], ent, node)):
     load(inst[], ent, node)
 
+
+# Scenes
 
 proc loadScene*(path: string) =
   ## Load a game scene into the kernel
@@ -61,6 +64,7 @@ proc loadScene*(path: string) =
           load(T, ent, typeJson)
 
 
+# Warn about fields we skipped automatic save / load for
 when not defined(nimsuggest):
-  import strutils
-  {.hint: "automatic loading skipped for: " & loadSkipped.join(", ").}
+  import std/[strutils, sequtils]
+  {.hint: "automatic save / load skipped for: " & autoSkipped.toSeq.join(", ").}
