@@ -24,7 +24,9 @@ type
     userData: uint32
 
   cpShapeType {.importc: "cpShapeType", header: cpH.} = enum
-    PolyShape = 2
+    CircleShape
+    SegmentShape
+    PolyShape
 
   cpShapeClass {.importc: "cpShapeClass", header: cpH.} = object
     `type`: cpShapeType
@@ -42,6 +44,11 @@ type
 
   Vec2* = tuple
     x, y: float
+
+  BodyKind* {.importc: "cpBodyType", header: cpH.} = enum
+    Dynamic
+    Kinematic
+    Static
 
   Body* = object
     cp: ptr cpBody
@@ -144,6 +151,36 @@ proc entity*(body: Body): Entity {.inline.} =
 
 proc `entity=`*(body: Body, ent: Entity) {.inline.} =
   body.cp.userData = ent.toIntegral
+
+proc kind*(body: Body): BodyKind {.inline.} =
+  proc cpBodyGetType(body: ptr cpBody): BodyKind
+    {.importc, header: cpH.}
+  cpBodyGetType(body.cp)
+
+proc `kind=`*(body: Body, kind: BodyKind) {.inline.} =
+  proc cpBodySetType(body: ptr cpBody, kind: BodyKind)
+    {.importc, header: cpH.}
+  cpBodySetType(body.cp, kind)
+
+proc mass*(body: Body): float {.inline.} =
+  proc cpBodyGetMass(body: ptr cpBody): float
+    {.importc, header: cpH.}
+  cpBodyGetMass(body.cp)
+
+proc `mass=`*(body: Body, mass: float) {.inline.} =
+  proc cpBodySetMass(body: ptr cpBody, mass: float)
+    {.importc, header: cpH.}
+  cpBodySetMass(body.cp, mass)
+
+proc moment*(body: Body): float {.inline.} =
+  proc cpBodyGetMoment(body: ptr cpBody): float
+    {.importc, header: cpH.}
+  cpBodyGetMoment(body.cp)
+
+proc `moment=`*(body: Body, moment: float) {.inline.} =
+  proc cpBodySetMoment(body: ptr cpBody, moment: float)
+    {.importc, header: cpH.}
+  cpBodySetMoment(body.cp, moment)
 
 proc position*(body: Body): Vec2 {.inline.} =
   proc cpBodyGetPosition(body: ptr cpBody): cpVect
@@ -251,6 +288,34 @@ proc entity*(shape: Shape): Entity {.inline.} =
 
 proc `entity=`*(shape: Shape, ent: Entity) {.inline.} =
   shape.cp.userData = ent.toIntegral
+
+proc radius*(shape: Shape): float {.inline.} =
+  if shape.cp.klass.`type` == CircleShape:
+    proc cpCircleShapeGetRadius(shape: ptr cpShape): float
+      {.importc, header: cpH.}
+    return cpCircleShapeGetRadius(shape.cp)
+  if shape.cp.klass.`type` == SegmentShape:
+    proc cpSegmentShapeGetRadius(shape: ptr cpShape): float
+      {.importc, header: cpH.}
+    return cpSegmentShapeGetRadius(shape.cp)
+  if shape.cp.klass.`type` == PolyShape:
+    proc cpPolyShapeGetRadius(shape: ptr cpShape): float
+      {.importc, header: cpH.}
+    return cpPolyShapeGetRadius(shape.cp)
+
+proc `radius=`*(shape: Shape, radius: float) {.inline.} =
+  if shape.cp.klass.`type` == CircleShape:
+    proc cpCircleShapeSetRadius(shape: ptr cpShape, radius: float)
+      {.importc, header: cpH.}
+    cpCircleShapeSetRadius(shape.cp, radius)
+  if shape.cp.klass.`type` == SegmentShape:
+    proc cpSegmentShapeSetRadius(shape: ptr cpShape, radius: float)
+      {.importc, header: cpH.}
+    cpSegmentShapeSetRadius(shape.cp, radius)
+  if shape.cp.klass.`type` == PolyShape:
+    proc cpPolyShapeSetRadius(shape: ptr cpShape, radius: float)
+      {.importc, header: cpH.}
+    cpPolyShapeSetRadius(shape.cp, radius)
 
 proc numVerts*(shape: Shape): int {.inline.} =
   cpPolyShapeGetCount(shape.cp)

@@ -9,14 +9,18 @@ import editing
 # Loading / saving
 
 proc load*(feet: var Feet, ent: Entity, node: JsonNode) =
-  # Create body, setting to entity's position if it has one
-  feet.body = phy.createStatic()
+  # Body
+  if node{"dynamic"}.getBool(false):
+    feet.body = phy.createDynamic(
+      node{"mass"}.getFloat(1), node{"moment"}.getFloat(Inf))
+  else:
+    feet.body = phy.createStatic()
   feet.body.entity = ent
   let pos = ker.get(Position, ent)
   if pos != nil:
-    feet.body.position = (pos.x, pos.y)
+    feet.body.position = (pos.x + feet.offsetX, pos.y + feet.offsetY)
 
-  # Read vertices and create shape, defaulting to a box
+  # Shape
   let vertsJson = node{"verts"}
   if vertsJson != nil:
     var verts: seq[Vec2]
@@ -27,9 +31,16 @@ proc load*(feet: var Feet, ent: Entity, node: JsonNode) =
   else:
     feet.shape = phy.createBox(feet.body, 40, 40)
   feet.shape.entity = ent
+  feet.shape.radius = node{"radius"}.getFloat(0)
 
 proc save*(feet: Feet, ent: Entity, node: JsonNode) =
-  # Save vertices
+  # Body
+  if feet.body.kind == Dynamic:
+    node["dynamic"] = %true
+    node["mass"] = %feet.body.mass
+    node["moment"] = %feet.body.moment
+
+  # Shape
   node["verts"] = block:
     let verts = newJArray()
     for i in 0..<feet.shape.numVerts:
@@ -37,6 +48,8 @@ proc save*(feet: Feet, ent: Entity, node: JsonNode) =
       verts.add(%v.x)
       verts.add(%v.y)
     verts
+  if feet.shape.radius != 0:
+    node["radius"] = %feet.shape.radius
 
 
 # Editing
