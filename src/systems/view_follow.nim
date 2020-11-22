@@ -23,6 +23,18 @@ onPhysicsPost.add proc() =
         abs(dy) / dy * # Sign of delta
         (abs(dy) - (0.5 * height - vf.border))
 
+    # Stay in world bounds
+    for _, wb in ker.each(WorldBounds):
+      if vf.x - 0.5 * width < wb.minX:
+        vf.x = wb.minX + 0.5 * width
+      if vf.x + 0.5 * width > wb.maxX:
+        vf.x = wb.maxX - 0.5 * width
+      if vf.y - 0.5 * height < wb.minY:
+        vf.y = wb.minY + 0.5 * height
+      if vf.y + 0.5 * height > wb.maxY:
+        vf.y = wb.maxY - 0.5 * height
+      break
+
 onApplyView.add proc() =
   for _, vf in ker.each(ViewFollow):
     gfx.setView(vf.x, vf.y, width, height)

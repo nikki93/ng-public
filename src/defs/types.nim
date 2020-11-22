@@ -53,6 +53,11 @@ type
     border*: float
     rate*: float
 
+  WorldBounds* {.ng.} = object
+    minX*, maxX*, minY*, maxY*: float
+    bodies*: array[4, Body]
+    shapes*: array[4, Shape]
+
 
   # Player
 
