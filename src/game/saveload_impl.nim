@@ -49,9 +49,9 @@ proc loadComponent(T: typedesc, ent: Entity, node: JsonNode) =
   for name, val in fieldPairs(inst[]):
     when compiles(loadField(val, JsonNode())):
       # Simple field
-      let valJson = node.getOrDefault(name)
-      if valJson != nil:
-        loadField(val, valJson)
+      let valNode = node.getOrDefault(name)
+      if valNode != nil:
+        loadField(val, valNode)
     else:
       # Not a simple field, keep track and hint
       static:
@@ -82,16 +82,16 @@ proc saveComponent[T](inst: ptr T, ent: Entity, node: JsonNode) =
 # Scenes
 
 loadSceneImpl = proc(root: JsonNode) =
-  for entJson in root["entities"]: # Each entity
+  for entNode in root["entities"]: # Each entity
     let ent = ker.create()
-    for typeJson in entJson["types"]: # Each type
-      let typeName = typeJson["_type"].getStr()
+    for typeNode in entNode["types"]: # Each type
+      let typeName = typeNode["_type"].getStr()
       let typeNameHash = hash(typeName)
       forEachRegisteredTypeSkip(T, "nosave"): # Skip `{.nosave.}` types
         const TName = $T
         const TNameHash = hash($T) # Can hash `$T` at compile time
         if typeNameHash == TNameHash and typeName == TName:
-          loadComponent(T, ent, typeJson)
+          loadComponent(T, ent, typeNode)
 
 saveSceneImpl = proc(): JsonNode =
   %{
@@ -105,10 +105,10 @@ saveSceneImpl = proc(): JsonNode =
               let inst = ker.get(T, ent)
               if inst != nil:
                 types.add:
-                  let typeJson = newJObject() # Node for this type
-                  typeJson["_type"] = %($T) # Save type name
-                  saveComponent(inst, ent, typeJson)
-                  typeJson
+                  let typeNode = newJObject() # Node for this type
+                  typeNode["_type"] = %($T) # Save type name
+                  saveComponent(inst, ent, typeNode)
+                  typeNode
             types
         })
       entities

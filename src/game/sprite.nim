@@ -13,9 +13,9 @@ proc load*(spr: var Sprite, ent: Entity, node: JsonNode) =
     spr.scale = 0.25
 
   # Load image, with a default fallback
-  let imageNameJson = node{"imageName"}
-  if imageNameJson != nil:
-    spr.image = gfx.loadImage("assets/" & imageNameJson.getStr())
+  let imageNameNode = node{"imageName"}
+  if imageNameNode != nil:
+    spr.image = gfx.loadImage("assets/" & imageNameNode.getStr())
   else:
     spr.image = gfx.loadImage("assets/player.png")
 

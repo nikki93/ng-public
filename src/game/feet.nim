@@ -21,12 +21,12 @@ proc load*(feet: var Feet, ent: Entity, node: JsonNode) =
     feet.body.position = (pos.x + feet.offsetX, pos.y + feet.offsetY)
 
   # Shape
-  let vertsJson = node{"verts"}
-  if vertsJson != nil:
+  let vertsNode = node{"verts"}
+  if vertsNode != nil:
     var verts: seq[Vec2]
-    while 2 * verts.len + 1 < vertsJson.len:
-      verts.add((vertsJson[2 * verts.len].getFloat(),
-        vertsJson[2 * verts.len + 1].getFloat()))
+    while 2 * verts.len + 1 < vertsNode.len:
+      verts.add((vertsNode[2 * verts.len].getFloat(),
+        vertsNode[2 * verts.len + 1].getFloat()))
     feet.shape = phy.createPoly(feet.body, verts)
   else:
     feet.shape = phy.createBox(feet.body, 40, 40)
