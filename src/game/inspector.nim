@@ -43,7 +43,7 @@ proc inspector*(editx: var Edit) =
                 ui.event("click"):
                   after.add proc() =
                     ker.remove(T, ent)
-                    edit.checkpoint("remove " & $T)
+                    edit.checkpoint("remove " & title)
 
             # Custom `inspect` hook
             when compiles(inspect(inst[], ent)):
@@ -67,7 +67,7 @@ proc inspector*(editx: var Edit) =
                 when compiles(load(inst[], ent, JsonNode())):
                   # Custom `load` hook
                   load(inst[], ent, JsonNode())
-                edit.checkpoint("add " & $T)
+                edit.checkpoint("add " & title)
 
       # Run after procs
       for p in after:
