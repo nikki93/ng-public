@@ -4,7 +4,7 @@ import std/[json, macros, hashes, sets]
 
 import ng
 
-import all
+import systems
 
 
 # Automatically-handled field types

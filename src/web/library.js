@@ -102,4 +102,13 @@ mergeInto(LibraryManager.library, {
       });
     }
   },
+
+  //
+  // main
+  //
+
+  JS_saveFile: function (filename, contents) {
+    const blob = new Blob([contents], { type: 'text/plain;charset=utf-8' });
+    saveAs(blob, filename); // From 'file-saver'
+  },
 });
