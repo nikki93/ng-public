@@ -6,6 +6,25 @@ import types, triggers
 import editing
 
 
+# Drawing
+
+onDraw.add proc() =
+  # Draw sprites in depth order
+  ker.isort(Sprite, proc (a, b: ptr Sprite): bool =
+    a.depth < b.depth)
+  for _, spr, pos in ker.each(Sprite, Position):
+    if spr.rows <= 1 and spr.cols <= 1: # Whole image
+      gfx.drawImage(spr.image, pos.x, pos.y,
+        scale = spr.scale, flipH = spr.flipH)
+    else: # Sub-image
+      let (imgW, imgH) = spr.image.size
+      let (subW, subH) = (imgW / spr.cols.toFloat, imgH / spr.rows.toFloat)
+      let (subX, subY) = (spr.col.toFloat * subW, spr.row.toFloat * subH)
+      gfx.drawImage(spr.image, pos.x, pos.y,
+        scale = spr.scale, flipH = spr.flipH,
+        subX = subX, subY = subY, subW = subW, subH = subH)
+
+
 # Loading / saving
 
 proc load*(spr: var Sprite, ent: Entity, node: JsonNode) =
@@ -39,25 +58,6 @@ proc save*(spr: Sprite, ent: Entity, node: JsonNode) =
 
   # Image name
   node["imageName"] = %spr.image.path.extractFilename
-
-
-# Drawing
-
-onDraw.add proc() =
-  # Draw sprites in depth order
-  ker.isort(Sprite, proc (a, b: ptr Sprite): bool =
-    a.depth < b.depth)
-  for _, spr, pos in ker.each(Sprite, Position):
-    if spr.rows <= 1 and spr.cols <= 1: # Whole image
-      gfx.drawImage(spr.image, pos.x, pos.y,
-        scale = spr.scale, flipH = spr.flipH)
-    else: # Sub-image
-      let (imgW, imgH) = spr.image.size
-      let (subW, subH) = (imgW / spr.cols.toFloat, imgH / spr.rows.toFloat)
-      let (subX, subY) = (spr.col.toFloat * subW, spr.row.toFloat * subH)
-      gfx.drawImage(spr.image, pos.x, pos.y,
-        scale = spr.scale, flipH = spr.flipH,
-        subX = subX, subY = subY, subW = subW, subH = subH)
 
 
 # Editing

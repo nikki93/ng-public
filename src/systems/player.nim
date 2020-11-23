@@ -84,7 +84,7 @@ onPhysicsPost.add proc() =
     anim.setClip("idle")
 
 
-# Overlay
+# Draw overlay
 
 let footprintsImg = gfx.loadImage("assets/footprints.png")
 onDrawOverlay.add proc() =

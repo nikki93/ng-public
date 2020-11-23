@@ -5,6 +5,8 @@ import core
 import types
 
 
+# Loading
+
 proc load*(fric: var Friction, ent: Entity, node: JsonNode) =
   let feet = ker.get(Feet, ent)
   if feet != nil:

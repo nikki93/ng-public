@@ -21,19 +21,6 @@ proc setClip*(anim: ptr Animation, name: static string) =
       anim.clipIndex = i
 
 
-# Loading / saving
-
-proc load*(anim: var Animation, ent: Entity, node: JsonNode) =
-  # Re-generate clip name hashes
-  anim.clipNameHashes.setLen(anim.clips.len)
-  for i in 0..<anim.clips.len:
-    anim.clipNameHashes[i] = hash(anim.clips[i].name)
-
-proc save*(anim: Animation, ent: Entity, node: JsonNode) =
-  # Skip clip name hashes (should re-generate)
-  node.delete("clipNameHashes")
-
-
 # Animating
 
 onAnimate.add proc() =
@@ -52,3 +39,16 @@ onAnimate.add proc() =
       spr.col = clip.start + frame mod clip.count
       spr.row = spr.col div spr.cols
       spr.col = spr.col mod spr.cols
+
+
+# Loading / saving
+
+proc load*(anim: var Animation, ent: Entity, node: JsonNode) =
+  # Re-generate clip name hashes
+  anim.clipNameHashes.setLen(anim.clips.len)
+  for i in 0..<anim.clips.len:
+    anim.clipNameHashes[i] = hash(anim.clips[i].name)
+
+proc save*(anim: Animation, ent: Entity, node: JsonNode) =
+  # Skip clip name hashes (should re-generate)
+  node.delete("clipNameHashes")
