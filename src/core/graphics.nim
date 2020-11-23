@@ -180,8 +180,7 @@ proc loadImage*(gfx: var Graphics, path: string): Image =
   ## handle to that data and is quick.
 
   # Check existing textures
-  let found = gfx.texs.getOrDefault(path)
-  if found != nil:
+  if (let found = gfx.texs.getOrDefault(path); found != nil):
     return initImage(found[].addr)
 
   # Didn't find existing texture. Load a new one and remember it.
@@ -258,8 +257,7 @@ proc loadEffect(gfx: var Graphics, path: string, code: string): Effect =
   # the compiler doesn't generate all this code for each string.
 
   # Check existing programs
-  let found = gfx.progs.getOrDefault(path)
-  if found != nil:
+  if (let found = gfx.progs.getOrDefault(path); found != nil):
     return initEffect(found[].addr)
 
   # Compile fragment shader and link with default textured vertex shader

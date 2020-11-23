@@ -29,8 +29,7 @@ proc loadComponent(T: typedesc, ent: Entity, node: JsonNode) =
   for name, val in fieldPairs(inst[]):
     when compiles(JsonNode().to(typeof(val))):
       # Auto-loadable field
-      let valNode = node.getOrDefault(name)
-      if valNode != nil:
+      if (let valNode = node.getOrDefault(name); valNode != nil):
         val = valNode.to(typeof(val))
     else:
       # Not auto-loadable, track and hint
@@ -92,8 +91,7 @@ saveSceneImpl = proc(
           "types": block:
             let types = newJArray()
             forEachRegisteredTypeSkip(T, "nosave"): # Skip `{.nosave.}` types
-              let inst = ker.get(T, ent)
-              if inst != nil:
+              if (let inst = ker.get(T, ent); inst != nil):
                 types.add:
                   let typeNode = newJObject() # Node for this type
                   typeNode["_type"] = %($T) # Save type name

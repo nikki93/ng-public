@@ -60,9 +60,8 @@ onPhysicsPost.add proc() =
     template query(x, y: float) =
       for res in phy.segmentQuery((x, y), (x, y + 1e4), 1):
         if res.entity != nullEntity and res.entity != ent:
-          let otherSpr = ker.get(Sprite, res.entity)
-          if otherSpr != nil:
-            spr.depth = min(spr.depth, otherSpr.depth - 0.2)
+          if (let other = ker.get(Sprite, res.entity); other != nil):
+            spr.depth = min(spr.depth, other.depth - 0.2)
     let (x, y) = feet.body.position
     query(x + 22, y)
     query(x - 22, y)

@@ -16,13 +16,11 @@ proc load*(feet: var Feet, ent: Entity, node: JsonNode) =
   else:
     feet.body = phy.createStatic()
   feet.body.entity = ent
-  let pos = ker.get(Position, ent)
-  if pos != nil:
+  if (let pos = ker.get(Position, ent); pos != nil):
     feet.body.position = (pos.x + feet.offsetX, pos.y + feet.offsetY)
 
   # Shape
-  let vertsNode = node{"verts"}
-  if vertsNode != nil:
+  if (let vertsNode = node{"verts"}; vertsNode != nil):
     var verts: seq[Vec2]
     while 2 * verts.len + 1 < vertsNode.len:
       verts.add((vertsNode[2 * verts.len].getFloat(),

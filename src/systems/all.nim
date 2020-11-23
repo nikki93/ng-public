@@ -9,8 +9,7 @@ macro generateImportsAndExports() =
   result = newStmtList()
   for kind, path in walkDir("./src/systems"):
     if kind == pcFile:
-      let name = path.splitFile.name
-      if name != "all":
+      if (let name = path.splitFile.name; name != "all"):
         let ident = newIdentNode(name)
         result.add quote do:
           import `ident`

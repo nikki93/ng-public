@@ -37,9 +37,8 @@ proc load*(spr: var Sprite, ent: Entity, node: JsonNode) =
     spr.rows = 1
 
   # Load image, with default fallback
-  let imageNameNode = node{"imageName"}
-  if imageNameNode != nil:
-    spr.image = gfx.loadImage("assets/" & imageNameNode.getStr())
+  if (let imageName = node{"imageName"}; imageName != nil):
+    spr.image = gfx.loadImage("assets/" & imageName.getStr())
   else:
     spr.image = gfx.loadImage("assets/player.png")
 
@@ -86,8 +85,7 @@ proc inspect*(spr: var Sprite, ent: Entity) =
         entries.setLen 0
         for kind, path in walkDir("assets/"):
           if kind == pcFile:
-            let split = path.splitFile
-            if split.ext == ".png":
+            if path.splitFile.ext == ".png":
               entries.add(gfx.loadImage(path))
   if picking:
     ui.box("picker-container"): # Darkened background overlay

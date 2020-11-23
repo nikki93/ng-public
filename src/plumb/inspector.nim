@@ -33,8 +33,7 @@ proc inspector*(editx: var Edit) =
 
       # Section for each type that isn't marked `{.noedit.}`
       forEachRegisteredTypeSkip(T, "noedit"):
-        let inst = ker.get(T, ent)
-        if inst != nil:
+        if (let inst = ker.get(T, ent); inst != nil):
           const title = titleify($T)
           ui.elem("details", class = title, key = title, open = true):
             # Header with title and remove button
