@@ -94,3 +94,6 @@ type
   EditBox* {.comp, nosave, noedit.} = object
     x*, y*: float
     width*, height*: float
+
+  EditMove*{.comp, nosave, noedit.} = object
+    dx*, dy*: float

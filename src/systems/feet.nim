@@ -60,6 +60,12 @@ proc save*(feet: Feet, ent: Entity, node: JsonNode) =
 
 # Editing
 
+onEditApplyMoves.add proc() =
+  for _, move, feet in ker.each(EditMove, Feet):
+    let (x, y) = feet.body.position
+    feet.body.position = (x + move.dx, y + move.dy)
+    phy.reindex(feet.body)
+
 onEditInput.add proc() =
   if edit.mode == "feet shape":
     var empty = true

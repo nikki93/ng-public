@@ -38,3 +38,14 @@ onEditUpdateBoxes.add proc() =
     edit.updateBox(ent,
       x = 0.5 * (wb.minX + wb.maxX), y = 0.5 * (wb.minY + wb.maxY),
       width = wb.maxX - wb.minX, height = wb.maxY - wb.minY)
+
+onEditApplyMoves.add proc() =
+  for _, move, wb in ker.each(EditMove, WorldBounds):
+    wb.minX += move.dx
+    wb.maxX += move.dx
+    wb.minY += move.dy
+    wb.maxY += move.dy
+    for body in wb.bodies.mitems:
+      let (x, y) = body.position
+      body.position = (x + move.dx, y + move.dy)
+      phy.reindex(body)

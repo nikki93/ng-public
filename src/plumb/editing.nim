@@ -162,6 +162,26 @@ proc toolbar*(edit: var Edit) =
   ui.box("flex-gap")
 
   if edit.enabled:
+    # Move
+    ui.box:
+      for _ in ker.each(EditSelect, EditBox):
+        ui.button("move", selected = edit.mode == "move"):
+          ui.event("click"):
+            edit.setMode(if edit.mode == "move": "select" else: "move")
+        break
+
+    ui.box("flex-gap")
+
+    # Delete
+    ui.box:
+      for _ in ker.each(EditSelect):
+        ui.button("delete"):
+          ui.event("click"):
+            for ent, _ in ker.each(EditSelect):
+              ker.destroy(ent)
+            edit.checkpoint("delete")
+        break
+
     # Undo / redo
     ui.button("undo", disabled = edit.undos.len <= 1):
       ui.event("click"):
@@ -236,6 +256,22 @@ proc input(edit: var Edit) =
       let (dx, dy) = gfx.viewToWorld(touch.screenDX, touch.screenDY)
       edit.viewX -= dx - zx
       edit.viewY -= dy - zy
+
+  if edit.mode == "move":
+    # Move selected boxes
+    if ev.touches.len == 1:
+      # Update `EditMove` that systems read in the `onEditApplyMoves` trigger
+      let touch = ev.touches[0]
+      for ent, _, _ in ker.each(EditSelect, EditBox):
+        var move = ker.get(EditMove, ent)
+        if move == nil:
+          move = ker.add(EditMove, ent)
+        move.dx += touch.dx
+        move.dy += touch.dy
+      onEditApplyMoves.run()
+      ker.clear(EditMove)
+      if touch.released: # Save undo checkpoint when gesture ends
+        edit.checkpoint("move")
 
 
 # Frame

@@ -403,20 +403,6 @@ proc createPoly*(
   ))
 
 
-# Background
-
-proc background*(phy: var Physics): lent Body =
-  phy.background
-
-
-# Gravity
-
-proc `gravity=`*(phy: var Physics, value: Vec2) =
-  proc cpSpaceSetGravity(space: ptr cpSpace, gravity: cpVect)
-    {.importc, header: cpH.}
-  cpSpaceSetGravity(phy.space, value)
-
-
 # Queries
 
 let cpShapeFilterAll
@@ -455,6 +441,17 @@ proc segmentQuery*(
   cpSpaceSegmentQuery(
     phy.space, start, finish, radius,
     cpShapeFilterAll, cHandler, result.addr)
+
+
+# Misc
+
+proc background*(phy: var Physics): lent Body =
+  phy.background
+
+proc reindex*(phy: var Physics, body: Body) =
+  proc cpSpaceReindexShapesForBody(space: ptr cpSpace, body: ptr cpBody)
+    {.importc, header: cpH.}
+  cpSpaceReindexShapesForBody(phy.space, body.cp)
 
 
 # Frame
