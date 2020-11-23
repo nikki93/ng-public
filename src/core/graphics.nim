@@ -52,10 +52,15 @@ type
     FragmentShader = 1
 
   GPUSnapEnum {.importc: "GPU_SnapEnum", header: gpuH.} = enum
-    None = 0
+    SnapNone = 0
 
   GPUFilterEnum {.importc: "GPU_FilterEnum", header: gpuH.} = enum
     LinearMipmap = 2
+
+  GPUFlipEnum {.importc: "GPU_FlipEnum", header: gpuH.} = enum
+    FlipNone = 0
+    FlipHorizontal = 1
+
 
   Texture = object
     gpuImage: ptr GPUImage
@@ -191,7 +196,7 @@ proc loadImage*(gfx: var Graphics, path: string): Image =
   # Smoother image filtering by default
   proc GPU_SetSnapMode(image: ptr GPUImage, snap: GPUSnapEnum)
     {.importc, header: gpuH.}
-  GPU_SetSnapMode(gpuImage, GPUSnapEnum.None)
+  GPU_SetSnapMode(gpuImage, SnapNone)
   proc GPU_SetImageFilter(image: ptr GPUImage, filter: GPUFilterEnum)
     {.importc, header: gpuH.}
   GPU_SetImageFilter(gpuImage, GPUFilterEnum.LinearMipmap)
@@ -523,17 +528,40 @@ proc sdlColor(gfx: var Graphics): SDLColor {.inline.} =
   ## Current `SDLColor` to pass to renderer
   SDLColor(r: gfx.state.r, g: gfx.state.g, b: gfx.state.b, a: gfx.state.a)
 
-proc drawImage*(gfx: var Graphics, img: Image, x, y, scale: float) =
+proc GPU_BlitRectX(image: ptr GPUImage, srcRect: ptr GPURect,
+  target: ptr GPUTarget, destRect: ptr GPURect,
+  degrees, pivotX, pivotY: float, flip: GPUFlipEnum)
+  {.importc, header: gpuH.}
+
+proc drawImage*(gfx: var Graphics, img: Image,
+  x, y, scale: float,
+  flipH: bool = false) =
   ## Draw the given image with its center at `(x, y)`, with size scaled by
   ## the given scale from its actual dimensions.
   let (imgW, imgH) = img.size
   let w = scale * imgW
   let h = scale * imgH
-  proc GPU_BlitRect(image: ptr GPUImage, srcRect: ptr GPURect,
-    target: ptr GPUTarget, destRect: var GPURect)
-    {.importc, header: gpuH.}
   var destRect = gfx.gpuRect(x, y, w, h)
-  GPU_BlitRect(img.tex.gpuImage, nil, gfx.screen, destRect)
+  GPU_BlitRectX(img.tex.gpuImage, nil,
+    gfx.screen, destRect.addr,
+    0, 0, 0,
+    if flipH: FlipHorizontal else: FlipNone)
+
+proc drawImage*(gfx: var Graphics, img: Image,
+  x, y, scale: float,
+  subX, subY, subW, subH: float,
+  flipH: bool = false) =
+  ## Draw the given subrectangle of the image with its center at `(x, y)`, with
+  ## size scaled by the given scale from its actual dimensions. The
+  ## subrectangle is specified in the local coordinate space of the image.
+  let w = scale * subW
+  let h = scale * subH
+  var srcRect = GPURect(x: subX, y: subY, w: subW, h: subH)
+  var destRect = gfx.gpuRect(x, y, w, h)
+  GPU_BlitRectX(img.tex.gpuImage, srcRect.addr,
+    gfx.screen, destRect.addr,
+    0, 0, 0,
+    if flipH: FlipHorizontal else: FlipNone)
 
 proc drawLine*(gfx: var Graphics, x1, y1, x2, y2: float) =
   ## Draw a line from `(x1, y1)` to `(x2, y2)`
