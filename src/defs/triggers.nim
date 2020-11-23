@@ -14,25 +14,18 @@ proc run*(trig: Trigger) =
 
 
 # Animation
-
 var onAnimate*: Trigger
 
-
 # Physics
-
 var onPhysicsPre*: Trigger
 var onPhysicsPost*: Trigger
 
-
 # Draw
-
 var onApplyView*: Trigger
 var onDraw*: Trigger
 var onDrawOverlay*: Trigger
 
-
 # Edit
-
 var onEditUpdateBoxes*: Trigger
 var onEditApplyMoves*: Trigger
 var onEditInput*: Trigger
