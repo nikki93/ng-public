@@ -1,4 +1,4 @@
-## Defines all of the types that can be added to entities in the game.
+## Defines all component types that can be added to entities in the game.
 ##
 ## These are in one file so the game's state structure is understandable
 ## at a glance, and for easy import into other modules.
