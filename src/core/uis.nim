@@ -180,6 +180,13 @@ template event*(ui: var UI, eventType: string, body: typed) =
     if false:
       body
 
+proc noEvents*(ui: var UI): bool =
+  when defined(emscripten):
+    proc JS_uiNoEvents(): bool {.importc.}
+    return JS_uiNoEvents()
+  else:
+    return true
+
 
 # Values
 

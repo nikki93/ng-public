@@ -96,12 +96,14 @@
       (() => {
         const UI = window.UI;
         UI.eventCounts = new WeakMap();
+        UI.noEvents = true;
         UI.eventHandler = (e) => {
           const target = e.target;
           let counts = UI.eventCounts.get(target);
           if (counts === undefined) {
             counts = {};
             UI.eventCounts.set(target, counts);
+            UI.noEvents = false;
           }
           const count = counts[e.type];
           if (count === undefined) {

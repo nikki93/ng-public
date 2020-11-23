@@ -87,6 +87,10 @@ mergeInto(LibraryManager.library, {
   },
   JS_uiClearEventCounts: function () {
     window.UI.eventCounts = new WeakMap();
+    window.UI.noEvents = true;
+  },
+  JS_uiNoEvents: function () {
+    return window.UI.noEvents != false;
   },
 
   JS_uiValue: function () {

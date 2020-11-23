@@ -69,6 +69,16 @@ proc main() =
     if tim.dt >= 3 * 1 / 60.0 or not ev.windowFocused:
       return
 
+    block: # In edit only run loop on I/O
+      var framesSinceIO {.global.} = 0
+      if edit.enabled and ev.touches.len == 0 and ui.noEvents:
+        if framesSinceIO > 2:
+          return
+        else:
+          inc framesSinceIO
+      else:
+        framesSinceIO = 0
+
     # Update
     if edit.enabled:
       # Edit
