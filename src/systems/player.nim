@@ -74,7 +74,7 @@ onPhysicsPost.add proc() =
 onPhysicsPost.add proc() =
   # Update player animation based on walk state
   for ent, _, spr, anim in ker.each(Player, Sprite, Animation):
-    if ker.get(Walk, ent) != nil:
+    if ker.has(Walk, ent):
       let feet = ker.get(Feet, ent)
       let (vx, vy) = feet.body.velocity
       if vx * vx + vy * vy >= 27:

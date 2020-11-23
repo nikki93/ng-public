@@ -112,7 +112,7 @@ proc checkpoint*(edit: var Edit, description: string) =
   # entities were selected at the time.
   let node = saveScene(
     extra = proc(ent: Entity, node: JsonNode) =
-    if ker.get(EditSelect, ent) != nil:
+    if ker.has(EditSelect, ent):
       node["selected"] = %true)
   edit.undos.addLast(Action(description: description, node: node))
   while edit.undos.len > 50: # Limit undo buffer size
@@ -164,23 +164,21 @@ proc toolbar*(edit: var Edit) =
   if edit.enabled:
     # Move
     ui.box:
-      for _ in ker.each(EditSelect, EditBox):
+      if ker.any(EditSelect, EditBox):
         ui.button("move", selected = edit.mode == "move"):
           ui.event("click"):
             edit.setMode(if edit.mode == "move": "select" else: "move")
-        break
 
     ui.box("flex-gap")
 
     # Delete
     ui.box:
-      for _ in ker.each(EditSelect):
+      if ker.any(EditSelect):
         ui.button("delete"):
           ui.event("click"):
             for ent, _ in ker.each(EditSelect):
               ker.destroy(ent)
             edit.checkpoint("delete")
-        break
 
     # Undo / redo
     ui.button("undo", disabled = edit.undos.len <= 1):
@@ -239,7 +237,7 @@ proc input(edit: var Edit) =
       var pick = nullEntity
       var pickNext = true
       for (_, ent) in hits:
-        if ker.get(EditSelect, ent) != nil:
+        if ker.has(EditSelect, ent):
           pickNext = true
         elif pickNext:
           pick = ent

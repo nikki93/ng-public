@@ -60,7 +60,7 @@ proc inspector*(editx: var Edit) =
       # Add button for each type the entity doesn't have
       ui.box("add-bar"):
         forEachRegisteredTypeSkip(T, "noedit"):
-          if ker.get(T, ent) == nil:
+          if not ker.has(T, ent):
             const title = titleify($T)
             ui.button("add", label = title):
               ui.event("click"):

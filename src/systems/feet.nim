@@ -116,7 +116,7 @@ proc inspect*(feet: var Feet, ent: Entity) =
   ui.box("info"):
     ui.text "shape: ", feet.shape.numVerts, " vertices"
 
-    if edit.enabled and ker.get(Player, ent) == nil:
+    if edit.enabled and not ker.has(Player, ent):
       # Button to enter feet shape mode
       ui.button("shape", selected = edit.mode == "feet shape"):
         ui.event("click"):

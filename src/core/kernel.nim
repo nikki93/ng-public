@@ -64,12 +64,17 @@ proc destroy*(ker: var Kernel, ent: Entity) {.inline.} =
   ker.reg.destroy(ent)
 
 
-# Get
+# Get / has
 
 proc get*(ker: var Kernel, T: typedesc, ent: Entity): ptr T {.inline.} =
   proc tryGet[T](reg: var Registry, ent: Entity): ptr T
     {.importcpp: "#.try_get<'*0>(#)".}
   ker.reg.tryGet[:T](ent)
+
+proc has*(ker: var Kernel, T: typedesc, ent: Entity): bool {.inline.} =
+  proc has[T](reg: var Registry, ent: Entity, _: ptr T): bool
+    {.importcpp: "#.has<'*3>(#)".}
+  ker.reg.has[:T](ent, nil)
 
 
 # Add / remove
@@ -192,6 +197,28 @@ iterator each*(ker: var Kernel, T1, T2, T3, T4: typedesc):
     {.emit: "});".}
   else:
     {.emit: "}".}
+
+
+# Any
+
+proc any*[T1](ker: var Kernel, t1: typedesc[T1]): bool {.inline.} =
+  for _ in each(ker, T1):
+    return true
+
+proc any*[T1, T2](ker: var Kernel,
+  t1: typedesc[T1], t2: typedesc[T2]): bool {.inline.} =
+  for _ in each(ker, T1, T2):
+    return true
+
+proc any*[T1, T2, T3](ker: var Kernel,
+  t1: typedesc[T1], t2: typedesc[T2], t3: typedesc[T3]): bool {.inline.} =
+  for _ in each(ker, T1, T2, T3):
+    return true
+
+proc any*[T1, T2, T3, T4](ker: var Kernel, t1: typedesc[T1], t2: typedesc[T2],
+  t3: typedesc[T3], t4: typedesc[T4]): bool {.inline.} =
+  for _ in each(ker, T1, T2, T3, T4):
+    return true
 
 
 # Clear

@@ -4,19 +4,19 @@ import kernel
 
 proc main() =
   type
-    Position {.ng.} = object
+    Position {.comp.} = object
       x: float
       y: float
 
-    Sprite {.ng.} = object
+    Sprite {.comp.} = object
       img: string
 
-    C1 {.ng.} = object
+    C1 {.comp.} = object
       x: float
-    C2 {.ng.} = object
+    C2 {.comp.} = object
       x: float
       y: float
-    C3 {.ng.} = object
+    C3 {.comp.} = object
       x: float
       y: float
       z: float
@@ -25,17 +25,17 @@ proc main() =
       name: string
     Resource = ref ResourceObj
 
-    Stuff1 {.ng.} = object
+    Stuff1 {.comp.} = object
       name: string
       nums: seq[int]
       ress: seq[Resource]
 
-    Stuff2 {.ng.} = object
+    Stuff2 {.comp.} = object
       name: string
       nums: seq[int]
       ress: seq[Resource]
 
-    Stuff {.ng.} = object
+    Stuff {.comp.} = object
       i: int
 
   proc basic() =
@@ -58,7 +58,7 @@ proc main() =
       var spr = ker.get(Sprite, ent)
       doAssert spr.img == "foo.png"
 
-    block: # each
+    block: # each, has
       var found = 0
       for _, pos, spr in ker.each(Position, Sprite):
         doAssert pos.x == 3 and pos.y == 4
@@ -75,7 +75,7 @@ proc main() =
       proc check(mustSumX, mustSumY: float) =
         var sumX, sumY: float
         for e, pos in ker.each(Position):
-          if ker.get(Sprite, e) == nil:
+          if not ker.has(Sprite, e):
             sumX += pos.x
             sumY += pos.y
         doAssert sumX == mustSumX and sumY == mustSumY
@@ -84,10 +84,10 @@ proc main() =
         ker.destroy(e)
       check(0, 0)
 
-    block: # get, remove
-      doAssert ker.get(Sprite, ent) != nil
+    block: # has, remove
+      doAssert ker.has(Sprite, ent)
       ker.remove(Sprite, ent)
-      doAssert ker.get(Sprite, ent) == nil
+      doAssert not ker.has(Sprite, ent)
       var found = 0
       for _, pos, spr in ker.each(Position, Sprite):
         inc found
