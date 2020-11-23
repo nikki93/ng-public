@@ -55,7 +55,7 @@ proc main() =
     (vf.x, vf.y) = (pos.x, pos.y)
     vf.offsetY = 30
     vf.border = 180
-    vf.rate = 200
+    vf.rate = 8
 
     discard ker.add(Player, ent)
 

@@ -15,11 +15,11 @@ onPhysicsPost.add proc() =
 
     # Move along delta with smoothing
     if abs(dx) > 0.5 * width - vf.border:
-      vf.x += pow(2, -vf.rate * tim.dt) * # Smoothing factor
+      vf.x += (1 - pow(2, -vf.rate * tim.dt)) * # Smoothing factor
         abs(dx) / dx * # Sign of delta
         (abs(dx) - (0.5 * width - vf.border))
     if abs(dy) > 0.5 * height - vf.border:
-      vf.y += pow(2, -vf.rate * tim.dt) * # Smoothing factor
+      vf.y += (1 - pow(2, -vf.rate * tim.dt)) * # Smoothing factor
         abs(dy) / dy * # Sign of delta
         (abs(dy) - (0.5 * height - vf.border))
 
