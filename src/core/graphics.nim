@@ -224,7 +224,7 @@ proc blobUrl*(img: Image): lent string =
 
 proc path*(img: Image): lent string {.inline.} =
   img.tex.path
-  
+
 
 # Effect
 

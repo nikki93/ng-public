@@ -123,7 +123,7 @@ proc main() =
               echo "saving scene..."
               let node = saveScene(
                 filter = proc(ent: Entity): bool =
-                  not ker.has(Player, ent))
+                not ker.has(Player, ent))
               echo node.pretty
 
       # Side
