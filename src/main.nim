@@ -49,9 +49,7 @@ proc main() =
     feet.shape.entity = ent
 
     let fric = ker.add(Friction, ent)
-    fric.constr = phy.createPivot(phy.background, feet.body)
-    fric.constr.maxForce = 800
-    fric.constr.maxBias = 0
+    load(fric[], ent, JsonNode())
 
     let vf = ker.add(ViewFollow, ent)
     (vf.x, vf.y) = (pos.x, pos.y)
