@@ -12,7 +12,7 @@ proc main() =
   initMeta()
 
   block: # Load scene
-    loadScene("assets/pool.scn")
+    loadScene("assets/test.scn")
 
   block: # Create player entity
     let ent = ker.create()
