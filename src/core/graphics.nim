@@ -149,7 +149,7 @@ proc `=copy`(a: var Texture, b: Texture) {.error.}
 
 proc `=copy`(a: var Image, b: Image) {.error.}
 
-proc `=destroy`(tex: var Texture) =
+proc `=destroy`(tex: var Texture) {.inline.} =
   # Free the GPU data associated with this texture
   if tex.gpuImage != nil:
     proc GPU_FreeImage(image: ptr GPUImage)
@@ -157,7 +157,7 @@ proc `=destroy`(tex: var Texture) =
     GPU_FreeImage(tex.gpuImage)
   destroyFields(tex)
 
-proc `=destroy`(img: var Image) =
+proc `=destroy`(img: var Image) {.inline.} =
   # User code just dropped an image handle. Decrement the handle count
   # of the associated texture.
   if img.tex != nil:
@@ -232,7 +232,7 @@ proc `=copy`(a: var Program, b: Program) {.error.}
 
 proc `=copy`(a: var Effect, b: Effect) {.error.}
 
-proc `=destroy`(prog: var Program) =
+proc `=destroy`(prog: var Program) {.inline.} =
   # Free the GPU data associated with this program
   if prog.gpuProgId != 0:
     proc GPU_FreeShaderProgram(prog: uint32)
@@ -240,7 +240,7 @@ proc `=destroy`(prog: var Program) =
     GPU_FreeShaderProgram(prog.gpuProgId)
   destroyFields(prog)
 
-proc `=destroy`(eff: var Effect) =
+proc `=destroy`(eff: var Effect) {.inline.} =
   # User code just dropped an effect handle. Decrement the handle count
   # of the associated program.
   if eff.prog != nil:

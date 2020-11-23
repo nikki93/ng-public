@@ -79,19 +79,19 @@ converter toCpVect(value: Vec2): cpVect {.inline.} =
 
 # Chipmunk object removal
 
-proc remove(body: ptr cpBody) =
+proc remove(body: ptr cpBody) {.inline.} =
   proc cpSpaceRemoveBody(space: ptr cpSpace, body: ptr cpBody)
     {.importc, header: cpH.}
   if body.space != nil:
     cpSpaceRemoveBody(body.space, body)
 
-proc remove(constr: ptr cpConstraint) =
+proc remove(constr: ptr cpConstraint) {.inline.} =
   proc cpSpaceRemoveConstraint(space: ptr cpSpace, constr: ptr cpConstraint)
     {.importc, header: cpH.}
   if constr.space != nil:
     cpSpaceRemoveConstraint(constr.space, constr)
 
-proc remove(shape: ptr cpShape) =
+proc remove(shape: ptr cpShape) {.inline.} =
   proc cpSpaceRemoveShape(space: ptr cpSpace, shape: ptr cpShape)
     {.importc, header: cpH.}
   if shape.space != nil:
@@ -118,7 +118,7 @@ proc cpPolyShapeGetVert(shape: ptr cpShape, index: int): cpVect
 
 proc `=copy`(a: var Body, b: Body) {.error.}
 
-proc `=destroy`(body: var Body) =
+proc `=destroy`(body: var Body) {.inline.} =
   if body.cp != nil:
     # Remove attached constraints and shapes. This must be done before
     # freeing the shape (see note at:
@@ -226,7 +226,7 @@ proc draw*(body: Body) =
 
 proc `=copy`(a: var Constraint, b: Constraint) {.error.}
 
-proc `=destroy`(constr: var Constraint) =
+proc `=destroy`(constr: var Constraint) {.inline.} =
   if constr.cp != nil:
     # Remove constraint from space and free it
     remove(constr.cp)
@@ -270,7 +270,7 @@ proc `maxBias=`*(constr: Constraint, maxBias: float) {.inline.} =
 
 proc `=copy`(a: var Shape, b: Shape) {.error.}
 
-proc `=destroy`(shape: var Shape) =
+proc `=destroy`(shape: var Shape) {.inline.} =
   if shape.cp != nil:
     # Remove shape from space and free it
     remove(shape.cp)
