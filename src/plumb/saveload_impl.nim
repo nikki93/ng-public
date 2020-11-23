@@ -28,12 +28,12 @@ proc loadComponent(T: typedesc, ent: Entity, node: JsonNode) =
   # Fields
   for name, val in fieldPairs(inst[]):
     when compiles(JsonNode().to(typeof(val))):
-      # Simple field
+      # Auto-saveable field
       let valNode = node.getOrDefault(name)
       if valNode != nil:
         val = valNode.to(typeof(val))
     else:
-      # Not a simple field, keep track and hint
+      # Not auto-saveable, track and hint
       static:
         autoSkipped.incl($T & "." & name & ": " & $typeof(val))
 
@@ -47,10 +47,10 @@ proc saveComponent[T](inst: ptr T, ent: Entity, node: JsonNode) =
   # Fields
   for name, val in fieldPairs(inst[]):
     when compiles(%val):
-      # Simple field
+      # Auto-loadable field
       node[name] = %val
     else:
-      # Not a simple field, track and hint
+      # Not auto-loadable, track and hint
       static:
         autoSkipped.incl($T & "." & name & ": " & $typeof(val))
 
