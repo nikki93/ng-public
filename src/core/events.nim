@@ -72,37 +72,6 @@ proc windowFocused*(ev: Events): bool {.inline.} =
     true
 
 
-# Init / deinit
-
-const SDL_INIT_EVENTS = 0x00004000
-
-proc init*(ev: var Events) =
-  # Refresh rate
-  ev.refreshBase = getTime()
-  ev.refreshCount = 1
-  ev.refreshRate = 60 # TODO(nikki): Read refresh rate from graphics
-
-  # Tell SDL not to consider touches as mouse events since we check both
-  proc SDL_SetHint(nane: cstring, value: cstring): bool
-    {.importc, header: sdlH.}
-  discard SDL_SetHint("SDL_TOUCH_MOUSE_EVENTS", "0")
-
-  # Init SDL events
-  proc SDL_InitSubSystem(flags: uint32): int
-    {.importc, header: sdlH.}
-  discard SDL_InitSubSystem(SDL_INIT_EVENTS)
-
-  echo "initialized events"
-
-proc deinit*(ev: var Events) =
-  # Deinit SDL events
-  proc SDL_QuitSubSystem(flags: uint32)
-    {.importc, header: sdlH.}
-  SDL_QuitSubSystem(SDL_INIT_EVENTS)
-
-  echo "deinitialized events"
-
-
 # Frame
 
 proc addTouch(ev: var Events, id: int64, screenX, screenY: float) {.inline.} =
@@ -239,6 +208,37 @@ template loop*(ev: var Events, body: typed) =
       # Regular loop
       while not ev.quitting:
         frameProc()
+
+
+# Init / deinit
+
+const SDL_INIT_EVENTS = 0x00004000
+
+proc init*(ev: var Events) =
+  # Refresh rate
+  ev.refreshBase = getTime()
+  ev.refreshCount = 1
+  ev.refreshRate = 60 # TODO(nikki): Read refresh rate from graphics
+
+  # Tell SDL not to consider touches as mouse events since we check both
+  proc SDL_SetHint(nane: cstring, value: cstring): bool
+    {.importc, header: sdlH.}
+  discard SDL_SetHint("SDL_TOUCH_MOUSE_EVENTS", "0")
+
+  # Init SDL events
+  proc SDL_InitSubSystem(flags: uint32): int
+    {.importc, header: sdlH.}
+  discard SDL_InitSubSystem(SDL_INIT_EVENTS)
+
+  echo "initialized events"
+
+proc deinit*(ev: var Events) =
+  # Deinit SDL events
+  proc SDL_QuitSubSystem(flags: uint32)
+    {.importc, header: sdlH.}
+  SDL_QuitSubSystem(SDL_INIT_EVENTS)
+
+  echo "deinitialized events"
 
 
 # Singleton

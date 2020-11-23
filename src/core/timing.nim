@@ -26,19 +26,6 @@ proc dt*(tim: Timing): float {.inline.} =
   tim.deltaSeconds
 
 
-# Init / deinit
-
-proc init*(tim: var Timing) =
-  tim.start = getTime()
-  tim.lastFrame = tim.start
-  tim.lastFPSUpdate = tim.start
-
-  echo "initialized timing"
-
-proc deinit*(tim: var Timing) =
-  echo "deinitialized timing"
-
-
 # Frame
 
 func inSecondsFloat(dur: Duration): float =
@@ -61,6 +48,19 @@ proc frame*(tim: var Timing) =
     tim.lastFPSUpdate = now
     tim.fps = tim.framesSinceFPSUpdate.toFloat / secSinceFPSUpdate
     tim.framesSinceFPSUpdate = 0
+
+
+# Init / deinit
+
+proc init*(tim: var Timing) =
+  tim.start = getTime()
+  tim.lastFrame = tim.start
+  tim.lastFPSUpdate = tim.start
+
+  echo "initialized timing"
+
+proc deinit*(tim: var Timing) =
+  echo "deinitialized timing"
 
 
 # Singleton

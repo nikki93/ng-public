@@ -415,95 +415,6 @@ proc setState(gfx: var Graphics, state: State) {.inline.} =
   gfx.useProgram(state.prog)
 
 
-# Init / deinit
-
-const SDL_INIT_VIDEO = 0x00000020
-
-proc init*(gfx: var Graphics) =
-  # Initial state
-  gfx.renderScale = 1
-  gfx.state = State(
-    r: 0xf8, g: 0xf8, b: 0xf2, a: 0xff,
-    viewX: 400, viewY: 225,
-    viewWidth: 800, viewHeight: 450)
-
-  # Init SDL video
-  proc SDL_InitSubSystem(flags: uint32): int
-    {.importc, header: sdlH.}
-  discard SDL_InitSubSystem(SDL_INIT_VIDEO)
-
-  # In Emscripten, tell SDL to only take keyboard focus when the canvas is
-  # focused. Without this it steals keyboard focus from the whole page.
-  when defined(emscripten):
-    proc SDL_SetHint(nane: cstring, value: cstring): bool
-      {.importc, header: sdlH.}
-    discard SDL_SetHint("SDL_EMSCRIPTEN_KEYBOARD_ELEMENT", "#canvas")
-
-  # Create window
-  let (bestW, bestH) = gfx.selectWindowSize()
-  proc SDL_CreateWindow(title: cstring, x, y, w, h: int,
-      flags: uint32): ptr SDLWindow
-    {.importc, header: sdlH.}
-  const SDL_WINDOWPOS_UNDEFINED = 0x1FFF0000
-  const SDL_WINDOW_ALLOW_HIGHDPI = 0x00002000
-  const SDL_WINDOW_OPENGL = 0x00000002
-  gfx.window = SDL_CreateWindow("ng",
-      SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-      bestW, bestH,
-      SDL_WINDOW_ALLOW_HIGHDPI or SDL_WINDOW_OPENGL)
-
-  # Create renderer
-  proc SDL_GetWindowID(window: ptr SDLWindow): uint32
-    {.importc, header: sdlH.}
-  proc GPU_SetInitWindow(windowId: uint32)
-    {.importc, header: gpuH.}
-  GPU_SetInitWindow(SDL_GetWindowID(gfx.window))
-  var w, h: cint
-  SDL_GetWindowSize(gfx.window, w, h)
-  const
-    gpuDefault {.used.} = 0
-    gpuEnableVsync {.used.} = 0x1
-    gpuDisableVsync {.used.} = 0x2
-    gpuDisableDoubleBuffer {.used.} = 0x4
-  var gpuFlags: uint32 = gpuDefault
-  when defined(emscripten):
-    gpuFlags = gpuDisableVsync or gpuDisableDoubleBuffer
-  proc GPU_SetPreInitFlags(flags: uint32)
-    {.importc, header: gpuH.}
-  GPU_SetPreInitFlags(gpuFlags)
-  proc GPU_Init(w, h: uint16, flags: uint32): ptr GPUTarget
-    {.importc, header: gpuH.}
-  gfx.screen = GPU_Init(cast[uint16](w), cast[uint16](h), 0)
-  GPU_SetWindowResolution(cast[uint16](w), cast[uint16](h))
-
-  # Apply initial state
-  gfx.setState(gfx.state)
-
-  echo "initialized graphics"
-
-proc deinit*(gfx: var Graphics) =
-  # Destroy all resources /before/ deinitializing renderer and window
-  gfx.progs.clear()
-  gfx.texs.clear()
-
-  # Destroy renderer
-  if gfx.screen != nil:
-    proc GPU_Quit()
-      {.importc, header: gpuH.}
-    GPU_Quit()
-
-  # Destroy window and deinit SDL video
-  if gfx.window != nil:
-    proc SDL_DestroyWindow(window: ptr SDLWindow)
-      {.importc, header: sdlH.}
-    proc SDL_QuitSubSystem(flags: uint32)
-      {.importc, header: sdlH.}
-    SDL_DestroyWindow(gfx.window)
-    SDL_QuitSubSystem(SDL_INIT_VIDEO)
-
-  echo "deinitialized graphics"
-
-
 # Draw
 
 proc clear*(gfx: var Graphics, r, g, b: uint8) =
@@ -649,6 +560,95 @@ template frame*(gfx: var Graphics, body: typed) =
   block:
     body
   endFrame(gfx)
+
+
+# Init / deinit
+
+const SDL_INIT_VIDEO = 0x00000020
+
+proc init*(gfx: var Graphics) =
+  # Initial state
+  gfx.renderScale = 1
+  gfx.state = State(
+    r: 0xf8, g: 0xf8, b: 0xf2, a: 0xff,
+    viewX: 400, viewY: 225,
+    viewWidth: 800, viewHeight: 450)
+
+  # Init SDL video
+  proc SDL_InitSubSystem(flags: uint32): int
+    {.importc, header: sdlH.}
+  discard SDL_InitSubSystem(SDL_INIT_VIDEO)
+
+  # In Emscripten, tell SDL to only take keyboard focus when the canvas is
+  # focused. Without this it steals keyboard focus from the whole page.
+  when defined(emscripten):
+    proc SDL_SetHint(nane: cstring, value: cstring): bool
+      {.importc, header: sdlH.}
+    discard SDL_SetHint("SDL_EMSCRIPTEN_KEYBOARD_ELEMENT", "#canvas")
+
+  # Create window
+  let (bestW, bestH) = gfx.selectWindowSize()
+  proc SDL_CreateWindow(title: cstring, x, y, w, h: int,
+      flags: uint32): ptr SDLWindow
+    {.importc, header: sdlH.}
+  const SDL_WINDOWPOS_UNDEFINED = 0x1FFF0000
+  const SDL_WINDOW_ALLOW_HIGHDPI = 0x00002000
+  const SDL_WINDOW_OPENGL = 0x00000002
+  gfx.window = SDL_CreateWindow("ng",
+      SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+      bestW, bestH,
+      SDL_WINDOW_ALLOW_HIGHDPI or SDL_WINDOW_OPENGL)
+
+  # Create renderer
+  proc SDL_GetWindowID(window: ptr SDLWindow): uint32
+    {.importc, header: sdlH.}
+  proc GPU_SetInitWindow(windowId: uint32)
+    {.importc, header: gpuH.}
+  GPU_SetInitWindow(SDL_GetWindowID(gfx.window))
+  var w, h: cint
+  SDL_GetWindowSize(gfx.window, w, h)
+  const
+    gpuDefault {.used.} = 0
+    gpuEnableVsync {.used.} = 0x1
+    gpuDisableVsync {.used.} = 0x2
+    gpuDisableDoubleBuffer {.used.} = 0x4
+  var gpuFlags: uint32 = gpuDefault
+  when defined(emscripten):
+    gpuFlags = gpuDisableVsync or gpuDisableDoubleBuffer
+  proc GPU_SetPreInitFlags(flags: uint32)
+    {.importc, header: gpuH.}
+  GPU_SetPreInitFlags(gpuFlags)
+  proc GPU_Init(w, h: uint16, flags: uint32): ptr GPUTarget
+    {.importc, header: gpuH.}
+  gfx.screen = GPU_Init(cast[uint16](w), cast[uint16](h), 0)
+  GPU_SetWindowResolution(cast[uint16](w), cast[uint16](h))
+
+  # Apply initial state
+  gfx.setState(gfx.state)
+
+  echo "initialized graphics"
+
+proc deinit*(gfx: var Graphics) =
+  # Destroy all resources /before/ deinitializing renderer and window
+  gfx.progs.clear()
+  gfx.texs.clear()
+
+  # Destroy renderer
+  if gfx.screen != nil:
+    proc GPU_Quit()
+      {.importc, header: gpuH.}
+    GPU_Quit()
+
+  # Destroy window and deinit SDL video
+  if gfx.window != nil:
+    proc SDL_DestroyWindow(window: ptr SDLWindow)
+      {.importc, header: sdlH.}
+    proc SDL_QuitSubSystem(flags: uint32)
+      {.importc, header: sdlH.}
+    SDL_DestroyWindow(gfx.window)
+    SDL_QuitSubSystem(SDL_INIT_VIDEO)
+
+  echo "deinitialized graphics"
 
 
 # Singleton
