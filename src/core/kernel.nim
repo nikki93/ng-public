@@ -238,7 +238,7 @@ var ker*: Kernel
 
 var typeInfoFirstUsedAt {.compileTime.}: string
 
-macro ng*(body: untyped) =
+macro comp*(body: untyped) =
   var ident = body[0][0]
   if ident.kind == nnkPostfix:
     ident = ident[1]

@@ -16,10 +16,10 @@ template noedit() {.pragma.} # Skip display of type in editor UI
 type
   # Basics
 
-  Position* {.ng.} = object
+  Position* {.comp.} = object
     x*, y*: float
 
-  Sprite* {.ng.} = object
+  Sprite* {.comp.} = object
     image*: Image
     depth*: float
     scale*: float
@@ -38,7 +38,7 @@ type
     fps*: float
     pause*: float
 
-  Animation* {.ng.} = object
+  Animation* {.comp.} = object
     clips*: seq[AnimationClip]
     clipNameHashes*: seq[Hash]
     clipIndex*: int
@@ -47,7 +47,7 @@ type
 
   # Solids
 
-  Feet* {.ng.} = object
+  Feet* {.comp.} = object
     body*: Body
     shape*: Shape
 
@@ -56,26 +56,26 @@ type
 
   # Motion
 
-  Walk* {.ng, nosave.} = object
+  Walk* {.comp, nosave.} = object
     target*: Body
     constr*: Constraint
 
     touchTime*: float
 
-  Friction* {.ng.} = object
+  Friction* {.comp.} = object
     constr*: Constraint
 
 
   # View
 
-  ViewFollow* {.ng.} = object
+  ViewFollow* {.comp.} = object
     x*, y*: float
 
     offsetX*, offsetY*: float
     border*: float
     rate*: float
 
-  WorldBounds* {.ng.} = object
+  WorldBounds* {.comp.} = object
     minX*, maxX*, minY*, maxY*: float
 
     bodies*: array[4, Body]
@@ -84,13 +84,13 @@ type
 
   # Player
 
-  Player* {.ng.} = object
+  Player* {.comp.} = object
 
 
   # Edit
 
-  EditSelect* {.ng, nosave, noedit.} = object
+  EditSelect* {.comp, nosave, noedit.} = object
 
-  EditBox* {.ng, nosave, noedit.} = object
+  EditBox* {.comp, nosave, noedit.} = object
     x*, y*: float
     width*, height*: float
