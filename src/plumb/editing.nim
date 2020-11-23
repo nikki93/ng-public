@@ -3,7 +3,7 @@
 
 import std/[algorithm, json, deques]
 
-import ng
+import core
 
 import types, triggers
 import saveload

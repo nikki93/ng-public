@@ -1,5 +1,6 @@
 import std/[math, json]
-import ng
+
+import core
 
 import types, triggers
 import systems/all

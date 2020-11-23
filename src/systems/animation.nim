@@ -1,6 +1,6 @@
 import std/[decls, json, hashes]
 
-import ng
+import core
 
 import types, triggers
 

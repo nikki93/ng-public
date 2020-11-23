@@ -6,7 +6,7 @@
 
 import std/[json, macros, hashes, sets]
 
-import ng
+import core
 
 import saveload
 

@@ -1,6 +1,6 @@
-## Re-exports all engine symbols. Handles module initialization and
+## Re-exports all core modules. Handles module initialization and
 ## deinitialization in the correct order. This is the module to import when
-## using the engine from application or game code.
+## using the core from application or game code.
 
 import timing, profiling, graphics, events, physics, uis, kernel
 export timing, profiling, graphics, events, physics, uis, kernel

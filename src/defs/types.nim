@@ -5,7 +5,7 @@
 
 import std/hashes
 
-import ng
+import core
 
 
 template nosave() {.pragma.} # Skip save / load for type

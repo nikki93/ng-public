@@ -1,6 +1,6 @@
 import std/json
 
-import ng
+import core
 
 import types
 

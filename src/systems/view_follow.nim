@@ -1,6 +1,6 @@
 import std/math
 
-import ng
+import core
 
 import types, triggers
 

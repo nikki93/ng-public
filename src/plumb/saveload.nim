@@ -3,7 +3,7 @@
 
 import std/json
 
-import ng
+import core
 
 
 # Implementations to be filled-in by 'saveload_impl'

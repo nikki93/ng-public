@@ -4,7 +4,7 @@
 
 import std/[strutils, json]
 
-import ng
+import core
 
 import editing
 
