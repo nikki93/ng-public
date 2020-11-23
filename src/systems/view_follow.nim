@@ -33,9 +33,9 @@ onPhysicsPost.add proc() =
         vf.y = wb.minY + 0.5 * height
       if vf.y + 0.5 * height > wb.maxY:
         vf.y = wb.maxY - 0.5 * height
-      break
+      break # Disambiguate by picking first one
 
 onApplyView.add proc() =
   for _, vf in ker.each(ViewFollow):
     gfx.setView(vf.x, vf.y, width, height)
-    break
+    break # Disambiguate by picking first one
