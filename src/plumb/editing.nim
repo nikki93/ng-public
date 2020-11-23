@@ -40,8 +40,11 @@ proc enabled*(edit: Edit): bool {.inline.} =
 proc play*(edit: var Edit) =
   edit.enabled = false
 
+proc restore(edit: var Edit)
+
 proc stop*(edit: var Edit) =
   edit.enabled = true
+  edit.restore()
   edit.mode = "select"
 
 proc mode*(edit: Edit): lent string {.inline.} =

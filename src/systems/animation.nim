@@ -1,8 +1,37 @@
-import std/decls
+import std/[decls, json, hashes]
 
 import ng
 
 import types, triggers
+
+
+# Interface
+
+proc addClip*(anim: ptr Animation, clip: AnimationClip) =
+  anim.clipNameHashes.add(hash(clip.name))
+  anim.clips.add(clip)
+
+proc setClip*(anim: ptr Animation, name: static string) =
+  const nameHash = hash(name)
+  if anim.clipIndex < anim.clips.len:
+    if anim.clipNameHashes[anim.clipIndex] == nameHash:
+      return # Assuming a collision is unlikely...
+  for i in 0..<anim.clips.len:
+    if anim.clipNameHashes[i] == nameHash and anim.clips[i].name == name:
+      anim.clipIndex = i
+
+
+# Loading / saving
+
+proc load*(anim: var Animation, ent: Entity, node: JsonNode) =
+  # Re-generate clip name hashes
+  anim.clipNameHashes.setLen(anim.clips.len)
+  for i in 0..<anim.clips.len:
+    anim.clipNameHashes[i] = hash(anim.clips[i].name)
+
+proc save*(anim: Animation, ent: Entity, node: JsonNode) =
+  # Skip clip name hashes (should re-generate)
+  node.delete("clipNameHashes")
 
 
 # Animating

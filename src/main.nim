@@ -17,12 +17,26 @@ proc main() =
     let ent = ker.create()
 
     let pos = ker.add(Position, ent)
-    (pos.x, pos.y) = (100.0, 100.0)
+    (pos.x, pos.y) = (230.0, 115.0)
 
     let spr = ker.add(Sprite, ent)
-    spr.image = gfx.loadImage("assets/player.png")
-    spr.scale = 0.25
+    spr.image = gfx.loadImage("assets/player_walk_right.png")
+    spr.cols = 4
+    spr.rows = 2
+    spr.scale = 0.37
     spr.depth = 1000
+
+    let anim = ker.add(Animation, ent)
+    anim.addClip(AnimationClip(
+      name: "idle",
+      count: 1,
+      fps: 24,
+    ))
+    anim.addClip(AnimationClip(
+      name: "walk_right",
+      count: 8,
+      fps: 12,
+    ))
 
     let feet = ker.add(Feet, ent)
     feet.body = phy.createDynamic(1, Inf)

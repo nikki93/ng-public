@@ -3,6 +3,8 @@
 ## These are in one file so the game's state structure is understandable
 ## at a glance, and for easy import into other modules.
 
+import std/hashes
+
 import ng
 
 
@@ -38,6 +40,7 @@ type
 
   Animation* {.ng.} = object
     clips*: seq[AnimationClip]
+    clipNameHashes*: seq[Hash]
     clipIndex*: int
     time*: float
 

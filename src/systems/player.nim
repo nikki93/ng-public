@@ -3,6 +3,7 @@ import std/math
 import ng
 
 import types, triggers
+import animation
 
 
 # Walking
@@ -72,7 +73,15 @@ onPhysicsPost.add proc() =
 
 onPhysicsPost.add proc() =
   # Update player animation based on walk state
-  discard
+  for ent, _, spr, anim in ker.each(Player, Sprite, Animation):
+    if ker.get(Walk, ent) != nil:
+      let feet = ker.get(Feet, ent)
+      let (vx, vy) = feet.body.velocity
+      if vx * vx + vy * vy >= 27:
+        spr.flipH = vx < 0
+        anim.setClip("walk_right")
+        return
+    anim.setClip("idle")
 
 
 # Overlay
