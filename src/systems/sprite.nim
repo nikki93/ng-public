@@ -17,7 +17,7 @@ proc load*(spr: var Sprite, ent: Entity, node: JsonNode) =
   if not node.hasKey("rows"):
     spr.rows = 1
 
-  # Load image, with a default fallback
+  # Load image, with default fallback
   let imageNameNode = node{"imageName"}
   if imageNameNode != nil:
     spr.image = gfx.loadImage("assets/" & imageNameNode.getStr())
@@ -25,10 +25,7 @@ proc load*(spr: var Sprite, ent: Entity, node: JsonNode) =
     spr.image = gfx.loadImage("assets/player.png")
 
 proc save*(spr: Sprite, ent: Entity, node: JsonNode) =
-  # Save image name
-  node["imageName"] = %spr.image.path.extractFilename
-
-  # Leave out super-common defaults
+  # Common defaults
   if spr.col == 0:
     node.delete("col")
   if spr.row == 0:
@@ -39,6 +36,9 @@ proc save*(spr: Sprite, ent: Entity, node: JsonNode) =
     node.delete("rows")
   if not spr.flipH:
     node.delete("flipH")
+
+  # Image name
+  node["imageName"] = %spr.image.path.extractFilename
 
 
 # Drawing
