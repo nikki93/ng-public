@@ -231,6 +231,7 @@ template patch*(ui: var UI, id: cstring, body: typed) =
       body
 
 when defined(emscripten):
+  # This is called from JS by `JS_uiPatch`
   proc JS_uiCallPatchProc()
     {.exportc, codegenDecl: "EMSCRIPTEN_KEEPALIVE $# $#$#".} =
     if thePatchProc != nil:
