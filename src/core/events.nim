@@ -212,8 +212,6 @@ proc endFrame(ev: var Events) =
         emscripten_set_main_loop_timing(EM_TIMING_RAF, 0)
       ev.prevUnfocused = unfocused
 
-var theFrameProc: proc() # Needed for the Emscripten case below
-
 template loop*(ev: var Events, body: typed) =
   ## Begin the application's event loop, running the body every frame of the
   ## event loop. Events are only accessible within this body.
@@ -229,7 +227,7 @@ template loop*(ev: var Events, body: typed) =
     when defined(emscripten):
       # Emscripten maanges the main loop and needs us to just pass it a
       # frame callback
-      theFrameProc = frameProc
+      let theFrameProc {.global.} = frameProc
       proc cFrame() {.cdecl.} =
         theFrameProc()
       proc emscripten_set_main_loop(
