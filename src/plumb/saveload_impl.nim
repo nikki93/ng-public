@@ -15,6 +15,12 @@ import systems/all
 
 # Automatically-handled field types
 
+proc loadField(val: var bool, node: JsonNode) {.used.} =
+  val = node.getBool()
+
+proc saveField(val: bool): JsonNode {.used.} =
+  %val
+
 proc loadField(val: var int, node: JsonNode) {.used.} =
   val = node.getInt()
 
