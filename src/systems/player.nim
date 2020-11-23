@@ -80,7 +80,7 @@ onPhysicsPost.add proc() =
       if vx * vx + vy * vy >= 27:
         spr.flipH = vx < 0
         anim.setClip("walk_right")
-        break
+        continue
     anim.setClip("idle")
 
 
