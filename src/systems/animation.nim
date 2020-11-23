@@ -1,19 +1,8 @@
-import std/[json, decls]
+import std/decls
 
 import ng
 
 import types, triggers
-
-
-# Loading / saving
-
-proc load*(anim: var Animation, ent: Entity, node: JsonNode) =
-  let clipsNode = node{"clips"}
-  if clipsNode != nil:
-    anim.clips = clipsNode.to(seq[AnimationClip])
-
-proc save*(anim: Animation, ent: Entity, node: JsonNode) =
-  node["clips"] = %anim.clips
 
 
 # Animating

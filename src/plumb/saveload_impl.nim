@@ -13,36 +13,9 @@ import saveload
 import systems/all
 
 
-# Automatically-handled field types
-
-proc loadField(val: var bool, node: JsonNode) {.used.} =
-  val = node.getBool()
-
-proc saveField(val: bool): JsonNode {.used.} =
-  %val
-
-proc loadField(val: var int, node: JsonNode) {.used.} =
-  val = node.getInt()
-
-proc saveField(val: int): JsonNode {.used.} =
-  %val
-
-proc loadField(val: var float, node: JsonNode) {.used.} =
-  val = node.getFloat()
-
-proc saveField(val: float): JsonNode {.used.} =
-  %val
-
-proc loadField(val: var string, node: JsonNode) {.used.} =
-  val = node.getStr()
-
-proc saveField(val: string): JsonNode {.used.} =
-  %val
-
-
 # Components
 
-var autoSkipped {.compileTime.}: HashSet[string]
+var autoSkipped {.compileTime.}: OrderedSet[string]
 
 proc loadComponent(T: typedesc, ent: Entity, node: JsonNode) =
   ## Load a component into an entity, adding it if needed
@@ -54,15 +27,15 @@ proc loadComponent(T: typedesc, ent: Entity, node: JsonNode) =
 
   # Fields
   for name, val in fieldPairs(inst[]):
-    when compiles(loadField(val, JsonNode())):
+    when compiles(JsonNode().to(typeof(val))):
       # Simple field
       let valNode = node.getOrDefault(name)
       if valNode != nil:
-        loadField(val, valNode)
+        val = valNode.to(typeof(val))
     else:
       # Not a simple field, keep track and hint
       static:
-        autoSkipped.incl($T & "." & name)
+        autoSkipped.incl($T & "." & name & ": " & $typeof(val))
 
   # Custom `load` hook
   when compiles(load(inst[], ent, node)):
@@ -73,13 +46,13 @@ proc saveComponent[T](inst: ptr T, ent: Entity, node: JsonNode) =
 
   # Fields
   for name, val in fieldPairs(inst[]):
-    when compiles(saveField(val)):
+    when compiles(%val):
       # Simple field
-      node[name] = saveField(val)
+      node[name] = %val
     else:
       # Not a simple field, track and hint
       static:
-        autoSkipped.incl($T & "." & name)
+        autoSkipped.incl($T & "." & name & ": " & $typeof(val))
 
   # Custom `save` hook
   when compiles(save(inst[], ent, node)):
@@ -138,4 +111,5 @@ saveSceneImpl = proc(
 # Warn about fields we skipped automatic save / load for
 when not defined(nimsuggest):
   import std/[strutils, sequtils]
-  {.hint: "automatic save / load skipped for: " & autoSkipped.toSeq.join(", ").}
+  {.hint: "automatic save / load skipped for:\n    " &
+    autoSkipped.toSeq.join("\n    ").}
