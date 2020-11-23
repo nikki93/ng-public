@@ -25,7 +25,7 @@ proc load*(spr: var Sprite, ent: Entity, node: JsonNode) =
     spr.image = gfx.loadImage("assets/player.png")
 
 proc save*(spr: Sprite, ent: Entity, node: JsonNode) =
-  # Common defaults
+  # Skip common defaults
   if spr.col == 0:
     node.delete("col")
   if spr.row == 0:
