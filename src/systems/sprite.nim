@@ -65,7 +65,9 @@ onDraw.add proc() =
 onEditUpdateBoxes.add proc() =
   for ent, pos, spr in ker.each(Position, Sprite):
     let (imgW, imgH) = spr.image.size
-    edit.updateBox(ent, pos.x, pos.y, spr.scale * imgW, spr.scale * imgH)
+    let w = spr.scale * imgW / spr.cols.toFloat
+    let h = spr.scale * imgH / spr.rows.toFloat
+    edit.updateBox(ent, pos.x, pos.y, w, h)
 
 proc inspect*(spr: var Sprite, ent: Entity) =
   # Image preview
