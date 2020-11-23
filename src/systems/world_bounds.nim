@@ -2,8 +2,11 @@ import std/json
 
 import core
 
-import types
+import types, triggers
+import editing
 
+
+# Loading
 
 proc load*(wb: var WorldBounds, ent: Entity, node: JsonNode) =
   if wb.maxX > wb.minX and wb.maxY > wb.minY:
@@ -26,3 +29,12 @@ proc load*(wb: var WorldBounds, ent: Entity, node: JsonNode) =
       wb.bodies[2], wb.maxX - wb.minX + 2 * thick, thick)
     wb.shapes[3] = phy.createBox( # Bottom
       wb.bodies[3], wb.maxX - wb.minX + 2 * thick, thick)
+
+
+# Editing
+
+onEditUpdateBoxes.add proc() =
+  for ent, wb in ker.each(WorldBounds):
+    edit.updateBox(ent,
+      x = 0.5 * (wb.minX + wb.maxX), y = 0.5 * (wb.minY + wb.maxY),
+      width = wb.maxX - wb.minX, height = wb.maxY - wb.minY)
