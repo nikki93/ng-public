@@ -9,8 +9,13 @@ import editing
 # Loading / saving
 
 proc load*(spr: var Sprite, ent: Entity, node: JsonNode) =
+  # Non-zero defaults
   if not node.hasKey("scale"):
     spr.scale = 0.25
+  if not node.hasKey("cols"):
+    spr.cols = 1
+  if not node.hasKey("rows"):
+    spr.rows = 1
 
   # Load image, with a default fallback
   let imageNameNode = node{"imageName"}
@@ -23,6 +28,18 @@ proc save*(spr: Sprite, ent: Entity, node: JsonNode) =
   # Save image name
   node["imageName"] = %spr.image.path.extractFilename
 
+  # Leave out super-common defaults
+  if spr.col == 0:
+    node.delete("col")
+  if spr.row == 0:
+    node.delete("row")
+  if spr.cols <= 1:
+    node.delete("cols")
+  if spr.rows <= 1:
+    node.delete("rows")
+  if not spr.flipH:
+    node.delete("flipH")
+
 
 # Drawing
 
@@ -31,7 +48,16 @@ onDraw.add proc() =
   ker.isort(Sprite, proc (a, b: ptr Sprite): bool =
     a.depth < b.depth)
   for _, spr, pos in ker.each(Sprite, Position):
-    gfx.drawImage(spr.image, pos.x, pos.y, spr.scale)
+    if spr.rows <= 1 and spr.cols <= 1: # Whole image
+      gfx.drawImage(spr.image, pos.x, pos.y,
+        scale = spr.scale, flipH = spr.flipH)
+    else: # Sub-image
+      let (imgW, imgH) = spr.image.size
+      let (subW, subH) = (imgW / spr.cols.toFloat, imgH / spr.rows.toFloat)
+      let (subX, subY) = (spr.col.toFloat * subW, spr.row.toFloat * subH)
+      gfx.drawImage(spr.image, pos.x, pos.y,
+        scale = spr.scale, flipH = spr.flipH,
+        subX = subX, subY = subY, subW = subW, subH = subH)
 
 
 # Editing

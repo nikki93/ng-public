@@ -19,11 +19,13 @@ type
 
   Sprite* {.ng.} = object
     image*: Image
-    #col*, row*: int
-    #cols*, rows*: int
-    scale*: float
     depth*: float
-    #flipH: bool
+    scale*: float
+
+    col*, row*: int
+    cols*, rows*: int
+
+    flipH*: bool
 
 
   # Solids
@@ -31,6 +33,7 @@ type
   Feet* {.ng.} = object
     body*: Body
     shape*: Shape
+
     offsetX*, offsetY*: float
 
 
@@ -39,6 +42,7 @@ type
   Walk* {.ng, nosave.} = object
     target*: Body
     constr*: Constraint
+
     touchTime*: float
 
   Friction* {.ng.} = object
@@ -49,12 +53,14 @@ type
 
   ViewFollow* {.ng.} = object
     x*, y*: float
+
     offsetX*, offsetY*: float
     border*: float
     rate*: float
 
   WorldBounds* {.ng.} = object
     minX*, maxX*, minY*, maxY*: float
+
     bodies*: array[4, Body]
     shapes*: array[4, Shape]
 
