@@ -66,6 +66,9 @@ proc main() =
       phy.frame()
       onPhysicsPost.run()
 
+      # Animation
+      onAnimate.run()
+
     # Graphics
     gfx.frame:
       # Background color

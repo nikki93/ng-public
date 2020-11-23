@@ -13,6 +13,11 @@ proc run*(trig: Trigger) =
     p()
 
 
+# Animation
+
+var onAnimate*: Trigger
+
+
 # Physics
 
 var onPhysicsPre*: Trigger

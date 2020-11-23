@@ -28,6 +28,20 @@ type
     flipH*: bool
 
 
+  # Animation
+
+  AnimationClip* = object
+    name*: string
+    start*, count*: int
+    fps*: float
+    pause*: float
+
+  Animation* {.ng.} = object
+    clips*: seq[AnimationClip]
+    clipIndex*: int
+    time*: float
+
+
   # Solids
 
   Feet* {.ng.} = object
