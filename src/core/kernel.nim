@@ -24,7 +24,7 @@ var typeNames {.compileTime.}: HashSet[string]
 
 var typePragmas {.compileTime.}: Table[string, NimNode]
 
-var typeRemovers: seq[proc(ent: Entity) {.nimcall.}]
+var removeAllTypes: proc(ent: Entity) {.nimcall.}
 
 var metaInitialized: bool
 
@@ -59,8 +59,7 @@ proc create*(ker: var Kernel): Entity {.inline.} =
 proc destroy*(ker: var Kernel, ent: Entity) {.inline.} =
   proc destroy(reg: var Registry, ent: Entity)
     {.importcpp.}
-  for remover in typeRemovers:
-    remover(ent)
+  removeAllTypes(ent)
   ker.reg.destroy(ent)
 
 
@@ -312,6 +311,6 @@ template initMeta*() =
   static:
     markTypeInfoUsed($instantiationInfo())
   metaInitialized = true
-  forEachRegisteredType(T):
-    typeRemovers.add(proc(ent: Entity) =
-      ker.remove(T, ent))
+  removeAllTypes = proc(ent: Entity) =
+    forEachRegisteredType(T):
+      ker.remove(T, ent)
