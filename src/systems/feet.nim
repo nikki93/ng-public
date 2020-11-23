@@ -34,6 +34,12 @@ proc load*(feet: var Feet, ent: Entity, node: JsonNode) =
   feet.shape.radius = node{"radius"}.getFloat(0)
 
 proc save*(feet: Feet, ent: Entity, node: JsonNode) =
+  # Common defaults
+  if feet.offsetX == 0:
+    node.delete("offsetX")
+  if feet.offsetY == 0:
+    node.delete("offsetY")
+
   # Body
   if feet.body.kind == Dynamic:
     node["dynamic"] = %true
